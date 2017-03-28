@@ -1,8 +1,3 @@
-
-#' antibodyKinetics
-#'
-#' antibodyKinetics
-#'
-#' @docType package
-#' @name antibodyKinetics
+#' @useDynLib antibodyKinetics
+#' @importFrom Rcpp sourceCpp
 NULL

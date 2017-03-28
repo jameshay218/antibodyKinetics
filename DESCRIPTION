@@ -9,5 +9,7 @@ LazyData: true
 URL: https://github.com/jameshay218/antibodyKinetics
 BugReports: https://github.com/jameshay218/antibodyKinetics/issues
 RoxygenNote: 5.0.1
-Suggests: 
+Suggests:
     testthat
+LinkingTo: Rcpp
+Imports: Rcpp
