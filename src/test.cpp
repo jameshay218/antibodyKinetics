@@ -11,13 +11,13 @@ using namespace Rcpp;
 //   http://gallery.rcpp.org/
 //
 //' @export
-//' @useDynLib zikaProj
+//' @useDynLib antibodyKinetics
 // [[Rcpp::export]]
 NumericVector timesTwo(NumericVector x) {
   return x * 2;
 }
 //' @export
-//' @useDynLib zikaProj
+//' @useDynLib antibodyKinetics
 // [[Rcpp::export]]
 NumericVector wowFunc(NumericVector x){
   return x*3;

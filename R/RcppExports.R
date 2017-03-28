@@ -2,13 +2,13 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @export
-#' @useDynLib zikaProj
+#' @useDynLib antibodyKinetics
 timesTwo <- function(x) {
     .Call('antibodyKinetics_timesTwo', PACKAGE = 'antibodyKinetics', x)
 }
 
 #' @export
-#' @useDynLib zikaProj
+#' @useDynLib antibodyKinetics
 wowFunc <- function(x) {
     .Call('antibodyKinetics_wowFunc', PACKAGE = 'antibodyKinetics', x)
 }
