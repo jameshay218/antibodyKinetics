@@ -3,13 +3,39 @@
 
 #' @export
 #' @useDynLib antibodyKinetics
-timesTwo <- function(x) {
-    .Call('antibodyKinetics_timesTwo', PACKAGE = 'antibodyKinetics', x)
+predict_titres <- function(params, times) {
+    .Call('antibodyKinetics_predict_titres', PACKAGE = 'antibodyKinetics', params, times)
+}
+
+#' Converts to unit scale
+#'
+#' @param x the double to be converted
+#' @param min the minimum value on the linear scale
+#' @param max the maximum value on the linear scale
+#' @return the value converted to a unit scale
+#' @export
+toUnitScale <- function(x, min, max) {
+    .Call('antibodyKinetics_toUnitScale', PACKAGE = 'antibodyKinetics', x, min, max)
+}
+
+#' Converts to linear scale
+#'
+#' @param x the double to be converted back to linear scale
+#' @param min the minimum value on the linear scale
+#' @param max the maximum value on the linear scale
+#' @return the value converted to a linear scale
+#' @export
+fromUnitScale <- function(x, min, max) {
+    .Call('antibodyKinetics_fromUnitScale', PACKAGE = 'antibodyKinetics', x, min, max)
 }
 
 #' @export
-#' @useDynLib antibodyKinetics
-wowFunc <- function(x) {
-    .Call('antibodyKinetics_wowFunc', PACKAGE = 'antibodyKinetics', x)
+obs_error <- function(actual, obs, S, EA) {
+    .Call('antibodyKinetics_obs_error', PACKAGE = 'antibodyKinetics', actual, obs, S, EA)
+}
+
+#' @export
+posterior <- function(y, data, params) {
+    .Call('antibodyKinetics_posterior', PACKAGE = 'antibodyKinetics', y, data, params)
 }
 
