@@ -16,3 +16,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// wowFunc
+NumericVector wowFunc(NumericVector x);
+RcppExport SEXP antibodyKinetics_wowFunc(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(wowFunc(x));
+    return rcpp_result_gen;
+END_RCPP
+}

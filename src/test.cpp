@@ -10,13 +10,19 @@ using namespace Rcpp;
 //   http://adv-r.had.co.nz/Rcpp.html
 //   http://gallery.rcpp.org/
 //
-
+//' @export
+//' @useDynLib zikaProj
 // [[Rcpp::export]]
 NumericVector timesTwo(NumericVector x) {
   return x * 2;
 }
-
-
+//' @export
+//' @useDynLib zikaProj
+// [[Rcpp::export]]
+NumericVector wowFunc(NumericVector x){
+  return x*3;
+}
+  
 // You can include R code blocks in C++ files processed with sourceCpp
 // (useful for testing and development). The R code will be automatically 
 // run after the compilation.

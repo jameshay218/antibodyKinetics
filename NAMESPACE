@@ -2,5 +2,8 @@
 
 export(testing)
 export(testing2)
+export(timesTwo)
+export(wowFunc)
 importFrom(Rcpp,sourceCpp)
 useDynLib(antibodyKinetics)
+useDynLib(zikaProj)
