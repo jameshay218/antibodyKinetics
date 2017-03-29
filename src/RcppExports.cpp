@@ -57,16 +57,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// posterior
-double posterior(NumericVector y, NumericVector data, NumericVector params);
-RcppExport SEXP antibodyKinetics_posterior(SEXP ySEXP, SEXP dataSEXP, SEXP paramsSEXP) {
+// obs_likelihood
+double obs_likelihood(NumericVector y, NumericVector data, NumericVector params);
+RcppExport SEXP antibodyKinetics_obs_likelihood(SEXP ySEXP, SEXP dataSEXP, SEXP paramsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type data(dataSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type params(paramsSEXP);
-    rcpp_result_gen = Rcpp::wrap(posterior(y, data, params));
+    rcpp_result_gen = Rcpp::wrap(obs_likelihood(y, data, params));
     return rcpp_result_gen;
 END_RCPP
 }

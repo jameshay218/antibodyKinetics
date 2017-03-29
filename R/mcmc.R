@@ -14,7 +14,7 @@
 run_MCMC <- function(parTab,
                      data=NULL,
                      mcmcPars,
-                     fileName,
+                     filename,
                      CREATE_POSTERIOR_FUNC=NULL,
                      mvrPars=NULL,
                      PRIOR_FUNC=NULL){
@@ -53,7 +53,6 @@ run_MCMC <- function(parTab,
         covMat <- mvrPars[[1]][unfixed_pars,unfixed_pars]
         scale <- mvrPars[[2]]
     }
-    print(covMat)
     posterior_simp <- protect(CREATE_POSTERIOR_FUNC(parTab,data, PRIOR_FUNC))
 
     ## Setup MCMC chain file with correct column names
@@ -70,7 +69,7 @@ run_MCMC <- function(parTab,
     ## Initial conditions ------------------------------------------------------
     ## Initial likelihood
     probab <- posterior_simp(current_pars)
-    print(probab)
+
     ## Set up initial csv file
     tmp_table <- array(dim=c(1,length(chain_colnames)))
     tmp_table <- as.data.frame(tmp_table)

@@ -35,7 +35,7 @@ obs_error <- function(actual, obs, S, EA) {
 }
 
 #' @export
-posterior <- function(y, data, params) {
-    .Call('antibodyKinetics_posterior', PACKAGE = 'antibodyKinetics', y, data, params)
+obs_likelihood <- function(y, data, params) {
+    .Call('antibodyKinetics_obs_likelihood', PACKAGE = 'antibodyKinetics', y, data, params)
 }
 

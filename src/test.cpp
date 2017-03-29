@@ -15,6 +15,7 @@ NumericMatrix predict_titres(NumericVector params, NumericVector times){
   NumericVector Y(times.size());
   
 
+
   int j = 0;
   double trunc_lower = params[0];
   double first_infection = params[1];
@@ -110,11 +111,12 @@ double obs_error(int actual, int obs, double S, double EA){
 
 //' @export
 //[[Rcpp::export]]
-double posterior(NumericVector y, NumericVector data, NumericVector params){
+double obs_likelihood(NumericVector y, NumericVector data, NumericVector params){
   double ln = 0;
+  int MAX_TITRE = params(2);
   for(int i = 0; i < y.length();++i){
     if(y(i) < 0) y(i) = 0;
-    if(y(i) >= 13) y(i) = 13;
+    if(y(i) >= MAX_TITRE) y(i) = MAX_TITRE;
     ln += log(obs_error(floor(y(i)), floor(data(i)),params(0),params(1)));
   }
   return ln;

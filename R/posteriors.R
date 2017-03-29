@@ -1,37 +1,18 @@
 #' @export
-create_test_posterior <- function(parTab, data, PRIOR_FUNC=NULL){
-    names <- parTab$names
-    f <- function(pars){
-        return(test_posterior(pars, names, data))
-    }
-    return(f)    
-}
-
-#' @export
-test_posterior <- function(pars, names, data){
-    names(pars) <- names
-    mu <- pars["mu"]
-    sd <- pars["sd"]
-
-    lnlik <- sum(dnorm(data, mean=mu,sd=sd, log=TRUE))
-    lnlik
-}
-
-
-#' @export
-posterior_2 <- function(params, names,data){
-    y <- predict_titres(params[!(names %in% c("S","EA"))], data[,1])
-    ln <- posterior(y[,2],data[,2],params[names %in% c("S","EA")])
+posterior_original <- function(params, names,data,PRIOR_FUNC=NULL){
+    y <- predict_titres(params[!(names %in% c("S","EA","MAX_TITRE"))], data[,1])
+    ln <- obs_likelihood(y[,2],data[,2],params[names %in% c("S","EA","MAX_TITRE")])
+    if(!is.null(PRIOR_FUNC)) ln <- ln + PRIOR_FUNC(params, names)
     return(ln)
     
 }
 
 #' @export
-create_test_posterior2 <- function(parTab,data,PRIOR_FUNC=NULL){
+create_posterior_original <- function(parTab,data,PRIOR_FUNC=NULL){
     names <- parTab$names
     f <- function(pars){
-        return(posterior_2(pars,names,data))
+        return(posterior_original(pars,names,data,PRIOR_FUNC))
     }
     return(f)
-       
+    
 }

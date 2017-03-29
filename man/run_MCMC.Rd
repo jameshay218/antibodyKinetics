@@ -4,7 +4,7 @@
 \alias{run_MCMC}
 \title{Adaptive Metropolis-within-Gibbs Random Walk Algorithm.}
 \usage{
-run_MCMC(parTab, data = NULL, mcmcPars, fileName,
+run_MCMC(parTab, data = NULL, mcmcPars, filename,
   CREATE_POSTERIOR_FUNC = NULL, mvrPars = NULL, PRIOR_FUNC = NULL)
 }
 \arguments{
@@ -14,13 +14,13 @@ run_MCMC(parTab, data = NULL, mcmcPars, fileName,
 
 \item{mcmcPars}{named vector named vector with parameters for the MCMC procedure. Iterations, popt, opt_freq, thin, burnin, adaptive_period and save_block.}
 
+\item{filename}{the full filepath at which the MCMC chain should be saved. "_chain.csv" will be appended to the end of this, so filename should have no file extensions}
+
 \item{CREATE_POSTERIOR_FUNC}{pointer to posterior function used to calculate a likelihood}
 
 \item{mvrPars}{a list of parameters if using a multivariate proposal. Must contain an initial covariance matrix, weighting for adapting cov matrix, and an initial scaling parameter (0-1)}
 
 \item{PRIOR_FUNC}{user function of prior for model parameters. Should take values, names and local from param_table}
-
-\item{filename}{the full filepath at which the MCMC chain should be saved. "_chain.csv" will be appended to the end of this, so filename should have no file extensions}
 }
 \value{
 a list with: 1) full file path at which the MCMC chain is saved as a .csv file; 2) the last used covarianec matrix; 3) the last used scale size
