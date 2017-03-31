@@ -1,3 +1,31 @@
+generate_prediction_intervals_new <- function(chain, samp_no=1000,ts, MODEL_FUNCTION,nstrains=3){
+    samps <- sample(nrow(chain),samp_no)
+    
+    dats <- replicate(nstrains,matrix(nrow=samp_no,ncol=length(ts)),simplify=FALSE)
+    for(i in 1:nrow(dats[[1]])){
+        samp <- samps[i]
+        pars <- as.numeric(chain[samp,!(colnames(chain) %in% c("sampno","lnlike"))])
+        names(pars) <- colnames(chain[,!(colnames(chain) %in% c("sampno","lnlike"))])
+        y <- MODEL_FUNCTION(pars, ts)
+        for(j in 1:nstrains){
+            dats[[j]][i,] <- y[,j]
+        }
+    }
+    allQuantiles <- NULL
+    for(i in 1:nstrains){
+        quantiles <- t(apply(dats[[i]], 2, function(x) quantile(x,c(0.025,0.5,0.975))))
+        quantiles <- data.frame(time=ts,quantiles)
+        colnames(quantiles) <- c("time","lower","median","upper")
+        allQuantiles[[i]] <- quantiles
+    }
+    
+    return(allQuantiles)
+    
+}
+
+
+
+
 #' @export
 generate_prediction_intervals_original <- function(chain, samp_no=1000,ts){
   samps <- sample(nrow(chain),samp_no)
@@ -29,7 +57,7 @@ get_best_pars <- function(chain){
 
 #' @export
 base_plot <- function(chains, data, samps=1000,infection_times=NULL){
-    ts <- seq(min(data[,1]),max(data[,1]),by=1)
+    ts <- seq(min(data$time),max(data$time),by=1)
     quants <- plyr::ddply(chains,~strain,
                           function(x) generate_prediction_intervals_original(x[,colnames(x) != "strain"],samps,ts))
     best_pars <-  plyr::ddply(chains,~strain,get_best_pars)

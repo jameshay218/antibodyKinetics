@@ -4,7 +4,7 @@ read_ferret_data <- function(data_file){
     colnames(raw_data) <- raw_data[1,]
     raw_data <- raw_data[2:nrow(raw_data),]
 
-    melted.data <- melt(raw_data)
+    melted.data <- reshape2::melt(raw_data)
     melted.data$variable <- as.integer(as.character(melted.data$variable))
     return(melted.data)
 
