@@ -1,3 +1,4 @@
+#' @export
 generate_prediction_intervals_new <- function(chain, samp_no=1000,ts, MODEL_FUNCTION,nstrains=3){
     samps <- sample(nrow(chain),samp_no)
     
@@ -16,9 +17,10 @@ generate_prediction_intervals_new <- function(chain, samp_no=1000,ts, MODEL_FUNC
         quantiles <- t(apply(dats[[i]], 2, function(x) quantile(x,c(0.025,0.5,0.975))))
         quantiles <- data.frame(time=ts,quantiles)
         colnames(quantiles) <- c("time","lower","median","upper")
+        quantiles$strain <- i
         allQuantiles[[i]] <- quantiles
     }
-    
+    allQuantiles <- do.call("rbind",allQuantiles)
     return(allQuantiles)
     
 }

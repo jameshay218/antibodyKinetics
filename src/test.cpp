@@ -70,6 +70,33 @@ NumericMatrix predict_titres(NumericVector params, NumericVector times){
   return out;
 }
 
+//' Single trajectory function
+//' @export
+//[[Rcpp::export]]
+NumericVector simple_model(NumericVector pars, NumericVector times){
+  double mu = pars(0)*pars(1)*pars(2)*(pars(3)*pars(4) + 1*!pars(4));
+  double dp = pars(5);
+  double tp = pars(6);
+  double ts = pars(7);
+  double m = pars(8);
+  double y0 = pars(9);
+  double t_i = pars(10);
+  double t;
+  double tmp;
+  
+  NumericVector y(times.size());
+
+  for(int i = 0; i < times.size(); ++i){
+    t = times(i);
+    tmp = 0;
+    if(t <= t_i) tmp = y0;
+    else if(t > t_i && t <= (t_i + tp)) tmp = (mu/tp)*(t-t_i);
+    else if(t > (tp+t_i) && t <=(ts + t_i+tp)) tmp = ((-(dp*mu)/ts)*(t) + ((mu*dp)/ts)*(t_i+tp) + mu);
+    else tmp = (-m*(t)+m*(t_i+tp+ts)+(1-dp)*mu);
+    y(i) = tmp;
+  }
+  return(y);
+}
 
 
 //' Converts to unit scale

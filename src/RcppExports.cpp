@@ -17,6 +17,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// simple_model
+NumericVector simple_model(NumericVector pars, NumericVector times);
+RcppExport SEXP antibodyKinetics_simple_model(SEXP parsSEXP, SEXP timesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type pars(parsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type times(timesSEXP);
+    rcpp_result_gen = Rcpp::wrap(simple_model(pars, times));
+    return rcpp_result_gen;
+END_RCPP
+}
 // toUnitScale
 double toUnitScale(double x, double min, double max);
 RcppExport SEXP antibodyKinetics_toUnitScale(SEXP xSEXP, SEXP minSEXP, SEXP maxSEXP) {

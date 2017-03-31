@@ -156,7 +156,9 @@ run_MCMC <- function(parTab,
                     tempaccepted <- tempiter <- reset
                 } else {       ## If using multivariate proposals
                     if(chain_index > OPT_TUNING*adaptive_period & chain_index < (0.9*adaptive_period)){
+                        oldCovMat <- covMat
                         covMat <- scale*cov(opt_chain[1:chain_index,])
+                        covMat <- 0.8*covMat + 0.2*oldCovMat
                         tempiter <- tempaccepted <- 0
                         message(cat("Optimisation iteration: ", i,sep="\t"))
                         ## Print acceptance rate

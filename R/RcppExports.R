@@ -7,6 +7,12 @@ predict_titres <- function(params, times) {
     .Call('antibodyKinetics_predict_titres', PACKAGE = 'antibodyKinetics', params, times)
 }
 
+#' Single trajectory function
+#' @export
+simple_model <- function(pars, times) {
+    .Call('antibodyKinetics_simple_model', PACKAGE = 'antibodyKinetics', pars, times)
+}
+
 #' Converts to unit scale
 #'
 #' @param x the double to be converted
