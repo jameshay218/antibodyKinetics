@@ -1,27 +1,38 @@
 #' @export
-generate_prediction_intervals_new <- function(chain, samp_no=1000,ts, MODEL_FUNCTION,nstrains=3){
+generate_prediction_intervals_new <- function(chain, samp_no=1000,ts, MODEL_FUNCTION,nstrains=3,ngroups=5){
     samps <- sample(nrow(chain),samp_no)
+
     
     dats <- replicate(nstrains,matrix(nrow=samp_no,ncol=length(ts)),simplify=FALSE)
-    for(i in 1:nrow(dats[[1]])){
+    all_dats <- replicate(ngroups,dats,simplify=FALSE)
+    
+    for(i in 1:samp_no){
         samp <- samps[i]
         pars <- as.numeric(chain[samp,!(colnames(chain) %in% c("sampno","lnlike"))])
         names(pars) <- colnames(chain[,!(colnames(chain) %in% c("sampno","lnlike"))])
         y <- MODEL_FUNCTION(pars, ts)
-        for(j in 1:nstrains){
-            dats[[j]][i,] <- y[,j]
+        for(x in 1:ngroups){
+            for(j in 1:nstrains){
+                all_dats[[x]][[j]][i,] <- y[y$group == x,j+1]
+            }
         }
     }
-    allQuantiles <- NULL
-    for(i in 1:nstrains){
-        quantiles <- t(apply(dats[[i]], 2, function(x) quantile(x,c(0.025,0.5,0.975))))
-        quantiles <- data.frame(time=ts,quantiles)
-        colnames(quantiles) <- c("time","lower","median","upper")
-        quantiles$strain <- i
-        allQuantiles[[i]] <- quantiles
+    allAllQuantiles <- NULL
+    for(j in 1:ngroups){
+        allQuantiles <- NULL
+        for(i in 1:nstrains){
+            quantiles <- t(apply(all_dats[[j]][[i]], 2, function(x) quantile(x,c(0.025,0.5,0.975))))
+            quantiles <- data.frame(time=ts,quantiles)
+            colnames(quantiles) <- c("time","lower","median","upper")
+            quantiles$strain <- i
+            allQuantiles[[i]] <- quantiles
+        }
+        allQuantiles <- do.call("rbind",allQuantiles)
+        allQuantiles$group <- j
+        allAllQuantiles[[j]] <- allQuantiles
     }
-    allQuantiles <- do.call("rbind",allQuantiles)
-    return(allQuantiles)
+    allAllQuantiles <- do.call("rbind",allAllQuantiles)
+    return(allAllQuantiles)
     
 }
 
