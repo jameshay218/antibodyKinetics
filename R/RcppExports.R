@@ -45,3 +45,18 @@ obs_likelihood <- function(y, data, params) {
     .Call('antibodyKinetics_obs_likelihood', PACKAGE = 'antibodyKinetics', y, data, params)
 }
 
+#' @export
+model_trajectory_cpp <- function(pars, times) {
+    .Call('antibodyKinetics_model_trajectory_cpp', PACKAGE = 'antibodyKinetics', pars, times)
+}
+
+#' @export
+posterior_func_group_cpp <- function(pars, times, groups, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths, data) {
+    .Call('antibodyKinetics_posterior_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths, data)
+}
+
+#' @export
+model_func_group_cpp <- function(pars, times, groups, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths) {
+    .Call('antibodyKinetics_model_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths)
+}
+

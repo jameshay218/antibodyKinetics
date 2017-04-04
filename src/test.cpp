@@ -1,6 +1,7 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+
 //' @export
 //' @useDynLib antibodyKinetics
 //[[Rcpp::export]]
@@ -147,4 +148,182 @@ double obs_likelihood(NumericVector y, NumericVector data, NumericVector params)
     ln += log(obs_error(floor(y(i)), floor(data(i)),params(0),params(1)));
   }
   return ln;
+}
+
+
+
+//' @export
+//[[Rcpp::export]]
+NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times){
+  double mu = pars[3];
+  double tp = pars[4];
+  double dp = pars[5];
+  double ts = pars[6];
+  double m = pars[7];
+  double sigma = pars[8];
+  double beta = pars[9];
+  double c = pars[10];
+  double primed = pars[11];
+  double mod = pars[12];
+  double x = pars[13];
+  double t_i = pars[14];
+
+  double y0 = 0;
+  double t = 0;
+  double tmp = 0;
+
+  double cr = exp(-sigma*x);
+  double prime_cr = c*exp(-beta*x)*primed;
+  //Rcpp::Rcout << "primed: " << primed << std::endl;
+  //Rcpp::Rcout << "beta: " << beta << std::endl;
+  //Rcpp::Rcout << "c: " << c << std::endl;
+  //Rcpp::Rcout << "x: " << x << std::endl;
+  //Rcpp::Rcout << "mu: " << mu << std::endl;
+  //Rcpp::Rcout << "cr: " << prime_cr << std::endl;
+  
+  mu = mu*cr*mod + prime_cr;
+  //Rcpp::Rcout << "Combined mu: " << mu << std::endl;
+
+
+  NumericVector y(times.size());
+  
+  for(int i = 0; i < times.size(); ++i){
+    t = times[i];
+    if(t <= t_i) tmp = 0;
+    else if(t > t_i && t <= (t_i + tp)) tmp = (mu/tp)*(t-t_i);
+    else if(t > (tp+t_i) && t <=(ts + t_i+tp)) tmp = ((-(dp*mu)/ts)*(t) + ((mu*dp)/ts)*(t_i+tp) + mu);
+    else tmp = (-m*(t)+m*(t_i+tp+ts)+(1-dp)*mu);
+    tmp += y0;
+    y[i] = tmp;
+  }
+  return y; 
+}
+
+
+//' @export
+//[[Rcpp::export]]
+double posterior_func_group_cpp(NumericVector pars, NumericVector times, IntegerVector groups, IntegerVector strains,
+				  IntegerVector exposure_types, IntegerVector exposure_strains, IntegerVector measured_strains, IntegerVector exposure_orders, IntegerVector exposure_primes,
+				  IntegerVector exposure_indices, IntegerVector cr_inds, IntegerVector par_type_ind, IntegerVector order_indices,
+				       IntegerVector exposure_i_lengths, IntegerVector par_lengths, IntegerVector cr_lengths, NumericMatrix data){
+  int group;
+  int strain;
+  int A, B, type, order, exposure_strain;
+  double t_i, mod, cr,isPrimed;
+  double ln = 0;
+  IntegerVector tmp_exposures;
+  NumericVector fullPars;
+  NumericMatrix results(strains.size()*groups.size(), times.size());
+  NumericVector y;
+  int index = 0;
+  for(int i = 0; i < groups.size(); ++i){
+    group = groups[i];
+    //Rcpp::Rcout << "Group: " << group << std::endl;
+    A = exposure_i_lengths[i];
+    B = exposure_i_lengths[i+1] - 1;
+    tmp_exposures = exposure_indices[Range(A,B)];
+    for(int j = 0; j < strains.size(); ++j){
+      strain = strains[j] -1;
+      //Rcpp::Rcout << "Strain: " << strain << std::endl;
+      for(int k = 0; k < tmp_exposures.size(); ++k){
+	t_i = pars[tmp_exposures[k]];
+	//Rcpp::Rcout << "Exposure: " << t_i << std::endl;
+	order = exposure_orders[tmp_exposures[k]] - 1;
+	exposure_strain = exposure_strains[tmp_exposures[k]] - 1;
+	mod = pars[order_indices[order]];
+	isPrimed = exposure_primes[tmp_exposures[k]];
+
+	cr = pars[cr_inds[cr_lengths[strain] + exposure_strain]];
+	//Rcpp::Rcout << "Exposure strain: " << exposure_strain << std::endl;
+	//Rcpp::Rcout << "cr: " << cr << std::endl;
+
+	type = exposure_types[tmp_exposures[k]] - 1;
+	//Rcpp::Rcout << par_lengths[type] << " " << par_lengths[type+1] << std::endl;
+	A = par_lengths[type];
+	B = par_lengths[type+1] - 1;
+
+	fullPars = pars[par_type_ind[Range(A,B)]];
+	fullPars.push_back(isPrimed);
+	fullPars.push_back(mod);
+	fullPars.push_back(cr);
+	fullPars.push_back(t_i);
+
+	//Rcpp::Rcout << "Pars: " << fullPars << std::endl;
+
+	y = model_trajectory_cpp(fullPars, times);
+	//Rcpp::Rcout << y << std::endl;
+	//Rcpp::Rcout << "Y: " << y << std::endl;
+	for(int ii = 0; ii < y.size(); ++ii){
+	  results(index, ii) += y[ii];
+	}
+      }
+      ln += obs_likelihood(results(index,_), data(index,_), fullPars);
+      index++;
+    }
+  }
+  return ln;
+}
+
+
+//' @export
+//[[Rcpp::export]]
+NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times, IntegerVector groups, IntegerVector strains,
+				  IntegerVector exposure_types, IntegerVector exposure_strains, IntegerVector measured_strains, IntegerVector exposure_orders, IntegerVector exposure_primes,
+				  IntegerVector exposure_indices, IntegerVector cr_inds, IntegerVector par_type_ind, IntegerVector order_indices,
+				  IntegerVector exposure_i_lengths, IntegerVector par_lengths, IntegerVector cr_lengths){
+  int group;
+  int strain;
+  int A, B, type, order, exposure_strain;
+  double t_i, mod, cr,isPrimed;
+  
+  IntegerVector tmp_exposures;
+  NumericVector fullPars;
+  NumericMatrix results(strains.size()*groups.size(), times.size());
+  NumericVector y;
+  int index = 0;
+  for(int i = 0; i < groups.size(); ++i){
+    group = groups[i];
+    //Rcpp::Rcout << "Group: " << group << std::endl;
+    A = exposure_i_lengths[i];
+    B = exposure_i_lengths[i+1] - 1;
+    tmp_exposures = exposure_indices[Range(A,B)];
+    for(int j = 0; j < strains.size(); ++j){
+      strain = strains[j] -1;
+      //Rcpp::Rcout << "Strain: " << strain << std::endl;
+      for(int k = 0; k < tmp_exposures.size(); ++k){
+	t_i = pars[tmp_exposures[k]];
+	//Rcpp::Rcout << "Exposure: " << t_i << std::endl;
+	order = exposure_orders[tmp_exposures[k]] - 1;
+	exposure_strain = exposure_strains[tmp_exposures[k]] - 1;
+	mod = pars[order_indices[order]];
+	isPrimed = exposure_primes[tmp_exposures[k]];
+
+	cr = pars[cr_inds[cr_lengths[strain] + exposure_strain]];
+	//Rcpp::Rcout << "Exposure strain: " << exposure_strain << std::endl;
+	//Rcpp::Rcout << "cr: " << cr << std::endl;
+
+	type = exposure_types[tmp_exposures[k]] - 1;
+	//Rcpp::Rcout << par_lengths[type] << " " << par_lengths[type+1] << std::endl;
+	A = par_lengths[type];
+	B = par_lengths[type+1] - 1;
+
+	fullPars = pars[par_type_ind[Range(A,B)]];
+	fullPars.push_back(isPrimed);
+	fullPars.push_back(mod);
+	fullPars.push_back(cr);
+	fullPars.push_back(t_i);
+
+	//Rcpp::Rcout << "Pars: " << fullPars << std::endl;
+
+	y = model_trajectory_cpp(fullPars, times);
+	//Rcpp::Rcout << y << std::endl;
+	//Rcpp::Rcout << "Y: " << y << std::endl;
+	for(int ii = 0; ii < y.size(); ++ii){
+	  results(index, ii) += y[ii];
+	}
+      }
+      index++;
+    }
+  }
+  return results;
 }
