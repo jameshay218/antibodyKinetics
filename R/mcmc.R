@@ -19,7 +19,8 @@ run_MCMC <- function(parTab,
                      CREATE_POSTERIOR_FUNC=NULL,
                      mvrPars=NULL,
                      PRIOR_FUNC=NULL,
-                     OPT_TUNING=0.2){
+                     OPT_TUNING=0.2,
+                     ...){
     ## Allowable error in scale tuning
     TUNING_ERROR <- 0.1
     
@@ -55,7 +56,7 @@ run_MCMC <- function(parTab,
         scale <- mvrPars[[2]]
         w <- mvrPars[[3]]
     }
-    posterior_simp <- protect(CREATE_POSTERIOR_FUNC(parTab,data, PRIOR_FUNC))
+    posterior_simp <- protect(CREATE_POSTERIOR_FUNC(parTab,data, PRIOR_FUNC,...))
 
     ## Setup MCMC chain file with correct column names
     mcmc_chain_file <- paste(filename,"_chain.csv",sep="")

@@ -146,10 +146,9 @@ double posterior_func_group_cpp(NumericVector pars, NumericVector times,
 	  results(index_model, ii) += y[ii];
 	}
       }
-
       // Calculate the likelihood of observing the data given that the model calculated
       // trajectory was the true trajectory. Do this for each individual
-      for(int jj = 0; j < individuals[i]; ++jj){
+      for(int jj = 0; jj < individuals[i]; ++jj){
 	ln += obs_likelihood(results(index_model,_), data(index_data,_), fullPars);
 	index_data++;
       }

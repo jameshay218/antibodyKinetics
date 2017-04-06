@@ -67,12 +67,12 @@ create_model_group_func <- function(parTab){
   return(f)  
 }
 
-
 #' Create model function pointer cpp implementation
 #'
 #' Creaters a function pointer for \code{\link{model_func_group_cpp}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. This function can also be used to create a pointer to the same model function, but solving a likelihood function
 #' @param parTab the full parameter table - see example csv file
 #' @param dat if posterior function, need the matrix of data. First row is model times, and subsequent rows are trajectories (each row is trajectory of antibodies for one strain, grouped by exposure group)
+#' @param PRIOR_FUNC optional pointer to prior calculating function that takes current parameter vector
 #' @param version string of either "model" (for pure model function) or "posterior" (for posterior calculation)
 #' @param convert_types optionally, a named vector converting strings of infection types to integers. The Cpp funciton needs these as integers, but the default arguments should be fine
 #' @param convert_strains as for convert_types, but relating to the infection strain names
@@ -81,7 +81,8 @@ create_model_group_func <- function(parTab){
 #' @return a function pointer for \code{\link{model_func_group_cpp}} or \code{\link{posterior_func_group_cpp}}
 #' @export
 #' @useDynLib antibodyKinetics
-create_model_group_func_cpp <- function(parTab, dat=NULL, version="model",
+create_model_group_func_cpp <- function(parTab, dat=NULL, PRIOR_FUNC = NULL,
+                                        version="model",
                                         convert_types = c("all"=0,"infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5),
                                         convert_strains = c("A"=1,"B"=2,"C"=3,"D"=4,"E"=5),
                                         convert_groups = c("1"=1,"2"=2,"3"=3,"4"=4,"5"=5),
@@ -202,13 +203,15 @@ create_model_group_func_cpp <- function(parTab, dat=NULL, version="model",
     if(version == "posterior"){
         times <- dat[1,]
         dat <- dat[2:nrow(dat),]
-        
+
         f <- function(pars){
-            posterior_func_group_cpp(pars, times, groups, individuals, strains,
-                                     exposure_types, exposure_strains, measured_strains,
-                                     exposure_orders, exposure_primes, 
-                                     exposure_indices, cr_inds, par_type_ind, order_indices,
+            ln <- posterior_func_group_cpp(pars, times, groups, individuals, strains,
+                                           exposure_types, exposure_strains, measured_strains,
+                                           exposure_orders, exposure_primes, 
+                                           exposure_indices, cr_inds, par_type_ind, order_indices,
                                      exposure_i_lengths,  par_lengths, cr_lengths, dat)
+            if(!is.null(PRIOR_FUNC)) ln <- ln + PRIOR_FUNC(pars)
+            ln
         }
     } else {
         f <- function(pars, times){

@@ -4,16 +4,18 @@
 \alias{create_model_group_func_cpp}
 \title{Create model function pointer cpp implementation}
 \usage{
-create_model_group_func_cpp(parTab, dat = NULL, version = "model",
-  convert_types = c(all = 0, infection = 1, vacc = 2, adj = 3, mod = 4, `NA` =
-  5), convert_strains = c(A = 1, B = 2, C = 3, D = 4, E = 5),
-  convert_groups = c(`1` = 1, `2` = 2, `3` = 3, `4` = 4, `5` = 5),
+create_model_group_func_cpp(parTab, dat = NULL, PRIOR_FUNC = NULL,
+  version = "model", convert_types = c(all = 0, infection = 1, vacc = 2, adj
+  = 3, mod = 4, `NA` = 5), convert_strains = c(A = 1, B = 2, C = 3, D = 4, E =
+  5), convert_groups = c(`1` = 1, `2` = 2, `3` = 3, `4` = 4, `5` = 5),
   individuals = c(1, 1, 1, 1, 1))
 }
 \arguments{
 \item{parTab}{the full parameter table - see example csv file}
 
 \item{dat}{if posterior function, need the matrix of data. First row is model times, and subsequent rows are trajectories (each row is trajectory of antibodies for one strain, grouped by exposure group)}
+
+\item{PRIOR_FUNC}{optional pointer to prior calculating function that takes current parameter vector}
 
 \item{version}{string of either "model" (for pure model function) or "posterior" (for posterior calculation)}
 
