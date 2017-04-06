@@ -1,39 +1,67 @@
+#' Generate prediction intervals from MCMC chain
+#'
+#' Produces a data frame of lower 2.5%, upper 97.5% and median prediction intervals for a given model function.
+#' @param chain the MCMC chain to sample from
+#' @param samp_no the number of random samples to take from the MCMC chain
+#' @param ts the times over which to solve the model
+#' @param MODEL_FUNCTION pointer to the model solving function that takes two arguments: pars and ts. This should return a matrix of trajectories with times across columns
+#' @param nstrains the number of strains for which measurements are available
+#' @param ngroups the number of exposure groups
 #' @export
-generate_prediction_intervals_new <- function(chain, samp_no=1000,ts, MODEL_FUNCTION,nstrains=3,ngroups=5){
+generate_prediction_intervals <- function(chain, samp_no=1000,ts, MODEL_FUNCTION,nstrains=3,ngroups=5){
+    ## Take random samples from the MCMC chain 
     samps <- sample(nrow(chain),samp_no)
 
+    ## The result of the model solving procedure will be a matrix of titres, with columns as time
+    ## and rows as groups/strains. As such, we need a way to store samp_no*(ngroups*nstrains) trajectories
+    ## of length length(ts). Best way off the top of my head - have a data frame for each
+    ## group and strain combo, with samples as rows.
+    dats <- replicate(ngroups,
+                      replicate(
+                          nstrains,matrix(nrow=samp_no,ncol=length(ts)),
+                          simplify=FALSE),
+                      simplify=FALSE)
     
-    dats <- replicate(nstrains,matrix(nrow=samp_no,ncol=length(ts)),simplify=FALSE)
-    all_dats <- replicate(ngroups,dats,simplify=FALSE)
     
+    ## For each sample
     for(i in 1:samp_no){
         samp <- samps[i]
+
+        ## Get parameters
         pars <- as.numeric(chain[samp,!(colnames(chain) %in% c("sampno","lnlike"))])
         names(pars) <- colnames(chain[,!(colnames(chain) %in% c("sampno","lnlike"))])
+
+        ## Solve model
         y <- MODEL_FUNCTION(pars, ts)
+
+        ## Save this trajectory
+        index <- 1
         for(x in 1:ngroups){
             for(j in 1:nstrains){
-                all_dats[[x]][[j]][i,] <- y[y$group == x,j+1]
+                dats[[x]][[j]][i,] <- y[index,]
+                index <- index + 1
             }
         }
     }
-    allAllQuantiles <- NULL
-    for(j in 1:ngroups){
-        allQuantiles <- NULL
-        for(i in 1:nstrains){
-            quantiles <- t(apply(all_dats[[j]][[i]], 2, function(x) quantile(x,c(0.025,0.5,0.975))))
+    
+    allQuantiles <- NULL
+    for(x in 1:ngroups){
+        tmpQuantiles <- NULL
+        for(j in 1:nstrains){
+            quantiles <- t(apply(dats[[x]][[j]], 2, function(x) quantile(x,c(0.025,0.5,0.975))))
             quantiles <- data.frame(time=ts,quantiles)
             colnames(quantiles) <- c("time","lower","median","upper")
-            quantiles$strain <- i
-            allQuantiles[[i]] <- quantiles
+            quantiles$strain <- j
+            tmpQuantiles[[j]] <- quantiles
         }
-        allQuantiles <- do.call("rbind",allQuantiles)
-        allQuantiles$group <- j
-        allAllQuantiles[[j]] <- allQuantiles
+        tmpQuantiles <- do.call("rbind",tmpQuantiles)
+        tmpQuantiles$group <- x
+        allQuantiles[[x]] <- tmpQuantiles
     }
-    allAllQuantiles <- do.call("rbind",allAllQuantiles)
-    return(allAllQuantiles)
-    
+    allQuantiles <- do.call("rbind",allQuantiles)
+    allQuantiles$group <- as.factor(allQuantiles$group)
+    allQuantiles$strain <- as.factor(allQuantiles$strain)
+    return(allQuantiles)
 }
 
 
@@ -59,6 +87,12 @@ generate_prediction_intervals_original <- function(chain, samp_no=1000,ts){
   return(quantiles)
 }
 
+#' Find best MCMC chain parameters
+#'
+#' Given an MCMC chain, finds the row with the highest log likelihood. There must be a column named "lnlike"
+#' which is the log likelihood. Will return the vector of all parameters other than "sampno","lnlike" and "strain"
+#' @param chain the MCMC chain
+#' @return a named vector of parameters
 #' @export
 get_best_pars <- function(chain){
     pars <- as.numeric(chain[which.max(chain[,"lnlike"]),])

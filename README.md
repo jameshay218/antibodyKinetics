@@ -6,7 +6,9 @@
 antibodyKinetics
 
 ## Installation
-
+```r
+devtools::install_github("jameshay218/antibodyKinetics")
+```
 ## Usage
 
 ```r

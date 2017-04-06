@@ -318,97 +318,97 @@ create_model_groups_post <- function(parTab, data, PRIOR_FUNC=NULL){
 
 
 create_model_group_func_fast <- function(parTab){
-  ##########################################################
-  ## Firstly, we need to isolate group specific exposures
-  ##########################################################
-  ## Get unique groups
-  groups <- unique(parTab$group)
-  groups <- groups[groups != "all"]
-  exposure_indices <- NULL
-  exposure_i_lengths <- NULL
-  
-  ## For each group, isolate the parameter table indices that correspond to exposures for
-  ## that group. Save these indices in a contiguous vector, and also store the indices
-  ## of THIS vector that each group corresponds to
-  for(group in groups){
-    tmp <- which(parTab$names == "t_i" & parTab$group == group)
-    exposure_indices <- c(exposure_indices, tmp)
-    exposure_i_lengths <- c(exposure_i_lengths, length(tmp))
-  }
-  
-  ## The length of this vector is the number of groups plus 1
-  exposure_i_lengths <- c(1,cumsum(exposure_i_lengths))
-  
-  #########################################################
-  ## Order modifier parameters
-  #########################################################
-  order_indices <- which(parTab$names == "mod")
-  
-  #########################################################
-  ## Cross reactivity parameters
-  #########################################################
-  strains <- unique(parTab$strain)
-  strains <- strains[!is.na(strains)]
-  cr_inds <- NULL
-  ## In blocks of length(strains),
-  cr_lengths <- rep(length(strains),length(strains))
-  cr_lengths <- c(1,cumsum(cr_lengths))
-  for(strain1 in strains){
-    for(strain2 in strains){
-      tmpStrains <- sort(c(strain1,strain2))
-      cr_inds <- c(cr_inds,which(parTab$exposure == tmpStrains[1] & parTab$strain == tmpStrains[2] & parTab$names == "x"))
+##########################################################
+    ## Firstly, we need to isolate group specific exposures
+##########################################################
+    ## Get unique groups
+    groups <- unique(parTab$group)
+    groups <- groups[groups != "all"]
+    exposure_indices <- NULL
+    exposure_i_lengths <- NULL
+    
+    ## For each group, isolate the parameter table indices that correspond to exposures for
+    ## that group. Save these indices in a contiguous vector, and also store the indices
+    ## of THIS vector that each group corresponds to
+    for(group in groups){
+        tmp <- which(parTab$names == "t_i" & parTab$group == group)
+        exposure_indices <- c(exposure_indices, tmp)
+        exposure_i_lengths <- c(exposure_i_lengths, length(tmp))
     }
-  }
-  
-  #########################################################
-  ## Model parameters
-  #########################################################
-  ## Indices of model parameters. 1 = infection, 2 = vaccine, 3 = adjuvant
-  param_indices <- which(parTab$index == "parameter")
-  par_lengths <- c(length(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")]),
-                   length(param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")]),
-                   length(param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")]))
-  par_type_ind <- c(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")],
-                    param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")],
-                    param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")])
-  par_lengths <- c(1,cumsum(par_lengths))
-  
-  
-  #########################################################
-  ## Model parameters
-  #########################################################
-  ## Now we can loop through each group, each strain and
-  ## each exposure and get the correct model parameters
-  pars <- parTab$values
-  exposure_types <- parTab$type
-  exposure_strains <- parTab$exposure
-  measured_strains <- parTab$strain
-  exposure_orders <- parTab$order
-  exposure_primes <- parTab$primed
-  
-  convert_types <- c("all"=0,"infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5)
-  convert_strains <- c("A"=1,"B"=2,"C"=3,"D"=4,"E"=5)
-  
-  convert_types_back <- c("infection","vacc","adj")
-  convert_strains_back <- c("A","B","C","D","E")
-  
-  exposure_types <- convert_types[exposure_types]
-  exposure_strains <- convert_strains[exposure_strains]
-  measured_strains <- convert_strains[measured_strains]
-  
-  strains <- convert_strains[strains]
-  
-  f <- function(pars, times){
-    model_func_groups_fast(pars, times, 
-                           groups, strains,
-                           exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, 
-                           exposure_indices, cr_inds, par_type_ind, order_indices,
-                           exposure_i_lengths,  par_lengths, cr_lengths)
-  }
-  return(f)
-  
-  
-  
+    
+    ## The length of this vector is the number of groups plus 1
+    exposure_i_lengths <- c(1,cumsum(exposure_i_lengths))
+    
+#########################################################
+    ## Order modifier parameters
+#########################################################
+    order_indices <- which(parTab$names == "mod")
+    
+#########################################################
+    ## Cross reactivity parameters
+#########################################################
+    strains <- unique(parTab$strain)
+    strains <- strains[!is.na(strains)]
+    cr_inds <- NULL
+    ## In blocks of length(strains),
+    cr_lengths <- rep(length(strains),length(strains))
+    cr_lengths <- c(1,cumsum(cr_lengths))
+    for(strain1 in strains){
+        for(strain2 in strains){
+            tmpStrains <- sort(c(strain1,strain2))
+            cr_inds <- c(cr_inds,which(parTab$exposure == tmpStrains[1] & parTab$strain == tmpStrains[2] & parTab$names == "x"))
+        }
+    }
+    
+#########################################################
+    ## Model parameters
+#########################################################
+    ## Indices of model parameters. 1 = infection, 2 = vaccine, 3 = adjuvant
+    param_indices <- which(parTab$index == "parameter")
+    par_lengths <- c(length(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")]),
+                     length(param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")]),
+                     length(param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")]))
+    par_type_ind <- c(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")],
+                      param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")],
+                      param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")])
+    par_lengths <- c(1,cumsum(par_lengths))
+    
+    
+#########################################################
+    ## Model parameters
+#########################################################
+    ## Now we can loop through each group, each strain and
+    ## each exposure and get the correct model parameters
+    pars <- parTab$values
+    exposure_types <- parTab$type
+    exposure_strains <- parTab$exposure
+    measured_strains <- parTab$strain
+    exposure_orders <- parTab$order
+    exposure_primes <- parTab$primed
+    
+    convert_types <- c("all"=0,"infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5)
+    convert_strains <- c("A"=1,"B"=2,"C"=3,"D"=4,"E"=5)
+    
+    convert_types_back <- c("infection","vacc","adj")
+    convert_strains_back <- c("A","B","C","D","E")
+    
+    exposure_types <- convert_types[exposure_types]
+    exposure_strains <- convert_strains[exposure_strains]
+    measured_strains <- convert_strains[measured_strains]
+    
+    strains <- convert_strains[strains]
+    
+    f <- function(pars, times){
+        model_func_groups_fast(pars, times, 
+                               groups, strains,
+                               exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, 
+                               exposure_indices, cr_inds, par_type_ind, order_indices,
+                               exposure_i_lengths,  par_lengths, cr_lengths)
+    }
+    return(f)
+    
+    
+    
 }
 
 
@@ -421,255 +421,258 @@ model_func_groups_fast <- function(pars, times, ## Model solving stuff
                                    exposure_i_lengths,  par_lengths, cr_lengths ## Length of the various components
                                    ){
 
-  y <- matrix(0,nrow=length(groups)*length(strains),ncol=length(times))
-  index <- 1
-  for(i in 1:length(groups)){
-   group <- groups[i]
-   #print(paste0("Group: ", group))
-   tmp_exposures <- exposure_indices[(exposure_i_lengths[i]:exposure_i_lengths[i+1])]  
-   for(strain in strains){
-     #print(paste0("Strain: ", strain))
-     for(j in 1:length(tmp_exposures)){
-       t_i <- pars[tmp_exposures[j]]
-       #print(paste0("Exposure: ",t_i))
-       type <- exposure_types[tmp_exposures[j]]
-       #print(paste0("Exposure type: ", convert_types_back[type]))
-       
-       order <- exposure_orders[tmp_exposures[j]]
-       exposure_strain <- exposure_strains[tmp_exposures[j]]
-       #print(paste0("Exposure strain: ",convert_strains_back[exposure_strain]))            
-       mod <- pars[order_indices[order]]
-       isPrimed <- exposure_primes[tmp_exposures[j]]
-       cr <- pars[cr_inds[cr_lengths[strain] + exposure_strain]]
-       
-       fullPars <- pars[par_type_ind[par_lengths[type]:par_lengths[type+1]]]
-       fullPars <- c(fullPars, isPrimed, mod, cr,t_i)
-       #print(fullPars)
-       #print(model_trajectory_cpp(fullPars,times))
-       omg <- model_trajectory_fast(fullPars, times)
-       omg1 <- model_trajectory_cpp(fullPars, times)
-       #print(fullPars)
-       #print(omg)
-       #print(omg1)
-       #print("")
-      y[index,] <- y[index,] + model_trajectory_cpp(fullPars,times)
-       #print("")
-     }
-     index <- index + 1
-     #print("")
-   }
-   #print("")
-  }
-  return(y)
+    y <- matrix(0,nrow=length(groups)*length(strains),ncol=length(times))
+    index <- 1
+    for(i in 1:length(groups)){
+        group <- groups[i]
+                                        #print(paste0("Group: ", group))
+        tmp_exposures <- exposure_indices[(exposure_i_lengths[i]:exposure_i_lengths[i+1])]  
+        for(strain in strains){
+                                        #print(paste0("Strain: ", strain))
+            for(j in 1:length(tmp_exposures)){
+                t_i <- pars[tmp_exposures[j]]
+                                        #print(paste0("Exposure: ",t_i))
+                type <- exposure_types[tmp_exposures[j]]
+                                        #print(paste0("Exposure type: ", convert_types_back[type]))
+                
+                order <- exposure_orders[tmp_exposures[j]]
+                exposure_strain <- exposure_strains[tmp_exposures[j]]
+                                        #print(paste0("Exposure strain: ",convert_strains_back[exposure_strain]))            
+                mod <- pars[order_indices[order]]
+                isPrimed <- exposure_primes[tmp_exposures[j]]
+                cr <- pars[cr_inds[cr_lengths[strain] + exposure_strain]]
+                
+                fullPars <- pars[par_type_ind[par_lengths[type]:par_lengths[type+1]]]
+                fullPars <- c(fullPars, isPrimed, mod, cr,t_i)
+                                        #print(fullPars)
+                                        #print(model_trajectory_cpp(fullPars,times))
+                omg <- model_trajectory_fast(fullPars, times)
+                omg1 <- model_trajectory_cpp(fullPars, times)
+                                        #print(fullPars)
+                                        #print(omg)
+                                        #print(omg1)
+                                        #print("")
+                y[index,] <- y[index,] + model_trajectory_cpp(fullPars,times)
+                                        #print("")
+            }
+            index <- index + 1
+                                        #print("")
+        }
+                                        #print("")
+    }
+    return(y)
 }
 
 create_model_group_func_cpp <- function(parTab){
-  ##########################################################
-  ## Firstly, we need to isolate group specific exposures
-  ##########################################################
-  ## Get unique groups
-  groups <- unique(parTab$group)
-  groups <- groups[groups != "all"]
-  exposure_indices <- NULL
-  exposure_i_lengths <- NULL
-  
-  ## For each group, isolate the parameter table indices that correspond to exposures for
-  ## that group. Save these indices in a contiguous vector, and also store the indices
-  ## of THIS vector that each group corresponds to
-  for(group in groups){
-    tmp <- which(parTab$names == "t_i" & parTab$group == group)
-    exposure_indices <- c(exposure_indices, tmp)
-    exposure_i_lengths <- c(exposure_i_lengths, length(tmp))
-  }
-  
-  ## The length of this vector is the number of groups plus 1
-  exposure_i_lengths <- c(0,cumsum(exposure_i_lengths))
-  
-  #########################################################
-  ## Order modifier parameters
-  #########################################################
-  order_indices <- which(parTab$names == "mod")
-  
-  #########################################################
-  ## Cross reactivity parameters
-  #########################################################
-  strains <- unique(parTab$strain)
-  strains <- strains[!is.na(strains)]
-  cr_inds <- NULL
-  ## In blocks of length(strains),
-  cr_lengths <- rep(length(strains),length(strains))
-  cr_lengths <- c(0,cumsum(cr_lengths))
-  for(strain1 in strains){
-    for(strain2 in strains){
-      tmpStrains <- sort(c(strain1,strain2))
-      cr_inds <- c(cr_inds,which(parTab$exposure == tmpStrains[1] & parTab$strain == tmpStrains[2] & parTab$names == "x"))
+##########################################################
+    ## Firstly, we need to isolate group specific exposures
+##########################################################
+    ## Get unique groups
+    groups <- unique(parTab$group)
+    groups <- groups[groups != "all"]
+    exposure_indices <- NULL
+    exposure_i_lengths <- NULL
+    
+    ## For each group, isolate the parameter table indices that correspond to exposures for
+    ## that group. Save these indices in a contiguous vector, and also store the indices
+    ## of THIS vector that each group corresponds to
+    for(group in groups){
+        tmp <- which(parTab$names == "t_i" & parTab$group == group)
+        exposure_indices <- c(exposure_indices, tmp)
+        exposure_i_lengths <- c(exposure_i_lengths, length(tmp))
     }
-  }
-  
-  #########################################################
-  ## Model parameters
-  #########################################################
-  ## Indices of model parameters. 1 = infection, 2 = vaccine, 3 = adjuvant
-  param_indices <- which(parTab$index == "parameter")
-  par_lengths <- c(length(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")]),
-                   length(param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")]),
-                   length(param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")]))
-  par_type_ind <- c(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")],
-                    param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")],
-                    param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")])
-  par_lengths <- c(0,cumsum(par_lengths))
-  
-  
-  #########################################################
-  ## Model parameters
-  #########################################################
-  ## Now we can loop through each group, each strain and
-  ## each exposure and get the correct model parameters
-  pars <- parTab$values
-  exposure_types <- parTab$type
-  exposure_strains <- parTab$exposure
-  measured_strains <- parTab$strain
-  exposure_orders <- parTab$order
-  exposure_primes <- parTab$primed
-  
-  convert_types <- c("all"=0,"infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5)
-  convert_strains <- c("A"=1,"B"=2,"C"=3,"D"=4,"E"=5)
-  convert_groups <- c("1"=1,"2"=2,"3"=3,"4"=4,"5"=5)
-  
-  convert_types_back <- c("infection","vacc","adj")
-  convert_strains_back <- c("A","B","C","D","E")
-  
-  
-  exposure_types <- convert_types[exposure_types]
-  exposure_strains <- convert_strains[exposure_strains]
-  measured_strains <- convert_strains[measured_strains]
-  
-  strains <- convert_strains[strains]
-  groups <- convert_groups[groups]
-  
-  exposure_indices <- exposure_indices - 1
-  cr_inds <- cr_inds - 1
-  par_type_ind <- par_type_ind - 1
-  order_indices <- order_indices - 1
-  exposure_i_lengths <- exposure_i_lengths
-  par_lengths <- par_lengths
-  cr_lengths <- cr_lengths
-  
-  f <- function(pars, times){
-          model_func_group_cpp(pars, times, groups, strains,
-                      exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, 
-                      exposure_indices, cr_inds, par_type_ind, order_indices,
-                      exposure_i_lengths,  par_lengths, cr_lengths)
-  }
-  return(f)
-  
-  
-  
+    
+    ## The length of this vector is the number of groups plus 1
+    exposure_i_lengths <- c(0,cumsum(exposure_i_lengths))
+    
+#########################################################
+    ## Order modifier parameters
+#########################################################
+    order_indices <- which(parTab$names == "mod")
+    
+#########################################################
+    ## Cross reactivity parameters
+#########################################################
+    strains <- unique(parTab$strain)
+    strains <- strains[!is.na(strains)]
+    cr_inds <- NULL
+    ## In blocks of length(strains),
+    cr_lengths <- rep(length(strains),length(strains))
+    cr_lengths <- c(0,cumsum(cr_lengths))
+    for(strain1 in strains){
+        for(strain2 in strains){
+            tmpStrains <- sort(c(strain1,strain2))
+            cr_inds <- c(cr_inds,which(parTab$exposure == tmpStrains[1] & parTab$strain == tmpStrains[2] & parTab$names == "x"))
+        }
+    }
+    
+#########################################################
+    ## Model parameters
+#########################################################
+    ## Indices of model parameters. 1 = infection, 2 = vaccine, 3 = adjuvant
+    param_indices <- which(parTab$index == "parameter")
+    par_lengths <- c(length(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")]),
+                     length(param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")]),
+                     length(param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")]))
+    par_type_ind <- c(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")],
+                      param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")],
+                      param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")])
+    par_lengths <- c(0,cumsum(par_lengths))
+    
+    
+#########################################################
+    ## Model parameters
+#########################################################
+    ## Now we can loop through each group, each strain and
+    ## each exposure and get the correct model parameters
+    pars <- parTab$values
+    exposure_types <- parTab$type
+    exposure_strains <- parTab$exposure
+    measured_strains <- parTab$strain
+    exposure_orders <- parTab$order
+    exposure_primes <- parTab$primed
+    
+    convert_types <- c("all"=0,"infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5)
+    convert_strains <- c("A"=1,"B"=2,"C"=3,"D"=4,"E"=5)
+    convert_groups <- c("1"=1,"2"=2,"3"=3,"4"=4,"5"=5)
+    
+    convert_types_back <- c("infection","vacc","adj")
+    convert_strains_back <- c("A","B","C","D","E")
+    
+    
+    exposure_types <- convert_types[exposure_types]
+    exposure_strains <- convert_strains[exposure_strains]
+    measured_strains <- convert_strains[measured_strains]
+    
+    strains <- convert_strains[strains]
+    groups <- convert_groups[groups]
+    
+    exposure_indices <- exposure_indices - 1
+    cr_inds <- cr_inds - 1
+    par_type_ind <- par_type_ind - 1
+    order_indices <- order_indices - 1
+    exposure_i_lengths <- exposure_i_lengths
+    par_lengths <- par_lengths
+    cr_lengths <- cr_lengths
+    
+    f <- function(pars, times){
+        model_func_group_cpp(pars, times, groups, strains,
+                             exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, 
+                             exposure_indices, cr_inds, par_type_ind, order_indices,
+                             exposure_i_lengths,  par_lengths, cr_lengths)
+    }
+    return(f)
+    
+    
+    
 }
-                                   
 
+#' Create posterior calculation function CPP model
+#'
+#' Creates a function pointer to the cpp version of the ferret model which returns a single likelihood value given a vector of parameters
+#' @export
 create_posterior_group_func_cpp <- function(parTab, dat, PRIOR_FUNC=NULL){
-  ##########################################################
-  ## Firstly, we need to isolate group specific exposures
-  ##########################################################
-  ## Get unique groups
-  groups <- unique(parTab$group)
-  groups <- groups[groups != "all"]
-  exposure_indices <- NULL
-  exposure_i_lengths <- NULL
-  
-  ## For each group, isolate the parameter table indices that correspond to exposures for
-  ## that group. Save these indices in a contiguous vector, and also store the indices
-  ## of THIS vector that each group corresponds to
-  for(group in groups){
-    tmp <- which(parTab$names == "t_i" & parTab$group == group)
-    exposure_indices <- c(exposure_indices, tmp)
-    exposure_i_lengths <- c(exposure_i_lengths, length(tmp))
-  }
-  
-  ## The length of this vector is the number of groups plus 1
-  exposure_i_lengths <- c(0,cumsum(exposure_i_lengths))
-  
-  #########################################################
-  ## Order modifier parameters
-  #########################################################
-  order_indices <- which(parTab$names == "mod")
-  
-  #########################################################
-  ## Cross reactivity parameters
-  #########################################################
-  strains <- unique(parTab$strain)
-  strains <- strains[!is.na(strains)]
-  cr_inds <- NULL
-  ## In blocks of length(strains),
-  cr_lengths <- rep(length(strains),length(strains))
-  cr_lengths <- c(0,cumsum(cr_lengths))
-  for(strain1 in strains){
-    for(strain2 in strains){
-      tmpStrains <- sort(c(strain1,strain2))
-      cr_inds <- c(cr_inds,which(parTab$exposure == tmpStrains[1] & parTab$strain == tmpStrains[2] & parTab$names == "x"))
+##########################################################
+    ## Firstly, we need to isolate group specific exposures
+##########################################################
+    ## Get unique groups
+    groups <- unique(parTab$group)
+    groups <- groups[groups != "all"]
+    exposure_indices <- NULL
+    exposure_i_lengths <- NULL
+    
+    ## For each group, isolate the parameter table indices that correspond to exposures for
+    ## that group. Save these indices in a contiguous vector, and also store the indices
+    ## of THIS vector that each group corresponds to
+    for(group in groups){
+        tmp <- which(parTab$names == "t_i" & parTab$group == group)
+        exposure_indices <- c(exposure_indices, tmp)
+        exposure_i_lengths <- c(exposure_i_lengths, length(tmp))
     }
-  }
-  
-  #########################################################
-  ## Model parameters
-  #########################################################
-  ## Indices of model parameters. 1 = infection, 2 = vaccine, 3 = adjuvant
-  param_indices <- which(parTab$index == "parameter")
-  par_lengths <- c(length(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")]),
-                   length(param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")]),
-                   length(param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")]))
-  par_type_ind <- c(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")],
-                    param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")],
-                    param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")])
-  par_lengths <- c(0,cumsum(par_lengths))
-  
-  
-  #########################################################
-  ## Model parameters
-  #########################################################
-  ## Now we can loop through each group, each strain and
-  ## each exposure and get the correct model parameters
-  pars <- parTab$values
-  exposure_types <- parTab$type
-  exposure_strains <- parTab$exposure
-  measured_strains <- parTab$strain
-  exposure_orders <- parTab$order
-  exposure_primes <- parTab$primed
-  
-  convert_types <- c("all"=0,"infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5)
-  convert_strains <- c("A"=1,"B"=2,"C"=3,"D"=4,"E"=5)
-  convert_groups <- c("1"=1,"2"=2,"3"=3,"4"=4,"5"=5)
-  
-  convert_types_back <- c("infection","vacc","adj")
-  convert_strains_back <- c("A","B","C","D","E")
-  
-  
-  exposure_types <- convert_types[exposure_types]
-  exposure_strains <- convert_strains[exposure_strains]
-  measured_strains <- convert_strains[measured_strains]
-  
-  strains <- convert_strains[strains]
-  groups <- convert_groups[groups]
-  
-  exposure_indices <- exposure_indices - 1
-  cr_inds <- cr_inds - 1
-  par_type_ind <- par_type_ind - 1
-  order_indices <- order_indices - 1
-  exposure_i_lengths <- exposure_i_lengths
-  par_lengths <- par_lengths
-  cr_lengths <- cr_lengths
-  
-  f <- function(pars){
-    posterior_func_group_cpp(pars, times, groups, strains,
-                         exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, 
-                         exposure_indices, cr_inds, par_type_ind, order_indices,
-                         exposure_i_lengths,  par_lengths, cr_lengths, dat)
-  }
-  return(f)
-  
-  
-  
+    
+    ## The length of this vector is the number of groups plus 1
+    exposure_i_lengths <- c(0,cumsum(exposure_i_lengths))
+    
+#########################################################
+    ## Order modifier parameters
+#########################################################
+    order_indices <- which(parTab$names == "mod")
+    
+#########################################################
+    ## Cross reactivity parameters
+#########################################################
+    strains <- unique(parTab$strain)
+    strains <- strains[!is.na(strains)]
+    cr_inds <- NULL
+    ## In blocks of length(strains),
+    cr_lengths <- rep(length(strains),length(strains))
+    cr_lengths <- c(0,cumsum(cr_lengths))
+    for(strain1 in strains){
+        for(strain2 in strains){
+            tmpStrains <- sort(c(strain1,strain2))
+            cr_inds <- c(cr_inds,which(parTab$exposure == tmpStrains[1] & parTab$strain == tmpStrains[2] & parTab$names == "x"))
+        }
+    }
+    
+#########################################################
+    ## Model parameters
+#########################################################
+    ## Indices of model parameters. 1 = infection, 2 = vaccine, 3 = adjuvant
+    param_indices <- which(parTab$index == "parameter")
+    par_lengths <- c(length(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")]),
+                     length(param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")]),
+                     length(param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")]))
+    par_type_ind <- c(param_indices[which(parTab$type %in% c("all","infection") & parTab$index == "parameter")],
+                      param_indices[which(parTab$type %in% c("all","vacc") & parTab$index == "parameter")],
+                      param_indices[which(parTab$type %in% c("all","adj") & parTab$index == "parameter")])
+    par_lengths <- c(0,cumsum(par_lengths))
+    
+    
+#########################################################
+    ## Model parameters
+#########################################################
+    ## Now we can loop through each group, each strain and
+    ## each exposure and get the correct model parameters
+    pars <- parTab$values
+    exposure_types <- parTab$type
+    exposure_strains <- parTab$exposure
+    measured_strains <- parTab$strain
+    exposure_orders <- parTab$order
+    exposure_primes <- parTab$primed
+    
+    convert_types <- c("all"=0,"infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5)
+    convert_strains <- c("A"=1,"B"=2,"C"=3,"D"=4,"E"=5)
+    convert_groups <- c("1"=1,"2"=2,"3"=3,"4"=4,"5"=5)
+    
+    convert_types_back <- c("infection","vacc","adj")
+    convert_strains_back <- c("A","B","C","D","E")
+    
+    
+    exposure_types <- convert_types[exposure_types]
+    exposure_strains <- convert_strains[exposure_strains]
+    measured_strains <- convert_strains[measured_strains]
+    
+    strains <- convert_strains[strains]
+    groups <- convert_groups[groups]
+    
+    exposure_indices <- exposure_indices - 1
+    cr_inds <- cr_inds - 1
+    par_type_ind <- par_type_ind - 1
+    order_indices <- order_indices - 1
+    exposure_i_lengths <- exposure_i_lengths
+    par_lengths <- par_lengths
+    cr_lengths <- cr_lengths
+    
+    times <- dat[1,]
+    dat <- dat[2:nrow(dat),]
+    
+    f <- function(pars){
+        posterior_func_group_cpp(pars, times, groups, strains,
+                                 exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, 
+                                 exposure_indices, cr_inds, par_type_ind, order_indices,
+                                 exposure_i_lengths,  par_lengths, cr_lengths, dat)
+    }
+    return(f)
 }
 
 

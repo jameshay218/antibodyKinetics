@@ -9,6 +9,7 @@
 #' @useDynLib antibodyKinetics
 mvr_proposal <- function(values, fixed, covMat){
     proposed <- values
+    #proposed[fixed] <- MASS::mvrnorm(n=1,mu=proposed[fixed],Sigma=covMat)
     proposed[fixed] <- MASS::mvrnorm(n=1,mu=proposed[fixed],Sigma=(5.6644/length(fixed))*covMat)
     return(proposed)
 }
@@ -60,6 +61,7 @@ univ_proposal <- function(values, lower_bounds, upper_bounds,steps, index){
 #' @param popt the desired acceptance rate
 #' @param pcur the current acceptance rate
 #' @return the scaled step size
+#' @export
 #' @useDynLib antibodyKinetics
 scaletuning <- function(step, popt,pcur){
     if(pcur ==1) pcur <- 0.99
@@ -76,6 +78,7 @@ scaletuning <- function(step, popt,pcur){
 #' @param f the function to be protected
 #' @return the protected function
 #' @export
+#' @useDynLib antibodyKinetics
 protect <- function(f){
     function(...){
         tryCatch(f(...),error=function(e){

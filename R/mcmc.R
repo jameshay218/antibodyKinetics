@@ -8,6 +8,7 @@
 #' @param CREATE_POSTERIOR_FUNC pointer to posterior function used to calculate a likelihood
 #' @param mvrPars a list of parameters if using a multivariate proposal. Must contain an initial covariance matrix, weighting for adapting cov matrix, and an initial scaling parameter (0-1)
 #' @param PRIOR_FUNC user function of prior for model parameters. Should take values, names and local from param_table
+#' @param OPT_TUNING constant used to indicate what proportion of the adaptive period should be used to build the covariance matrix, if needed
 #' @return a list with: 1) full file path at which the MCMC chain is saved as a .csv file; 2) the last used covarianec matrix; 3) the last used scale size
 #' @export
 #' @useDynLib antibodyKinetics
@@ -17,10 +18,10 @@ run_MCMC <- function(parTab,
                      filename,
                      CREATE_POSTERIOR_FUNC=NULL,
                      mvrPars=NULL,
-                     PRIOR_FUNC=NULL){
+                     PRIOR_FUNC=NULL,
+                     OPT_TUNING=0.2){
     ## Allowable error in scale tuning
     TUNING_ERROR <- 0.1
-    OPT_TUNING  <- 0.2
     
     ## Extract MCMC parameters
     iterations <- mcmcPars["iterations"]
@@ -52,6 +53,7 @@ run_MCMC <- function(parTab,
         tempaccepted <- tempiter <- 0
         covMat <- mvrPars[[1]][unfixed_pars,unfixed_pars]
         scale <- mvrPars[[2]]
+        w <- mvrPars[[3]]
     }
     posterior_simp <- protect(CREATE_POSTERIOR_FUNC(parTab,data, PRIOR_FUNC))
 
@@ -97,7 +99,7 @@ run_MCMC <- function(parTab,
             tempiter[j] <- tempiter[j] + 1
             ## If using multivariate proposals
         } else {
-            proposal <- mvr_proposal(current_pars, unfixed_pars, covMat)
+            proposal <- mvr_proposal(current_pars, unfixed_pars, scale*covMat)
             tempiter <- tempiter + 1
         }
         ## Propose new parameters and calculate posterior
@@ -109,8 +111,9 @@ run_MCMC <- function(parTab,
            ){
             ## Calculate new likelihood and find difference to old likelihood
             new_probab <- posterior_simp(proposal)
+
             log_prob <- min(new_probab-probab,0)
-            
+         
             ## Accept with probability 1 if better, or proportional to
             ## difference if not
             if(is.finite(log_prob) && log(runif(1)) < log_prob){
@@ -135,45 +138,50 @@ run_MCMC <- function(parTab,
             save_chain[no_recorded,ncol(save_chain)] <- probab
             no_recorded <- no_recorded + 1
         }
+
+       
         
         ## If within adaptive period, need to do some adapting!
-
         if(i <= adaptive_period){
             ## Current acceptance rate
             pcur <- tempaccepted/tempiter
             ## Save each step
             opt_chain[chain_index,] <- current_pars[unfixed_pars]
-            
+           
             ## If in an adaptive step
             if(chain_index %% opt_freq == 0){
                 ## If using univariate proposals
                 if(is.null(mvrPars)){
                     ## For each non fixed parameter, scale the step size
                     for(x in unfixed_pars) steps[x] <- scaletuning(steps[x],popt,pcur[x])
-                    message(cat("Optimisation iteration: ", i,sep="\t"))
                     message(cat("Pcur: ", pcur[unfixed_pars],sep="\t"))
                     message(cat("Step sizes: ", steps[unfixed_pars],sep="\t"))
                     tempaccepted <- tempiter <- reset
+
                 } else {       ## If using multivariate proposals
                     if(chain_index > OPT_TUNING*adaptive_period & chain_index < (0.8*adaptive_period)){
-                        #oldCovMat <- covMat
-                        covMat <- scale*cov(opt_chain[1:chain_index,])
-                        #covMat <- 0.8*covMat + 0.2*oldCovMat
-                        tempiter <- tempaccepted <- 0
-                        message(cat("Optimisation iteration: ", i,sep="\t"))
-                        ## Print acceptance rate
-                        message(cat("Pcur: ", pcur,sep="\t"))
-                        message(cat("Step size: ", scale,sep="\t"))
+                        oldCovMat <- covMat
+                        ## Creates a new covariance matrix, but weights it with the old one
+                        covMat <- cov(opt_chain[1:chain_index,])
+                        covMat <- w*covMat + (1-w)*oldCovMat
                     }
-                    if(chain_index > (0.9)*adaptive_period){
+                    ## Scale tuning for last 20% of the adpative period
+                    if(chain_index > (0.8)*adaptive_period){
                         scale <- scaletuning(scale, popt,pcur)
-                        message(cat("Scale: ",scale,sep=""))
                     }
+                    tempiter <- tempaccepted <- 0
+
+                    message(cat("Pcur: ", pcur,sep="\t"))
+                    message(cat("Scale: ", scale,sep="\t"))
                 }
             }
             chain_index <- chain_index + 1
         }
-        if(i %% save_block == 0) message(cat("Current iteration: ", i, sep="\t"))
+        if(i %% save_block == 0){
+            message(cat("Current iteration: ", i, sep="\t"))
+            ## Print out optimisation frequencies
+        }
+        
         if(no_recorded == save_block){
             write.table(save_chain[1:(no_recorded-1),],file=mcmc_chain_file,col.names=FALSE,row.names=FALSE,sep=",",append=TRUE)
             save_chain <- empty_save_chain

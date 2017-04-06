@@ -2,8 +2,8 @@ Package: antibodyKinetics
 Title: antibodyKinetics
 Version: 1.0.0
 Author: jameshay218
-Maintainer: jameshay218 <jameshay218@gmail.com>
-Description: antibodyKinetics
+Maintainer: jameshay218 <jameshay218@gmail.com> <james.hay13@imperial.ac.uk>
+Description: R package with the necessary functions for implementing and fitting the antibody kinetics model to antibody titre data
 License: GPL-3
 LazyData: true
 URL: https://github.com/jameshay218/antibodyKinetics
@@ -12,4 +12,8 @@ RoxygenNote: 5.0.1
 Suggests:
     testthat
 LinkingTo: Rcpp
-Imports: Rcpp
+Imports:
+	ggplot2,
+	plyr,
+	reshape2,
+	Rcpp

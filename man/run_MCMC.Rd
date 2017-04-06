@@ -5,7 +5,8 @@
 \title{Adaptive Metropolis-within-Gibbs Random Walk Algorithm.}
 \usage{
 run_MCMC(parTab, data = NULL, mcmcPars, filename,
-  CREATE_POSTERIOR_FUNC = NULL, mvrPars = NULL, PRIOR_FUNC = NULL)
+  CREATE_POSTERIOR_FUNC = NULL, mvrPars = NULL, PRIOR_FUNC = NULL,
+  OPT_TUNING = 0.2)
 }
 \arguments{
 \item{parTab}{the parameter table controlling information such as bounds, initial values etc}
@@ -21,6 +22,8 @@ run_MCMC(parTab, data = NULL, mcmcPars, filename,
 \item{mvrPars}{a list of parameters if using a multivariate proposal. Must contain an initial covariance matrix, weighting for adapting cov matrix, and an initial scaling parameter (0-1)}
 
 \item{PRIOR_FUNC}{user function of prior for model parameters. Should take values, names and local from param_table}
+
+\item{OPT_TUNING}{constant used to indicate what proportion of the adaptive period should be used to build the covariance matrix, if needed}
 }
 \value{
 a list with: 1) full file path at which the MCMC chain is saved as a .csv file; 2) the last used covarianec matrix; 3) the last used scale size
