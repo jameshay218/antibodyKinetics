@@ -23,18 +23,6 @@ fromUnitScale <- function(x, min, max) {
     .Call('antibodyKinetics_fromUnitScale', PACKAGE = 'antibodyKinetics', x, min, max)
 }
 
-#' @export
-#' @useDynLib antibodyKinetics
-predict_titres <- function(params, times) {
-    .Call('antibodyKinetics_predict_titres', PACKAGE = 'antibodyKinetics', params, times)
-}
-
-#' Single trajectory function
-#' @export
-simple_model <- function(pars, times) {
-    .Call('antibodyKinetics_simple_model', PACKAGE = 'antibodyKinetics', pars, times)
-}
-
 #' Model trajectory calc cpp
 #'
 #' Calculates the ferret model trajectory for a single infection event.
@@ -48,8 +36,9 @@ simple_model <- function(pars, times) {
 #' @useDynLib antibodyKinetics
 #' @examples
 #' pars <- c("mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,
-#'           "sigma"=0.01, "beta"=0.02,"c"=4, "primed"=0,"mod"=1,
-#'           "x"=0,"t_i"=10)
+#'           "sigma"=0.01, "beta"=0.02,"c"=4,"y0_mod"=0,
+#'            "primed"=0,"mod"=1,
+#'           "x"=0,"t_i"=10,"y0"=0,"eff_y0"=0)
 #' times <- seq(0,100,by=10)
 #' y <- model_trajectory_cpp(pars,times)
 #' @export
@@ -80,11 +69,12 @@ model_trajectory_cpp <- function(pars, times) {
 #' @param exposure_i_lengths IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group
 #' @param par_lengths IntegerVector of lengths describing the size of blocks in the par_type_ind vector that relate to each exposure type
 #' @param cr_lengths IntegerVector of lengths describing the size of blocks in the cr_ind vector that relate to each strain
+#' @param version integer indicating which version of the model will be solve. 0 solves the isolated form, and 1 solves the competitive exposure form.
 #' @return a matrix of antibody kinetic trajectories, with rows for group and then strain
 #' @export
 #' @useDynLib antibodyKinetics
-model_func_group_cpp <- function(pars, times, groups, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths) {
-    .Call('antibodyKinetics_model_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths)
+model_func_group_cpp <- function(pars, times, groups, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths, version) {
+    .Call('antibodyKinetics_model_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths, version)
 }
 
 #' Observation error matrix solver
@@ -139,11 +129,12 @@ obs_likelihood <- function(y, data, params) {
 #' @param exposure_i_lengths IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group
 #' @param par_lengths IntegerVector of lengths describing the size of blocks in the par_type_ind vector that relate to each exposure type
 #' @param cr_lengths IntegerVector of lengths describing the size of blocks in the cr_ind vector that relate to each strain
+#' @param version integer indicating which model version to use. if 0, uses the isolation boosting version. if 1, uses the continuous boosting version.
 #' @param data NumericMatrix of antibody titre data. Each row should be complete observations of titres against a given strain for a given group. If we have 5 strains measured and 5 groups, rows 1:5 should be titres in group 1, rows 6:10 titres in group 3 etc. If more than 1 individual in each group, multiply these criteria by number of inidividuals in that group (ie., rows 1:15 for group 1)
 #' @return a single likelihood of observing the data given the model parameters
 #' @export
 #' @useDynLib antibodyKinetics
-posterior_func_group_cpp <- function(pars, times, groups, individuals, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths, data) {
-    .Call('antibodyKinetics_posterior_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, individuals, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths, data)
+posterior_func_group_cpp <- function(pars, times, groups, individuals, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths, version, data) {
+    .Call('antibodyKinetics_posterior_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, individuals, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths, version, data)
 }
 

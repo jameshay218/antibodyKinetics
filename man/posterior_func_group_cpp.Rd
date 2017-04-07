@@ -7,7 +7,7 @@
 posterior_func_group_cpp(pars, times, groups, individuals, strains,
   exposure_types, exposure_strains, measured_strains, exposure_orders,
   exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices,
-  exposure_i_lengths, par_lengths, cr_lengths, data)
+  exposure_i_lengths, par_lengths, cr_lengths, version, data)
 }
 \arguments{
 \item{pars}{the vector of model parameters as in parTab}
@@ -43,6 +43,8 @@ posterior_func_group_cpp(pars, times, groups, individuals, strains,
 \item{par_lengths}{IntegerVector of lengths describing the size of blocks in the par_type_ind vector that relate to each exposure type}
 
 \item{cr_lengths}{IntegerVector of lengths describing the size of blocks in the cr_ind vector that relate to each strain}
+
+\item{version}{integer indicating which model version to use. if 0, uses the isolation boosting version. if 1, uses the continuous boosting version.}
 
 \item{data}{NumericMatrix of antibody titre data. Each row should be complete observations of titres against a given strain for a given group. If we have 5 strains measured and 5 groups, rows 1:5 should be titres in group 1, rows 6:10 titres in group 3 etc. If more than 1 individual in each group, multiply these criteria by number of inidividuals in that group (ie., rows 1:15 for group 1)}
 }

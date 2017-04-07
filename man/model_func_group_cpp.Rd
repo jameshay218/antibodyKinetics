@@ -7,7 +7,7 @@
 model_func_group_cpp(pars, times, groups, strains, exposure_types,
   exposure_strains, measured_strains, exposure_orders, exposure_primes,
   exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths,
-  par_lengths, cr_lengths)
+  par_lengths, cr_lengths, version)
 }
 \arguments{
 \item{pars}{the vector of model parameters as in parTab}
@@ -41,6 +41,8 @@ model_func_group_cpp(pars, times, groups, strains, exposure_types,
 \item{par_lengths}{IntegerVector of lengths describing the size of blocks in the par_type_ind vector that relate to each exposure type}
 
 \item{cr_lengths}{IntegerVector of lengths describing the size of blocks in the cr_ind vector that relate to each strain}
+
+\item{version}{integer indicating which version of the model will be solve. 0 solves the isolated form, and 1 solves the competitive exposure form.}
 }
 \value{
 a matrix of antibody kinetic trajectories, with rows for group and then strain

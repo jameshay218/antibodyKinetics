@@ -35,11 +35,11 @@ double obs_error(int actual, int obs, double S, double EA, int MAX_TITRE){
 //[[Rcpp::export]]
 double obs_likelihood(NumericVector y, NumericVector data, NumericVector params){
   double ln = 0;
-  int MAX_TITRE = params(2);
+  int MAX_TITRE = params(3);
   for(int i = 0; i < y.length();++i){
     if(y(i) < 0) y(i) = 0;
     if(y(i) >= MAX_TITRE) y(i) = MAX_TITRE;
-    ln += log(obs_error(floor(y(i)), floor(data(i)),params(0),params(1),MAX_TITRE));
+    ln += log(obs_error(floor(y(i)), floor(data(i)),params(1),params(2),MAX_TITRE));
   }
   return ln;
 }
@@ -68,6 +68,7 @@ double obs_likelihood(NumericVector y, NumericVector data, NumericVector params)
 //' @param exposure_i_lengths IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group
 //' @param par_lengths IntegerVector of lengths describing the size of blocks in the par_type_ind vector that relate to each exposure type
 //' @param cr_lengths IntegerVector of lengths describing the size of blocks in the cr_ind vector that relate to each strain
+//' @param version integer indicating which model version to use. if 0, uses the isolation boosting version. if 1, uses the continuous boosting version.
 //' @param data NumericMatrix of antibody titre data. Each row should be complete observations of titres against a given strain for a given group. If we have 5 strains measured and 5 groups, rows 1:5 should be titres in group 1, rows 6:10 titres in group 3 etc. If more than 1 individual in each group, multiply these criteria by number of inidividuals in that group (ie., rows 1:15 for group 1)
 //' @return a single likelihood of observing the data given the model parameters
 //' @export
@@ -81,75 +82,22 @@ double posterior_func_group_cpp(NumericVector pars, NumericVector times,
 				IntegerVector exposure_indices, IntegerVector cr_inds,
 				IntegerVector par_type_ind, IntegerVector order_indices,
 				IntegerVector exposure_i_lengths, IntegerVector par_lengths, 
-				IntegerVector cr_lengths, NumericMatrix data){
-  int group;
-  int strain;
-  int A, B, type, order, exposure_strain;
-  double t_i, mod, cr,isPrimed;
+				IntegerVector cr_lengths, int version, 
+				NumericMatrix data){
+
+  NumericMatrix result = model_func_group_cpp(pars, times, groups, strains, exposure_types,
+					      exposure_strains, measured_strains, exposure_orders, exposure_primes,
+					      exposure_indices, cr_inds, par_type_ind, order_indices,
+					      exposure_i_lengths, par_lengths,
+					      cr_lengths, version);
   double ln = 0;
-  IntegerVector tmp_exposures;
-  NumericVector fullPars;
-  NumericMatrix results(strains.size()*groups.size(), times.size());
-  NumericVector y;
   int index_data = 0;
   int index_model = 0;
 
-  // For each group
   for(int i = 0; i < groups.size(); ++i){
-    group = groups[i];
-
-    // Get the range of indices for exposure parameters corresponding to this exposure
-    A = exposure_i_lengths[i];
-    B = exposure_i_lengths[i+1] - 1;
-    tmp_exposures = exposure_indices[Range(A,B)];
-
-    // For each measured strain
     for(int j = 0; j < strains.size(); ++j){
-  // Strains have to be 0 indexed
-      strain = strains[j] -1;
-
-      // For each exposure, calculate the antibody kinetics for this strain
-      for(int k = 0; k < tmp_exposures.size(); ++k){
-
-	// Get infection time, the order of this infection and what the exposure strain was.
-	// If we want to limit to non-additive kinetics, then here I'd need to subset the times
-	// vector by those times after t_i and before the next t_i (or the end of the times vector)
-	t_i = pars[tmp_exposures[k]];
-	order = exposure_orders[tmp_exposures[k]] - 1;
-	exposure_strain = exposure_strains[tmp_exposures[k]] - 1;
-	mod = pars[order_indices[order]];
-	isPrimed = exposure_primes[tmp_exposures[k]];
-
-	// This is just matrix indexing of a vector
-	cr = pars[cr_inds[cr_lengths[strain] + exposure_strain]];
-
-	// Again, need to zero index exposure strains
-	type = exposure_types[tmp_exposures[k]] - 1;
-
-	// Use these toget subset of parameters that correspond to this infection
-	// type
-	A = par_lengths[type];
-	B = par_lengths[type+1] - 1;
-
-	// Combine parameters
-	fullPars = pars[par_type_ind[Range(A,B)]];
-	fullPars.push_back(isPrimed);
-	fullPars.push_back(mod);
-	fullPars.push_back(cr);
-	fullPars.push_back(t_i);
-
-	// Solve modle for this single strain and exposure
-	y = model_trajectory_cpp(fullPars, times);
-
-	// Additive antibody levels
-	for(int ii = 0; ii < y.size(); ++ii){
-	  results(index_model, ii) += y[ii];
-	}
-      }
-      // Calculate the likelihood of observing the data given that the model calculated
-      // trajectory was the true trajectory. Do this for each individual
-      for(int jj = 0; jj < individuals[i]; ++jj){
-	ln += obs_likelihood(results(index_model,_), data(index_data,_), fullPars);
+      for(int k = 0; k < individuals[i]; ++k){
+	ln += obs_likelihood(result(index_model,_), data(index_data,_), pars[Range(0,3)]);
 	index_data++;
       }
       index_model++;

@@ -27,8 +27,9 @@ times <- seq(0,100,by=10)
 y <- model_trajectory(pars,times,FALSE)
 }
 \seealso{
-Other model.functions: \code{\link{model_func_groups}},
-  \code{\link{model_func}},
+Other model.functions: \code{\link{model_func_competitive}},
+  \code{\link{model_func_groups}},
+  \code{\link{model_func_isolated}},
   \code{\link{model_trajectory_cpp}}
 }
 

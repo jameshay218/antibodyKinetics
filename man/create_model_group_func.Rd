@@ -4,13 +4,15 @@
 \alias{create_model_group_func}
 \title{Create model function pointer groups}
 \usage{
-create_model_group_func(parTab)
+create_model_group_func(parTab, form = "isolated")
 }
 \arguments{
 \item{parTab}{the full parameter table - see example csv file}
+
+\item{form}{a string to indicate the form of the model ("isolated" or "competitive")}
 }
 \value{
-a function pointer for \code{\link{model_func}}
+a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_competitive}}
 }
 \description{
 Creaters a function pointer for \code{\link{model_func_groups}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.

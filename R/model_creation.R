@@ -1,11 +1,12 @@
 #' Create model function pointer
 #'
-#' Creaters a function pointer for \code{\link{model_func}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
+#' Creaters a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_additive}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
 #' @param parTab the full parameter table - see example csv file
-#' @return a function pointer for \code{\link{model_func}}
+#' @param form string to indicate if this uses the isolated or competitive version of the model. \code{\link{model_func_isolated}}, \code{\link{model_func_competitive}}
+#' @return a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_competitive}}
 #' @export
 #' @useDynLib antibodyKinetics
-create_model_func <- function(parTab){
+create_model_func <- function(parTab, form="isolated"){
   strains <- unique(parTab$strain)
   strains <- strains[complete.cases(strains)]
   
@@ -20,14 +21,18 @@ create_model_func <- function(parTab){
   
   parTab1 <- parTab[!(parTab$names %in% c("t_i","x","mod")),]
   parTab_indices <- which(!(parTab$names %in% c("t_i","x","mod")))
+
+  f_model <- NULL
+  if(form == "isolated") f_model <- model_func_isolated
+  if(form == "competitive") f_model <- model_func_competitive
   
   f <- function(pars,times){
-    parTab1$values <- pars[parTab_indices]
-    cr_table$values <- pars[cr_indices]
-    order_tab$values <- pars[order_indices]
-    exposures$values <- pars[exposure_indices]
-    y <- model_func(parTab1,cr_table,order_tab,exposures,strains,times)
-    return(y)
+      parTab1$values <- pars[parTab_indices]
+      cr_table$values <- pars[cr_indices]
+      order_tab$values <- pars[order_indices]
+      exposures$values <- pars[exposure_indices]
+      y <- f_model(parTab1,cr_table,order_tab,exposures,strains,times)
+      return(y)
   }
   return(f)  
 }
@@ -36,11 +41,12 @@ create_model_func <- function(parTab){
 #'
 #' Creaters a function pointer for \code{\link{model_func_groups}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
 #' @param parTab the full parameter table - see example csv file
-#' @return a function pointer for \code{\link{model_func}}
+#' @param form a string to indicate the form of the model ("isolated" or "competitive")
+#' @return a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_competitive}}
 #' @export
 #' @useDynLib antibodyKinetics
 #' @seealso \code{\link{create_model_func}}
-create_model_group_func <- function(parTab){
+create_model_group_func <- function(parTab, form = "isolated"){
   strains <- unique(parTab$strain)
   strains <- strains[complete.cases(strains)]
   
@@ -55,21 +61,25 @@ create_model_group_func <- function(parTab){
   
   parTab1 <- parTab[!(parTab$names %in% c("t_i","x","mod")),]
   parTab_indices <- which(!(parTab$names %in% c("t_i","x","mod")))
-  
+
+  f_model <- NULL
+  if(form=="isolated") f_model <- model_func_isolated
+  if(form=="competitive") f_model <- model_func_competitive
+
   f <- function(pars,times){
-    parTab1$values <- pars[parTab_indices]
-    cr_table$values <- pars[cr_indices]
-    order_tab$values <- pars[order_indices]
-    exposures$values <- pars[exposure_indices]
-    y <- model_func_groups(parTab1,cr_table,order_tab,exposures,strains,times)
-    return(y)
+      parTab1$values <- pars[parTab_indices]
+      cr_table$values <- pars[cr_indices]
+      order_tab$values <- pars[order_indices]
+      exposures$values <- pars[exposure_indices]
+      y <- model_func_groups(parTab1,cr_table,order_tab,exposures,strains,times, f_model)
+      return(y)
   }
   return(f)  
 }
 
 #' Create model function pointer cpp implementation
 #'
-#' Creaters a function pointer for \code{\link{model_func_group_cpp}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. This function can also be used to create a pointer to the same model function, but solving a likelihood function
+#' Creaters a function pointer for \code{\link{model_func_group_cpp}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. This function can also be used to create a pointer to the same model function, but solving a likelihood function. This currently uses the "isolated" form of the model. Support could be added to allow either the competitive or isolated form.
 #' @param parTab the full parameter table - see example csv file
 #' @param dat if posterior function, need the matrix of data. First row is model times, and subsequent rows are trajectories (each row is trajectory of antibodies for one strain, grouped by exposure group)
 #' @param PRIOR_FUNC optional pointer to prior calculating function that takes current parameter vector
@@ -78,6 +88,7 @@ create_model_group_func <- function(parTab){
 #' @param convert_strains as for convert_types, but relating to the infection strain names
 #' @param convert_groups if the groups are named, used to convert names to integers
 #' @param individuals vector indicating how many individuals are in each group ie. relating to rows in the data matrix
+#' @param form string of "isolated" or "competitive" indicating whether we're using the isolation boosting or competitive boosting version of the model
 #' @return a function pointer for \code{\link{model_func_group_cpp}} or \code{\link{posterior_func_group_cpp}}
 #' @export
 #' @useDynLib antibodyKinetics
@@ -86,7 +97,8 @@ create_model_group_func_cpp <- function(parTab, dat=NULL, PRIOR_FUNC = NULL,
                                         convert_types = c("all"=0,"infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5),
                                         convert_strains = c("A"=1,"B"=2,"C"=3,"D"=4,"E"=5),
                                         convert_groups = c("1"=1,"2"=2,"3"=3,"4"=4,"5"=5),
-                                        individuals = c(1,1,1,1,1)
+                                        individuals = c(1,1,1,1,1),
+                                        form = "isolated"
                                         ){
 ##########################################################
     ## Firstly, we need to isolate group specific exposures
@@ -200,16 +212,22 @@ create_model_group_func_cpp <- function(parTab, dat=NULL, PRIOR_FUNC = NULL,
     f <- NULL
     ## Return the posterior calculation or just model calculation depending on what
     ## is asked for
+
+    ver <- 0
+    if(form == "isolated") ver <- 0
+    if(form == "competitive") ver <- 1
+
     if(version == "posterior"){
         times <- dat[1,]
         dat <- dat[2:nrow(dat),]
-
         f <- function(pars){
             ln <- posterior_func_group_cpp(pars, times, groups, individuals, strains,
                                            exposure_types, exposure_strains, measured_strains,
                                            exposure_orders, exposure_primes, 
                                            exposure_indices, cr_inds, par_type_ind, order_indices,
-                                     exposure_i_lengths,  par_lengths, cr_lengths, dat)
+                                           exposure_i_lengths,  par_lengths, cr_lengths,
+                                           ver, dat)
+
             if(!is.null(PRIOR_FUNC)) ln <- ln + PRIOR_FUNC(pars)
             ln
         }
@@ -219,7 +237,8 @@ create_model_group_func_cpp <- function(parTab, dat=NULL, PRIOR_FUNC = NULL,
                                  exposure_types, exposure_strains, measured_strains,
                                  exposure_orders, exposure_primes, 
                                  exposure_indices, cr_inds, par_type_ind, order_indices,
-                                 exposure_i_lengths,  par_lengths, cr_lengths)
+                                 exposure_i_lengths,  par_lengths, cr_lengths,
+                                 ver)
         }
     }
     return(f)

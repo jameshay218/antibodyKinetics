@@ -36,15 +36,20 @@ model_trajectory <- function(pars, times, logSigma=TRUE){
     m <- pars["m"]
     y0 <- pars["y0"]
     t_i <- pars["t_i"]
+    lower_bound <- pars["lower_bound"]
 
     if(logSigma){
         sigma <- exp(pars["sigma"])
         beta <- exp(pars["beta"])
+        y0_mod <- exp(pars["y0_mod"])
     } else {
         sigma <-  pars["sigma"]
         beta <- pars["beta"]
+        y0_mod <- pars["y0_mod"]
     }
     
+    ## mu = f(y0)
+    mu <- mu*exp(-max(y0,0)*y0_mod)
     cr <- exp(-sigma*pars["x"])
     prime_cr <- pars["c"]*exp(-beta*pars["x"])*pars["primed"]
 
@@ -67,6 +72,7 @@ model_trajectory <- function(pars, times, logSigma=TRUE){
             (
                 (t > (ts + tp + t_i))*(-m*t+m*(t_i+tp+ts)+(1-dp)*mu)
             ) + y0
+        if(y[i] < lower_bound) y[i] <- lower_bound
         i <- i + 1
     }
     return(y)
@@ -82,12 +88,13 @@ model_trajectory <- function(pars, times, logSigma=TRUE){
 #' @param exposures the table for exposure types and times
 #' @param strains a vector with the names of all of the strains involved in the model
 #' @param times a vector of times to solve the model over
+#' @param MODEL_FUNC pointer to the R function that will be used to solve the model. 
 #' @return a table of antibody titres for the given times, with a column for times, group and colnames of the measured strain
 #' @export
 #' @useDynLib antibodyKinetics
 #' @family model functions
-#' @seealso \code{\link{model_func}} for next level, \code{link{model_trajectory}} for model solving code
-model_func_groups <- function(parTab, cr_table, order_tab, exposures, strains, times){
+#' @seealso \code{\link{model_func_isolated}} for next level, \code{link{model_trajectory}} for model solving code
+model_func_groups <- function(parTab, cr_table, order_tab, exposures, strains, times, MODEL_FUNC=antibodyKinetics::model_func_isolated){
     ## Get unique groups (groups of exposures)
     groups <- unique(exposures$group)
 
@@ -98,14 +105,14 @@ model_func_groups <- function(parTab, cr_table, order_tab, exposures, strains, t
     ## For each group, isolate group specific exposures and solve model
     for(group in groups){
         tmpExposures <- exposures[exposures$group == group,] 
-        y[y$group==group,strains] <- model_func(parTab, cr_table, order_tab, tmpExposures, strains, times)
+        y[y$group==group,strains] <- MODEL_FUNC(parTab, cr_table, order_tab, tmpExposures, strains, times)
     }
     return(y)
 }
 
-#' Model solver for one group
+#' Model solver for one group, competitive process
 #'
-#' Solves the antibody kinetics model for a single group, which may have multiple measured and exposure strains
+#' Solves the antibody kinetics model for a single group, which may have multiple measured and exposure strains. This particular implementation assumes that each subsequent exposure supercedes the previous one
 #' @param parTab the parameter table containing at least a values
 #' column and a names column which can be used to solve \code{\link{model_trajectory}}
 #' @param cr_table the cross reactivity part of the parameter table, with values and names for the exposure strain, the measured strain, and the antigenic distance (x)
@@ -117,15 +124,127 @@ model_func_groups <- function(parTab, cr_table, order_tab, exposures, strains, t
 #' @export
 #' @useDynLib antibodyKinetics
 #' @family model functions
-model_func <- function(parTab, cr_table, order_tab, exposures, strains, times){
+model_func_competitive <- function(parTab, cr_table, order_tab, exposures, strains, times){
     trajectories <- matrix(0, ncol=length(strains),nrow=length(times))
     index <- 1
     ## For each strain to be measured
     for(strain in strains){
-
+        y <- 0
         ## For each exposure
         for(i in 1:nrow(exposures)){
+            y0 <- y[length(y)]
 
+            ## Get exposure time, type and exposure strain
+            t_i <- exposures[i,"values"]
+            type <- exposures[i,"type"]
+            exposure <- exposures[i,"exposure"]
+            
+            ## Is this first, second etc exposure?
+            order <- exposures[i,"order"]
+
+            ## Was there priming?
+            isPrimed <- exposures[i,"primed"]
+
+            ## Get model parameters for this type of exposure
+            tmpParTab <- parTab[parTab$type %in% c(type,"all","priming"),]
+            pars <- tmpParTab$values
+            names(pars) <- tmpParTab$names
+
+            ## Get the correct modifier for this exposure order
+            mod <- order_tab[order_tab$order == order,"values"]
+            ind <- sort(c(exposure,strain))
+
+            ## Find the antigenic distance between the measured and exposure strain
+            x <- cr_table[cr_table$exposure==ind[1] & cr_table$strain == ind[2],"values"]
+            
+            ## If not first exposure
+            if(i > 1){
+                ## What was last exposure?
+                old_ti <- exposures[i-1,"values"]
+                ## If same time
+                if(old_ti == t_i){
+                    old_strain <- exposures[i-1,"exposure"]
+                    ind <- sort(c(old_strain,strain))
+                    ## Check which exposure had the closest cross reactivity
+                    old_x <- cr_table[cr_table$exposure==ind[1] & cr_table$strain == ind[2],"values"]
+
+                    ## If previous one was better, can skip this
+                    if(old_x < x){
+                        next
+                    } else { ## Otherwise, subtract the previous trajectory to use this one
+                        trajectories[tmpTimeI,index] <- trajectories[tmpTimeI,index] - y[1:(length(y)-1)]
+                    }
+                }
+            }
+            
+            ## Get next exposure - will calculate dynamics up until this point
+            ## If it's the last exposure, go up to the end of the time vector
+            ii <- i
+            if(i == nrow(exposures)){
+                next_t <- max(times)
+            } else {
+                ## Get next exposure time. However, we need to find the next exposure
+                ## that is different to the current one
+                ii <- i
+                next_t <- exposures[ii+1,"values"]
+                ## Loop through until we find a different exposure. If we get to the end
+                ## and we're still on the same exposure time, 
+           
+                while(next_t == t_i & (ii + 1) < nrow(exposures)){
+                    next_t <- exposures[ii+1,"values"]
+                    ii <- ii + 1
+                }
+                if((ii+1) == nrow(exposures)) next_t <- max(times)
+            }
+
+            ## Only using times up to the next infection
+            ## The next infection time needs to be included,
+            ## as this will be the starting titre for the next boost
+            tmpTimeI <- which(times >= t_i & times < next_t)
+            tmpTimes <- c(times[tmpTimeI],next_t)
+
+            ## If this is the final time, we need to calculate the last
+            ## titre twice for indexing purposes
+            if(next_t == max(times)){
+                tmpTimeI <- which(times >= t_i & times <= next_t)
+                tmpTimes <- c(tmpTimes, next_t)
+            }
+            
+            
+            ## Solve model
+            pars <- c("t_i"=t_i,pars,"mod"=mod,"x"=x,y0=y0,"primed"=isPrimed)
+            y <- model_trajectory(pars, tmpTimes)
+            trajectories[tmpTimeI,index] <-  y[1:(length(y)-1)]
+        }
+        index <- index + 1
+    }
+    colnames(trajectories) <- strains
+    return(trajectories)
+}
+
+
+
+#' Model solver for one group, isolated process
+#'
+#' Solves the antibody kinetics model for a single group, which may have multiple measured and exposure strains. This particular implementation assumes that each exposure occurs in isolation, and final titres are the sum of all isolated exposure processes
+#' @param parTab the parameter table containing at least a values
+#' column and a names column which can be used to solve \code{\link{model_trajectory}}
+#' @param cr_table the cross reactivity part of the parameter table, with values and names for the exposure strain, the measured strain, and the antigenic distance (x)
+#' @param order_tab the table for parameters modifying boosting based on infection order (antigenic seniority)
+#' @param exposures the table for exposure types and times
+#' @param strains a vector with the names of all of the strains involved in the model
+#' @param times a vector of times to solve the model over
+#' @return a table of antibody titres for the given times, with a column for times and colnames of the measured strain
+#' @export
+#' @useDynLib antibodyKinetics
+#' @family model functions
+model_func_isolated <- function(parTab, cr_table, order_tab, exposures, strains, times){
+    trajectories <- matrix(0, ncol=length(strains),nrow=length(times))
+    index <- 1
+    ## For each strain to be measured
+    for(strain in strains){
+        ## For each exposure
+        for(i in 1:nrow(exposures)){
             ## Get exposure time, type and exposure strain
             t_i <- exposures[i,"values"]
             type <- exposures[i,"type"]
@@ -149,14 +268,32 @@ model_func <- function(parTab, cr_table, order_tab, exposures, strains, times){
             ## Find the antigenic distance between the measured and exposure strain
             x <- cr_table[cr_table$exposure==ind[1] & cr_table$strain == ind[2],"values"]
 
+            ## If not first exposure
+            if(i > 1){
+                ## What was last exposure?
+                old_ti <- exposures[i-1,"values"]
+                ## If same time
+                if(old_ti == t_i){
+                    old_strain <- exposures[i-1,"exposure"]
+                    ind <- sort(c(old_strain,strain))
+                    ## Check which exposure had the closest cross reactivity
+                    old_x <- cr_table[cr_table$exposure==ind[1] & cr_table$strain == ind[2],"values"]
+                    ## If previous one was better, can skip this
+                    if(old_x < x){
+                        next
+                    } else { ## Otherwise, subtract the previous trajectory to use this one
+                        trajectories[,index] <- trajectories[,index] - y
+                    }
+                }
+            }
+            
             ## Solve model
             pars <- c("t_i"=t_i,pars,"mod"=mod,"x"=x,y0=0,"primed"=isPrimed)
             y <- model_trajectory(pars, times)
-            trajectories[,index] <-  trajectories[,index] +y
-            
+            trajectories[,index] <-  trajectories[,index] +  y
         }
         index <- index + 1
     }
-  colnames(trajectories) <- strains
-  return(trajectories)
+    colnames(trajectories) <- strains
+    return(trajectories)
 }
