@@ -23,7 +23,7 @@ run_MCMC <- function(parTab,
                      ...){
     ## Allowable error in scale tuning
     TUNING_ERROR <- 0.1
-    
+
     ## Extract MCMC parameters
     iterations <- mcmcPars["iterations"]
     popt <- mcmcPars["popt"]
@@ -56,6 +56,8 @@ run_MCMC <- function(parTab,
         scale <- mvrPars[[2]]
         w <- mvrPars[[3]]
     }
+
+
     posterior_simp <- protect(CREATE_POSTERIOR_FUNC(parTab,data, PRIOR_FUNC,...))
 
     ## Setup MCMC chain file with correct column names
@@ -87,7 +89,7 @@ run_MCMC <- function(parTab,
     no_recorded <- 1
     sampno <- 2
     par_i <- 1
-    
+
     for (i in 1:(iterations+adaptive_period)){
         ## If using univariate proposals
         if(is.null(mvrPars)) {

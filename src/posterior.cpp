@@ -85,7 +85,7 @@ double posterior_func_group_cpp(NumericVector pars, NumericVector times,
 				IntegerVector cr_lengths, int version, 
 				NumericMatrix data){
 
-  NumericMatrix result = model_func_group_cpp(pars, times, groups, strains, exposure_types,
+   NumericMatrix result = model_func_group_cpp(pars, times, groups, strains, exposure_types,
 					      exposure_strains, measured_strains, exposure_orders, exposure_primes,
 					      exposure_indices, cr_inds, par_type_ind, order_indices,
 					      exposure_i_lengths, par_lengths,
@@ -97,7 +97,7 @@ double posterior_func_group_cpp(NumericVector pars, NumericVector times,
   for(int i = 0; i < groups.size(); ++i){
     for(int j = 0; j < strains.size(); ++j){
       for(int k = 0; k < individuals[i]; ++k){
-	ln += obs_likelihood(result(index_model,_), data(index_data,_), pars[Range(0,3)]);
+	ln += obs_likelihood(result(index_model,_), data(index_data,_), pars);
 	index_data++;
       }
       index_model++;

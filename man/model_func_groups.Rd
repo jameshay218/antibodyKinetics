@@ -32,8 +32,7 @@ Calculates model trajectories for multiple groups
 \seealso{
 \code{\link{model_func_isolated}} for next level, \code{link{model_trajectory}} for model solving code
 
-Other model.functions: \code{\link{model_func_competitive}},
-  \code{\link{model_func_isolated}},
+Other model.functions: \code{\link{model_func}},
   \code{\link{model_trajectory_cpp}},
   \code{\link{model_trajectory}}
 }

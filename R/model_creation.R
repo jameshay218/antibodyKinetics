@@ -22,16 +22,15 @@ create_model_func <- function(parTab, form="isolated"){
   parTab1 <- parTab[!(parTab$names %in% c("t_i","x","mod")),]
   parTab_indices <- which(!(parTab$names %in% c("t_i","x","mod")))
 
-  f_model <- NULL
-  if(form == "isolated") f_model <- model_func_isolated
-  if(form == "competitive") f_model <- model_func_competitive
-  
+  if(form == "isolated") ver <- 0
+  if(form == "competitive") ver <- 1
+
   f <- function(pars,times){
       parTab1$values <- pars[parTab_indices]
       cr_table$values <- pars[cr_indices]
       order_tab$values <- pars[order_indices]
       exposures$values <- pars[exposure_indices]
-      y <- f_model(parTab1,cr_table,order_tab,exposures,strains,times)
+      y <- model_func(parTab1,cr_table,order_tab,exposures,strains,times,ver)
       return(y)
   }
   return(f)  
@@ -217,6 +216,7 @@ create_model_group_func_cpp <- function(parTab, dat=NULL, PRIOR_FUNC = NULL,
     if(form == "isolated") ver <- 0
     if(form == "competitive") ver <- 1
 
+    
     if(version == "posterior"){
         times <- dat[1,]
         dat <- dat[2:nrow(dat),]

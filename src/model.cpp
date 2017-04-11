@@ -125,7 +125,7 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
   tmp_time_indices = time_indices;
 
   int index = 0;
-
+  
   // For each group
   for(int i = 0; i < groups.size(); ++i){
     group = groups[i];
@@ -139,9 +139,9 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
     for(int j = 0; j < strains.size(); ++j){
       strain = strains[j] -1;
       y0 = 0.0;
-      
       // For each exposure
       for(int k = 0; k < tmp_exposures.size(); ++k){
+	tmpTimes = times;
 	t_i = pars[tmp_exposures[k]];
 	order = exposure_orders[tmp_exposures[k]] - 1;
 	exposure_strain = exposure_strains[tmp_exposures[k]] - 1;
@@ -170,9 +170,8 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	    if(old_cr < cr) continue;
 	    else {
 	      // Otherwise, remove the previously recorded trajectory
-	      //Rcpp::Rcout << "Removing old... " << std::endl;
 	      for(int ii = 0; ii < tmp_time_indices.size(); ++ii){
-		results(index, tmp_time_indices[ii]) -= y[ii];
+		results(index, tmp_time_indices[ii]-1) -= y[ii];
 	      }
 	    }
 	  }
@@ -197,8 +196,8 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	  // However, next exposure time might be the same as this one. If this is the case.
 	  // need to keep looking until we find a later exposure or the end of the times vector
 	  while(next_t == t_i && (ii+1) < tmp_exposures.size()){
-	    next_t = pars[tmp_exposures[ii + 1]];
 	    ii++;
+	    next_t = pars[tmp_exposures[ii + 1]];
 	  }
 	  // If we got to the last exposure and it's still the same, use the last time
 	  if((ii+1) == tmp_exposures.size()){
@@ -213,20 +212,17 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	  if(next_t == times[times.size()-1]){
 	    tmpTimes = times[times >= t_i & times <= next_t];
 	    tmp_time_indices = time_indices[times >= t_i & times <= next_t];
-	    tmpTimes.push_back(next_t);
 	  } else {
 	    tmpTimes = times[times >= t_i & times < next_t];
 	    tmp_time_indices = time_indices[times >= t_i & times < next_t];
 	  }
 	}
 	tmpTimes.push_back(next_t);
-
 	// **********************************************************************************
 	
 	type = exposure_types[tmp_exposures[k]] - 1;
 	A = par_lengths[type];
 	B = par_lengths[type+1] - 1;
-
 	fullPars = pars[par_type_ind[Range(A,B)]];
 	fullPars.push_back(isPrimed);
 	fullPars.push_back(mod);
@@ -250,7 +246,7 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	   be all time points. If version 1, this will correspond to the times relating to the
 	   current exposure */
 	for(int ii = 0; ii < tmp_time_indices.size(); ++ii){
-	  results(index, tmp_time_indices[ii]-1) += y[ii];
+	   results(index, tmp_time_indices[ii]-1) += y[ii];
 	}
 	// Get the last element from the y vector, as this will be y0 for the next exposure
 	y0 = y[y.size()-1];
