@@ -27,11 +27,11 @@ create_model_func <- function(parTab, exposures,form="isolated",cross_reactivity
   if(form == "competitive") ver <- 1
 
   f <- function(pars,times){
-      parTab1$values <- pars[parTab_indices]
+      parTab$values <- pars
       cr_table$values <- pars[cr_indices]
       order_tab$values <- pars[order_indices]
- #     exposures$values <- pars[exposure_indices]
-      y <- model_func(parTab1,cr_table,order_tab,exposures,strains,
+      
+      y <- model_func(parTab,cr_table,order_tab,exposures,strains,
                       times,ver,cross_reactivity=FALSE,typing=FALSE)
       return(y)
   }
@@ -69,11 +69,11 @@ create_model_group_func <- function(parTab, exposures, form = "isolated",cross_r
   if(form=="competitive") ver <- 1
 
   f <- function(pars,times){
-      parTab1$values <- pars[parTab_indices]
+      parTab$values <- pars
       cr_table$values <- pars[cr_indices]
       order_tab$values <- pars[order_indices]
-      #exposures$values <- pars[exposure_indices]
-      y <- model_func_groups(parTab1, cr_table, order_tab, exposures,
+      
+      y <- model_func_groups(parTab, cr_table, order_tab, exposures,
                              strains, times, ver, cross_reactivity, typing)
       return(y)
   }
@@ -103,18 +103,20 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
                                         convert_strains = c("A"=1,"B"=2,"C"=3,"D"=4,"E"=5),
                                         convert_groups = c("1"=1,"2"=2,"3"=3,"4"=4,"5"=5),
                                         individuals = c(1,1,1,1,1),
-                                        form = "isolated"
+                                        form = "isolated",
+                                        typing=FALSE,
+                                        cross_reactivity=FALSE
                                         ){
 ##########################################################
     ## Firstly, we need to isolate group specific exposures
 ##########################################################
     ## Get unique groups
-    groups <- unique(exposures$group)
+    groups <- unique(exposureTab$group)
     groups <- groups[groups != "all"]
     groups <- groups[!is.na(groups)]
     
     ## Get unique strains
-    strains <- unique(exposures$strain)
+    strains <- unique(exposureTab$strain)
     strains <- strains[strains != "all"]
     strains <- strains[!is.na(strains)]
     
@@ -125,24 +127,23 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     strain_i_lengths <- NULL
     
     
-    ## For each group, isolate the parameter table indices that correspond to exposures for
+    ## For each group, isolate the exposure table indices that correspond to exposures for
     ## that group. Save these indices in a contiguous vector, and also store the indices
     ## of THIS vector that each group corresponds to eg. first 10 members correspond to
     ## group 1 would give the first entry to the exposure_i_lengths vector of 10
     for(group in groups){
-        tmp <- which(exposures$group == group)
+        tmp <- which(exposureTab$group == group)
         exposure_indices <- c(exposure_indices, tmp)
         exposure_i_lengths <- c(exposure_i_lengths, length(tmp))
         
         ## For each strain
-        tmpExposures <- exposures[exposure_indices,]
+        tmpExposures <- exposureTab[exposure_indices,]
         strain_i_lengths_tmp <- NULL
         
         for(strain in strains){
           tmp <- which(tmpExposures$strain == strain)
           strain_indices <- c(strain_indices, tmp)
           strain_i_lengths_tmp <- c(strain_i_lengths_tmp, length(tmp))
-          print(tmp)
         }
         strain_i_lengths <- c(strain_i_lengths, c(0,cumsum(strain_i_lengths_tmp)))
     }
@@ -156,7 +157,7 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     ## Order modifier parameters
 #########################################################
     ## Which indices of parTab correspond to order modifiers?
-    order_indices <- which(parTab$names == "mod")
+    order_inds <- which(parTab$names == "mod")
     
 #########################################################
     ## Cross reactivity parameters
@@ -189,9 +190,9 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     
     par_inds <- NULL
     par_lengths <- NULL
-    for(i in 1:nrow(exposures)){
-      tmpType <- exposures[i,"type"]
-      tmpID <- exposures[i, "id"]
+    for(i in 1:nrow(exposureTab)){
+      tmpType <- exposureTab[i,"type"]
+      tmpID <- exposureTab[i, "id"]
       if(typing){
         tmp <- param_indices[which(parTab$type %in% c("all",tmpType) & !(parTab$names %in% c("mod","x")))]
       } else {
@@ -212,13 +213,13 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     pars <- parTab$values
 
     ## What are the exposure types, strains, order and priming?
-    exposure_types <- exposures$type
-    exposure_strains <- exposures$exposure
-    measured_strains <- exposures$strain
-    exposure_orders <- exposures$order
-    exposure_primes <- exposures$primed
-    exposure_next <- exposures$next_t
-    exposure_end <- exposures$end
+    exposure_types <- exposureTab$type
+    exposure_times <- exposureTab$values
+    exposure_strains <- exposureTab$exposure
+    exposure_measured <- exposureTab$strain
+    exposure_orders <- exposureTab$order
+    exposure_primes <- exposureTab$primed
+    exposure_next <- exposureTab$next_t
 
     convert_types_back <- names(convert_types)
     convert_strains_back <- names(convert_strains)
@@ -227,7 +228,7 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     ## Convert any named elements to integers
     exposure_types <- convert_types[exposure_types]
     exposure_strains <- convert_strains[exposure_strains]
-    measured_strains <- convert_strains[measured_strains]
+    exposure_measured <- convert_strains[exposure_measured]
     
     strains <- convert_strains[strains]
     groups <- convert_groups[groups]
@@ -236,9 +237,9 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     ## the indices calculated in R
     exposure_indices <- exposure_indices - 1
     cr_inds <- cr_inds - 1
-    par_ind <- par_ind - 1
-    order_indices <- order_indices - 1
-
+    par_inds <- par_inds - 1
+    order_inds <- order_inds - 1
+    strain_indices <- strain_indices - 1
     f <- NULL
     ## Return the posterior calculation or just model calculation depending on what
     ## is asked for
@@ -252,24 +253,21 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
         times <- dat[1,]
         dat <- dat[2:nrow(dat),]
         f <- function(pars){
-            ln <- posterior_func_group_cpp(pars, times, groups, individuals, strains,
-                                           exposure_types, exposure_strains, measured_strains,
-                                           exposure_orders, exposure_primes, 
-                                           exposure_indices, cr_inds, par_type_ind, order_indices,
-                                           exposure_i_lengths,  par_lengths, cr_lengths,
-                                           ver, dat)
-
+            ln <- posterior_func_group_cpp(pars, times, groups, strains,
+                                           exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths,
+                                           exposure_times, exposure_strains, exposure_next, exposure_measured,
+                                           exposure_orders, exposure_primes, cr_inds, par_inds,
+                                           order_inds, par_lengths, cr_lengths, ver, individuals, dat)
             if(!is.null(PRIOR_FUNC)) ln <- ln + PRIOR_FUNC(pars)
             ln
         }
     } else {
         f <- function(pars, times){
             model_func_group_cpp(pars, times, groups, strains,
-                                 exposure_types, exposure_strains, measured_strains,
-                                 exposure_orders, exposure_primes, 
-                                 exposure_indices, cr_inds, par_type_ind, order_indices,
-                                 exposure_i_lengths,  par_lengths, cr_lengths,
-                                 ver)
+                                 exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths,
+                                 exposure_times, exposure_strains, exposure_next, exposure_measured,
+                                 exposure_orders, exposure_primes, cr_inds, par_inds,
+                                 order_inds, par_lengths, cr_lengths, ver)
         }
     }
     return(f)

@@ -147,37 +147,43 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
   // For each group
   for(int i = 0; i < groups.size(); ++i){
     group = groups[i];
-
     // Get exposures for this group
     A = exposure_i_lengths[i];
     B = exposure_i_lengths[i+1] - 1;
     tmp_exposures_group = exposure_indices[Range(A,B)];
-
     // For each strain, a subset of these exposures apply
     tmp_strains = strain_indices[Range(A,B)];
     tmp_strain_lengths = strain_i_lengths[Range((i*5),(i*5)+5)];
-    
+    //Rcpp::Rcout << "Tmp strain lengths: " << tmp_strain_lengths << std::endl;
+    //Rcpp::Rcout << "Tmp strain indices: " << tmp_strains << std::endl; 
     // For each strain in this group
-    for(int j = 0; j < tmp_strain_lengths.size(); ++j){
+    for(int j = 0; j < strains.size(); ++j){
+      //Rcpp::Rcout << "Strain: " << j << std::endl;
       A = tmp_strain_lengths[j];
       B = tmp_strain_lengths[j+1] - 1;
+      //Rcpp::Rcout << A << "  " << B << std::endl;
       tmp_exposures = tmp_exposures_group[tmp_strains[Range(A,B)]];
-      
+      //Rcpp::Rcout << "Strain indices: " << tmp_exposures << std::endl;
       y0 = 0;
       
       // For each exposure for this strain
       for(int k = 0; k < tmp_exposures.size(); ++k){
+	//Rcpp::Rcout << "Exposure: " << k << std::endl;
+	//Rcpp::Rcout << "Overall exposure: " << tmp_exposures[k] << std::endl;
 	tmpTimes = times;
 	/* The par_lengths vector should be the same size as
 	   the number of exposures (+1 for the first index of 0)
 	   Use this to get subset of parameters.
 	*/
 	A = par_lengths[tmp_exposures[k]];
-	B = par_lengths[tmp_exposures[k+1]] - 1;
+	B = par_lengths[tmp_exposures[k]+1] - 1;
+	//Rcpp::Rcout << A << "  " << B << std::endl;
+	//Rcpp::Rcout << "Length: " << par_inds.size() << std::endl;
 	fullPars = pars[par_inds[Range(A,B)]];
 	
 	index = tmp_exposures[k];
 	t_i = exposure_times[index];
+	next_t = exposure_next[index];
 	exposure_strain = exposure_strains[index]-1;
 	measured_strain = exposure_measured[index]-1;
 	order = exposure_orders[index];
@@ -199,7 +205,6 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	} else {
 	  fullPars.push_back(y0);
 	}
-
 	/* Which times we solve over depends on the version. If the isolated boosting version (0), 
 	   solve over all times. If it's the competitive boosting version (1), we need to subset the
 	   times vector to those times between the current and next infection. */
@@ -214,10 +219,9 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	}
 	tmpTimes.push_back(next_t);
 
-	
 	// Solve the model
 	y = model_trajectory_cpp(fullPars, tmpTimes, TRUE);
-
+	
 	/* Add model solutions to the correct row in the results matrix. If version 0, this will
 	   be all time points. If version 1, this will correspond to the times relating to the
 	   current exposure */

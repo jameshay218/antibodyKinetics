@@ -1,4 +1,4 @@
-id,values,type,exposure,strain,order,primed,group,end,next
+id,values,type,exposure,strain,order,primed,group,end,next_t
 A1A,28,vacc,B,A,1,0,1,100,42
 A1B,28,vacc,B,B,1,0,1,100,42
 A1C,28,vacc,B,C,1,0,1,100,42

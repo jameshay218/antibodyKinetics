@@ -54,41 +54,48 @@ double obs_likelihood(NumericVector y, NumericVector data, NumericVector params)
 //' @param pars the vector of model parameters as in parTab
 //' @param times the vector of times to solve the model over
 //' @param groups IntegerVector of the exposure groups (starting at group 1)
-//' @param individuals IntegerVector with number of individuals in each group (to be used to index the data matrix)
 //' @param strains IntegerVector of strains involved in exposures (ie. observed and exposed), starting at 1
-//' @param exposure_types IntegerVector of exposure types matching the exposure table. "all"=0, "infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5
-//' @param exposure_strains IntegerVector of exposure strains for each exposure. Note that this goes from 1 to 5.
-//' @param measured_strains IntegerVector of measured strains for each exposure (ie. second index in cross reactivity calculation)
+//' @param exposure_indices IntegerVector of indices from the exposure table
+//' @param exposure_i_lengths IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group
+//' @param strain_indices IntegerVector of indices relating to the exposure table, with contiguous indices for each group and then each strain
+//' @param strain_i_lengths IntegerVector of lengths describing the size of blocks in the strain_indices vector that relate to each strain and group
+//' @param exposure_times NumericVector infection time of each exposure
+//' @param exposure_strains IntegerVector of exposure strains for each exposure
+//' @param exposure_next NumericVector specifying the time of the exposure after the current one (for subsetting times)
+//' @param exposure_measured IntegerVector of measured strain for each exposure
 //' @param exposure_orders IntegerVector of order of exposures
 //' @param exposure_primes IntegerVector of whether each exposure was primed or not (for priming modifier)
-//' @param exposure_indices IntegerVector of indices describing which parTab rows relate to exposure parameters
 //' @param cr_inds IntegerVector of indices describing which parTab rows relate to cross reactivity parameters
-//' @param par_type_ind IntegerVector of indices describing which parTab rows relate to model parameters
-//' @param order_indices IntegerVector of indices describing which parTab rows relate to order modifer parameters
+//' @param par_inds IntegerVector of indices describing which parTab rows relate to model parameters
+//' @param order_inds IntegerVector of indices describing which parTab rows relate to order modifer parameters
 //' @param exposure_i_lengths IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group
 //' @param par_lengths IntegerVector of lengths describing the size of blocks in the par_type_ind vector that relate to each exposure type
 //' @param cr_lengths IntegerVector of lengths describing the size of blocks in the cr_ind vector that relate to each strain
-//' @param version integer indicating which model version to use. if 0, uses the isolation boosting version. if 1, uses the continuous boosting version.
+//' @param version integer indicating which version of the model will be solve. 0 solves the isolated form, and 1 solves the competitive exposure form.
+//' @param individuals IntegerVector indicating how many individuals there are in each group
 //' @param data NumericMatrix of antibody titre data. Each row should be complete observations of titres against a given strain for a given group. If we have 5 strains measured and 5 groups, rows 1:5 should be titres in group 1, rows 6:10 titres in group 3 etc. If more than 1 individual in each group, multiply these criteria by number of inidividuals in that group (ie., rows 1:15 for group 1)
 //' @return a single likelihood of observing the data given the model parameters
 //' @export
 //' @useDynLib antibodyKinetics
 //[[Rcpp::export]]
-double posterior_func_group_cpp(NumericVector pars, NumericVector times, 
-				IntegerVector groups, IntegerVector individuals,
-				IntegerVector strains, IntegerVector exposure_types, 
-				IntegerVector exposure_strains, IntegerVector measured_strains, 
-				IntegerVector exposure_orders, IntegerVector exposure_primes,
-				IntegerVector exposure_indices, IntegerVector cr_inds,
-				IntegerVector par_type_ind, IntegerVector order_indices,
-				IntegerVector exposure_i_lengths, IntegerVector par_lengths, 
-				IntegerVector cr_lengths, int version, 
+double posterior_func_group_cpp(
+				NumericVector pars, NumericVector times, 
+				IntegerVector groups, IntegerVector strains,
+				IntegerVector exposure_indices, IntegerVector exposure_i_lengths,
+				IntegerVector strain_indices, IntegerVector strain_i_lengths,
+				NumericVector exposure_times, IntegerVector exposure_strains,
+				NumericVector exposure_next, IntegerVector exposure_measured,
+				IntegerVector exposure_orders, IntegerVector exposure_primes, 
+				IntegerVector cr_inds, IntegerVector par_inds, 
+				IntegerVector order_inds, IntegerVector par_lengths,
+				IntegerVector cr_lengths, int version, IntegerVector individuals,
 				NumericMatrix data){
 
-   NumericMatrix result = model_func_group_cpp(pars, times, groups, strains, exposure_types,
-					      exposure_strains, measured_strains, exposure_orders, exposure_primes,
-					      exposure_indices, cr_inds, par_type_ind, order_indices,
-					      exposure_i_lengths, par_lengths,
+  NumericMatrix result = model_func_group_cpp(pars, times, groups, strains, exposure_indices,
+					      exposure_i_lengths,strain_indices, strain_i_lengths,
+					      exposure_times, exposure_strains, exposure_next,
+					      exposure_measured, exposure_orders, exposure_primes,
+					      cr_inds, par_inds, order_inds, par_lengths,
 					      cr_lengths, version);
   double ln = 0;
   int index_data = 0;

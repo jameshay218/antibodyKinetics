@@ -23,4 +23,3 @@ a single probability value
 \description{
 Calculates a single likelihood for an observed titre given the true titre and observation error parameters
 }
-

@@ -4,14 +4,16 @@
 \alias{create_model_group_func_cpp}
 \title{Create model function pointer cpp implementation}
 \usage{
-create_model_group_func_cpp(parTab, dat = NULL, PRIOR_FUNC = NULL,
-  version = "model", convert_types = c(all = 0, infection = 1, vacc = 2, adj
-  = 3, mod = 4, `NA` = 5), convert_strains = c(A = 1, B = 2, C = 3, D = 4, E =
-  5), convert_groups = c(`1` = 1, `2` = 2, `3` = 3, `4` = 4, `5` = 5),
-  individuals = c(1, 1, 1, 1, 1), form = "isolated")
+create_model_group_func_cpp(parTab, exposureTab, dat = NULL,
+  PRIOR_FUNC = NULL, version = "model", convert_types = c(all = 0,
+  infection = 1, vacc = 2, adj = 3, mod = 4, `NA` = 5), convert_strains = c(A
+  = 1, B = 2, C = 3, D = 4, E = 5), convert_groups = c(`1` = 1, `2` = 2, `3` =
+  3, `4` = 4, `5` = 5), individuals = c(1, 1, 1, 1, 1), form = "isolated")
 }
 \arguments{
 \item{parTab}{the full parameter table - see example csv file}
+
+\item{exposureTab}{table of exposure times etcs - see example csv file}
 
 \item{dat}{if posterior function, need the matrix of data. First row is model times, and subsequent rows are trajectories (each row is trajectory of antibodies for one strain, grouped by exposure group)}
 
@@ -35,4 +37,3 @@ a function pointer for \code{\link{model_func_group_cpp}} or \code{\link{posteri
 \description{
 Creaters a function pointer for \code{\link{model_func_group_cpp}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. This function can also be used to create a pointer to the same model function, but solving a likelihood function. This currently uses the "isolated" form of the model. Support could be added to allow either the competitive or isolated form.
 }
-

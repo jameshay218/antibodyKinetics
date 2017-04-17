@@ -4,7 +4,8 @@
 \alias{create_model_func}
 \title{Create model function pointer}
 \usage{
-create_model_func(parTab, form = "isolated")
+create_model_func(parTab, exposures, form = "isolated",
+  cross_reactivity = FALSE, typing = FALSE)
 }
 \arguments{
 \item{parTab}{the full parameter table - see example csv file}
@@ -17,4 +18,3 @@ a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_fu
 \description{
 Creaters a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_additive}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
 }
-

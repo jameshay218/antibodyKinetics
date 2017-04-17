@@ -17,4 +17,3 @@ a single, modified titre value
 \description{
 Add noise to a titre observation
 }
-

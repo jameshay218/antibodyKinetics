@@ -4,8 +4,8 @@
 \alias{model_func}
 \title{Model solver for one group, competitive process}
 \usage{
-model_func(parTab, cr_table, order_tab, exposures, strains, times,
-  version = 0)
+model_func(parTab, cr_table, order_tab, all_exposures, strains, times,
+  version = 0, cross_reactivity = FALSE, typing = FALSE)
 }
 \arguments{
 \item{parTab}{the parameter table containing at least a values
@@ -15,13 +15,13 @@ column and a names column which can be used to solve \code{\link{model_trajector
 
 \item{order_tab}{the table for parameters modifying boosting based on infection order (antigenic seniority)}
 
-\item{exposures}{the table for exposure types and times}
-
 \item{strains}{a vector with the names of all of the strains involved in the model}
 
 \item{times}{a vector of times to solve the model over}
 
 \item{version}{0 for isolated, 1 for competitive}
+
+\item{exposures}{the table for exposure types and times}
 }
 \value{
 a table of antibody titres for the given times, with a column for times and colnames of the measured strain
@@ -30,8 +30,7 @@ a table of antibody titres for the given times, with a column for times and coln
 Solves the antibody kinetics model for a single group, which may have multiple measured and exposure strains. This particular implementation assumes that each subsequent exposure supercedes the previous one
 }
 \seealso{
-Other model.functions: \code{\link{model_func_groups}},
+Other model functions: \code{\link{model_func_groups}},
   \code{\link{model_trajectory_cpp}},
   \code{\link{model_trajectory}}
 }
-

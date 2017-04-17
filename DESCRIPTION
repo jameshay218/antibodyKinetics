@@ -8,7 +8,7 @@ License: GPL-3
 LazyData: true
 URL: https://github.com/jameshay218/antibodyKinetics
 BugReports: https://github.com/jameshay218/antibodyKinetics/issues
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Suggests:
     testthat
 LinkingTo: Rcpp
