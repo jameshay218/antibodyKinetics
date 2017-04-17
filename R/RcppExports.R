@@ -42,8 +42,8 @@ fromUnitScale <- function(x, min, max) {
 #' times <- seq(0,100,by=10)
 #' y <- model_trajectory_cpp(pars,times)
 #' @export
-model_trajectory_cpp <- function(pars, times) {
-    .Call('antibodyKinetics_model_trajectory_cpp', PACKAGE = 'antibodyKinetics', pars, times)
+model_trajectory_cpp <- function(pars, times, logSigma) {
+    .Call('antibodyKinetics_model_trajectory_cpp', PACKAGE = 'antibodyKinetics', pars, times, logSigma)
 }
 
 #' Model calculation cpp implementation
@@ -57,15 +57,19 @@ model_trajectory_cpp <- function(pars, times) {
 #' @param times the vector of times to solve the model over
 #' @param groups IntegerVector of the exposure groups (starting at group 1)
 #' @param strains IntegerVector of strains involved in exposures (ie. observed and exposed), starting at 1
-#' @param exposure_types IntegerVector of exposure types matching the exposure table. "all"=0, "infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5
-#' @param exposure_strains IntegerVector of exposure strains for each exposure. Note that this goes from 1 to 5.
-#' @param measured_strains IntegerVector of measured strains for each exposure (ie. second index in cross reactivity calculation)
+#' @param exposure_indices IntegerVector of indices from the exposure table
+#' @param exposure_i_lengths IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group
+#' @param strain_indices IntegerVector of indices relating to the exposure table, with contiguous indices for each group and then each strain
+#' @param strain_i_lengths IntegerVector of lengths describing the size of blocks in the strain_indices vector that relate to each strain and group
+#' @param exposure_times NumericVector infection time of each exposure
+#' @param exposure_strains IntegerVector of exposure strains for each exposure
+#' @param exposure_next NumericVector specifying the time of the exposure after the current one (for subsetting times)
+#' @param exposure_measured IntegerVector of measured strain for each exposure
 #' @param exposure_orders IntegerVector of order of exposures
 #' @param exposure_primes IntegerVector of whether each exposure was primed or not (for priming modifier)
-#' @param exposure_indices IntegerVector of indices describing which parTab rows relate to exposure parameters
 #' @param cr_inds IntegerVector of indices describing which parTab rows relate to cross reactivity parameters
-#' @param par_type_ind IntegerVector of indices describing which parTab rows relate to model parameters
-#' @param order_indices IntegerVector of indices describing which parTab rows relate to order modifer parameters
+#' @param par_inds IntegerVector of indices describing which parTab rows relate to model parameters
+#' @param order_inds IntegerVector of indices describing which parTab rows relate to order modifer parameters
 #' @param exposure_i_lengths IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group
 #' @param par_lengths IntegerVector of lengths describing the size of blocks in the par_type_ind vector that relate to each exposure type
 #' @param cr_lengths IntegerVector of lengths describing the size of blocks in the cr_ind vector that relate to each strain
@@ -73,8 +77,8 @@ model_trajectory_cpp <- function(pars, times) {
 #' @return a matrix of antibody kinetic trajectories, with rows for group and then strain
 #' @export
 #' @useDynLib antibodyKinetics
-model_func_group_cpp <- function(pars, times, groups, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths, version) {
-    .Call('antibodyKinetics_model_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_types, exposure_strains, measured_strains, exposure_orders, exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices, exposure_i_lengths, par_lengths, cr_lengths, version)
+model_func_group_cpp <- function(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version) {
+    .Call('antibodyKinetics_model_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version)
 }
 
 #' Observation error matrix solver

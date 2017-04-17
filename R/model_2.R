@@ -136,7 +136,6 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
             ## Get exposure time, type and exposure strain
             ## Also end time of trajectory to calculate
             t_i <- exposures[i,"values"]
-            end_t <- exposures[i,"end"]
             next_t <- exposures[i,"next."]
             type <- exposures[i,"type"]
             id <- exposures[i,"id"]

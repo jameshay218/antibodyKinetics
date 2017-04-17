@@ -125,7 +125,7 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     strain_i_lengths <- NULL
     
     
-    ## For each group, isolate the parameter table indices that correspond to exposures for
+    ## For each group, isolate the exposure table indices that correspond to exposures for
     ## that group. Save these indices in a contiguous vector, and also store the indices
     ## of THIS vector that each group corresponds to eg. first 10 members correspond to
     ## group 1 would give the first entry to the exposure_i_lengths vector of 10
