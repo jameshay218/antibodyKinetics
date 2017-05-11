@@ -4,10 +4,11 @@
 \alias{posterior_func_group_cpp}
 \title{Posterior calculation cpp implementation}
 \usage{
-posterior_func_group_cpp(pars, times, groups, individuals, strains,
-  exposure_types, exposure_strains, measured_strains, exposure_orders,
-  exposure_primes, exposure_indices, cr_inds, par_type_ind, order_indices,
-  exposure_i_lengths, par_lengths, cr_lengths, version, data)
+posterior_func_group_cpp(pars, times, groups, strains, exposure_indices,
+  exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times,
+  exposure_strains, exposure_next, exposure_measured, exposure_orders,
+  exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths,
+  version, individuals, data)
 }
 \arguments{
 \item{pars}{the vector of model parameters as in parTab}
@@ -16,37 +17,45 @@ posterior_func_group_cpp(pars, times, groups, individuals, strains,
 
 \item{groups}{IntegerVector of the exposure groups (starting at group 1)}
 
-\item{individuals}{IntegerVector with number of individuals in each group (to be used to index the data matrix)}
-
 \item{strains}{IntegerVector of strains involved in exposures (ie. observed and exposed), starting at 1}
 
-\item{exposure_types}{IntegerVector of exposure types matching the exposure table. "all"=0, "infection"=1,"vacc"=2,"adj"=3,"mod"=4,"NA"=5}
+\item{exposure_indices}{IntegerVector of indices from the exposure table}
 
-\item{exposure_strains}{IntegerVector of exposure strains for each exposure. Note that this goes from 1 to 5.}
+\item{exposure_i_lengths}{IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group}
 
-\item{measured_strains}{IntegerVector of measured strains for each exposure (ie. second index in cross reactivity calculation)}
+\item{strain_indices}{IntegerVector of indices relating to the exposure table, with contiguous indices for each group and then each strain}
+
+\item{strain_i_lengths}{IntegerVector of lengths describing the size of blocks in the strain_indices vector that relate to each strain and group}
+
+\item{exposure_times}{NumericVector infection time of each exposure}
+
+\item{exposure_strains}{IntegerVector of exposure strains for each exposure}
+
+\item{exposure_next}{NumericVector specifying the time of the exposure after the current one (for subsetting times)}
+
+\item{exposure_measured}{IntegerVector of measured strain for each exposure}
 
 \item{exposure_orders}{IntegerVector of order of exposures}
 
 \item{exposure_primes}{IntegerVector of whether each exposure was primed or not (for priming modifier)}
 
-\item{exposure_indices}{IntegerVector of indices describing which parTab rows relate to exposure parameters}
-
 \item{cr_inds}{IntegerVector of indices describing which parTab rows relate to cross reactivity parameters}
 
-\item{par_type_ind}{IntegerVector of indices describing which parTab rows relate to model parameters}
+\item{par_inds}{IntegerVector of indices describing which parTab rows relate to model parameters}
 
-\item{order_indices}{IntegerVector of indices describing which parTab rows relate to order modifer parameters}
-
-\item{exposure_i_lengths}{IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group}
+\item{order_inds}{IntegerVector of indices describing which parTab rows relate to order modifer parameters}
 
 \item{par_lengths}{IntegerVector of lengths describing the size of blocks in the par_type_ind vector that relate to each exposure type}
 
 \item{cr_lengths}{IntegerVector of lengths describing the size of blocks in the cr_ind vector that relate to each strain}
 
-\item{version}{integer indicating which model version to use. if 0, uses the isolation boosting version. if 1, uses the continuous boosting version.}
+\item{version}{integer indicating which version of the model will be solve. 0 solves the isolated form, and 1 solves the competitive exposure form.}
+
+\item{individuals}{IntegerVector indicating how many individuals there are in each group}
 
 \item{data}{NumericMatrix of antibody titre data. Each row should be complete observations of titres against a given strain for a given group. If we have 5 strains measured and 5 groups, rows 1:5 should be titres in group 1, rows 6:10 titres in group 3 etc. If more than 1 individual in each group, multiply these criteria by number of inidividuals in that group (ie., rows 1:15 for group 1)}
+
+\item{exposure_i_lengths}{IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group}
 }
 \value{
 a single likelihood of observing the data given the model parameters
@@ -58,4 +67,3 @@ for the given data set. This is a complex function, so should only really be cal
 going on! The key confusing thing is that the length of the vectors has to match the number
 of rows from the overall parameter table
 }
-

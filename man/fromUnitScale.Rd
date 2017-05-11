@@ -19,4 +19,3 @@ the value converted to a linear scale
 \description{
 Converts to linear scale
 }
-

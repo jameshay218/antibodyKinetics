@@ -18,4 +18,3 @@ a single value, x#'
 Calculates the necessary antigenic distance needed to give a given
 percentage cross reactivity with gradient m and percentage y
 }
-

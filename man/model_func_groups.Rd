@@ -5,7 +5,7 @@
 \title{Multiple group model trajectory}
 \usage{
 model_func_groups(parTab, cr_table, order_tab, exposures, strains, times,
-  MODEL_FUNC = antibodyKinetics::model_func_isolated)
+  version = 0, cross_reactivity = FALSE, typing = FALSE)
 }
 \arguments{
 \item{parTab}{the parameter table containing at least a values
@@ -32,8 +32,7 @@ Calculates model trajectories for multiple groups
 \seealso{
 \code{\link{model_func_isolated}} for next level, \code{link{model_trajectory}} for model solving code
 
-Other model.functions: \code{\link{model_func}},
+Other model functions: \code{\link{model_func}},
   \code{\link{model_trajectory_cpp}},
   \code{\link{model_trajectory}}
 }
-

@@ -1,3 +1,14 @@
+setwd("~/Documents/antibodyKinetics")
+library(devtools)
+load_all()
+parTab <- read.csv("scripts/parTab_grp1_cr.csv",stringsAsFactors = FALSE)
+exposureTab <- read.csv("scripts/infections_cr.csv",stringsAsFactors=FALSE)
+f <- create_model_group_func_cpp(parTab,exposureTab,form="competitive")
+times <- seq(0,100,by=1)
+y <- f(parTab$values, times)
+f1 <- create_model_group_func(parTab,exposureTab,form="competitive")
+y1 <- f1(parTab$values,times)
+
 #devtools::install_github("jameshay218/antibodyKinetics")
 #library(antibodyKinetics)
 

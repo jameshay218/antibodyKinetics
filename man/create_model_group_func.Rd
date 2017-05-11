@@ -4,7 +4,8 @@
 \alias{create_model_group_func}
 \title{Create model function pointer groups}
 \usage{
-create_model_group_func(parTab, form = "isolated")
+create_model_group_func(parTab, exposures, form = "isolated",
+  cross_reactivity = FALSE, typing = FALSE)
 }
 \arguments{
 \item{parTab}{the full parameter table - see example csv file}
@@ -20,4 +21,3 @@ Creaters a function pointer for \code{\link{model_func_groups}} to save passing 
 \seealso{
 \code{\link{create_model_func}}
 }
-
