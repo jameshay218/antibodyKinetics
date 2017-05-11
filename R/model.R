@@ -55,7 +55,7 @@ model_trajectory <- function(pars, times, logSigma=TRUE){
     prime_cr <- pars["c"]*exp(-beta*pars["x"])*pars["primed"]
 
     mu <- mu*cr*pars["mod"] + prime_cr
-    
+    print(paste0("CR: ",cr))
     y <- numeric(length(times))
     i <- 1
     ## Loops through all times and calculate titre based on time relative to time of infection
@@ -124,6 +124,7 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
     index <- 1
     ## For each strain to be measured
     for(strain in strains){
+        print(strain)
         y <- 0
         ## To avoid problems with having multiple exposures at the same time, we enumerate which
         ## exposures relate to a particular strain
@@ -136,7 +137,7 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
             ## Get exposure time, type and exposure strain
             ## Also end time of trajectory to calculate
             t_i <- exposures[i,"values"]
-            next_t <- exposures[i,"next."]
+            next_t <- exposures[i,"next_t"]
             type <- exposures[i,"type"]
             id <- exposures[i,"id"]
             exposure <- exposures[i,"exposure"]

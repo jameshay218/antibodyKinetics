@@ -1,11 +1,16 @@
 setwd("~/Documents/antibodyKinetics")
 library(devtools)
 load_all()
-parTab <- read.csv("scripts/parTab_grp1_cr.csv",stringsAsFactors = FALSE)
-exposureTab <- read.csv("scripts/infections_cr.csv",stringsAsFactors=FALSE)
-f <- create_model_group_func_cpp(parTab,exposureTab,form="competitive")
+parTab <- read.csv("scripts/parTab_grp1_base.csv",stringsAsFactors = FALSE)
+exposures <- read.csv("scripts/infections_cr.csv",stringsAsFactors=FALSE)
+f <- create_model_group_func_cpp(parTab,exposureTab,form="isolated",
+                                 cross_reactivity=FALSE,typing=TRUE)
 times <- seq(0,100,by=1)
 y <- f(parTab$values, times)
+dat <- reshape2::melt(y)
+ggplot(dat) + geom_line(aes(x=Var2,col=Var1,group=Var1,y=value))
+
+
 f1 <- create_model_group_func(parTab,exposureTab,form="competitive")
 y1 <- f1(parTab$values,times)
 

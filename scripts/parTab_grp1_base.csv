@@ -80,7 +80,7 @@ ts,A3E,10,infection,E,E,NA,1,0.1,0,20
 m,A3E,0.003,infection,E,E,NA,1,0.1,0,1
 beta,all,-20,all,NA,NA,NA,1,0.1,-20,2
 c,all,4,all,NA,NA,NA,1,0.1,0,20
-sigma,all,-3,all,NA,NA,NA,1,0.1,-20,2
+sigma,all,-Inf,all,NA,NA,NA,1,0.1,-20,2
 y0_mod,all,-20,all,NA,NA,NA,1,0.1,-20,2
 x,NA,0,NA,A,A,NA,1,0.1,0,2000
 x,NA,50,NA,A,B,NA,1,0.1,0,2000

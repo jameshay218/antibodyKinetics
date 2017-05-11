@@ -43,11 +43,14 @@ create_model_func <- function(parTab, exposures,form="isolated",cross_reactivity
 #' Creaters a function pointer for \code{\link{model_func_groups}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
 #' @param parTab the full parameter table - see example csv file
 #' @param form a string to indicate the form of the model ("isolated" or "competitive")
+#' @param cross_reactivity if TRUE, then uses cross-reactive boosting rather than ID based boosting
+#' @param typing if TRUE, then uses the type specific parameters rather than universal parameters
 #' @return a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_competitive}}
 #' @export
 #' @useDynLib antibodyKinetics
 #' @seealso \code{\link{create_model_func}}
-create_model_group_func <- function(parTab, exposures, form = "isolated",cross_reactivity=FALSE,typing=FALSE){
+create_model_group_func <- function(parTab, exposures, form = "isolated",
+                                    cross_reactivity=FALSE,typing=FALSE){
   strains <- unique(parTab$strain)
   strains <- strains[complete.cases(strains)]
   strains <- strains[strains != "all"]
@@ -137,7 +140,7 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
         exposure_i_lengths <- c(exposure_i_lengths, length(tmp))
         
         ## For each strain
-        tmpExposures <- exposureTab[exposure_indices,]
+        tmpExposures <- exposureTab[tmp,]
         strain_i_lengths_tmp <- NULL
         
         for(strain in strains){
@@ -150,7 +153,8 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     
     ## The length of this vector is the number of groups plus 1
     ## Index starts at 0
-    exposure_i_lengths <- c(0,cumsum(exposure_i_lengths))
+    exposure_i_lengths <- c(1,exposure_i_lengths)
+    exposure_i_lengths <- cumsum(exposure_i_lengths)
   
     
 #########################################################
@@ -167,7 +171,7 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     ## In blocks of length(strains),
     cr_lengths <- rep(length(strains),length(strains))
     cr_lengths <- c(0,cumsum(cr_lengths))
-
+  
     ## This is just creating a vectorised matrix, where the size of each "block"
     ## corresponds to the number of strains. Thus, to find the cross reactivity between
     ## say the second and third strain, we can look at the 3rd element of the 2nd block
@@ -179,7 +183,6 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
             cr_inds <- c(cr_inds,which(parTab$exposure == tmpStrains[1] & parTab$strain == tmpStrains[2] & parTab$names == "x"))
         }
     }
-    
 #########################################################
     ## Model parameters
 #########################################################
@@ -192,10 +195,19 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     par_lengths <- NULL
     for(i in 1:nrow(exposureTab)){
       tmpType <- exposureTab[i,"type"]
+      tmpExp <- exposureTab[i,"exposure"]
+      tmpStrain <- exposureTab[i,"strain"]
       tmpID <- exposureTab[i, "id"]
       if(typing){
-        tmp <- param_indices[which(parTab$type %in% c("all",tmpType) & !(parTab$names %in% c("mod","x")))]
-      } else {
+        if(!cross_reactivity){
+          tmp <- param_indices[which(parTab$type %in% c("all",tmpType) & parTab$exposure %in% c(NA,tmpExp) & 
+                                     parTab$strain %in% c(NA,tmpStrain,"all") & !(parTab$names %in% c("mod","x")))]
+        } else {
+          tmp <- param_indices[which(parTab$type %in% c("all",tmpType) & 
+                                       parTab$strain %in% c(NA,tmpStrain,"all") & !(parTab$names %in% c("mod","x")))]
+          
+        }
+        } else {
         tmp <- param_indices[which(parTab$id %in% c("all",tmpID) & !(parTab$names %in% c("mod","x")))]
       }
       par_inds <- c(par_inds, tmp)
@@ -240,6 +252,7 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     par_inds <- par_inds - 1
     order_inds <- order_inds - 1
     strain_indices <- strain_indices - 1
+    exposure_i_lengths <- exposure_i_lengths - 1
     f <- NULL
     ## Return the posterior calculation or just model calculation depending on what
     ## is asked for

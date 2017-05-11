@@ -28,20 +28,21 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   double dp = pars[6];
   double ts = pars[7];
   double m = pars[8];
-  double c = pars[11];
+  double c = pars[10];
   double primed = pars[13];
   double mod = pars[14];
   double x = pars[15];
   double t_i = pars[16];
 
   double sigma, beta, y0_mod;
+  // Rcpp::Rcout << "sigma: " << pars[11] << std::endl;
   if(logSigma){
-    sigma = exp(pars[9]);
-    beta = exp(pars[10]);
+    beta = exp(pars[9]);
+    sigma  = exp(pars[11]);
     y0_mod = exp(pars[12]);
   } else {
-    sigma = pars[9];
-    beta = pars[10];
+    beta = pars[9];
+    sigma = pars[11];
     y0_mod = pars[12];
 
 }
@@ -55,11 +56,12 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   double tmp = 0;
 
   double cr = exp(-sigma*x);
+  //Rcpp::Rcout << "x: " << x << "sigma: " << sigma << ", cr: " << cr << std::endl;
   double prime_cr = c*exp(-beta*x)*primed;
   double mod_boost = exp(-y0_mod*y0);
 
   mu = mu*cr*mod*mod_boost + prime_cr;
-
+  //Rcpp::Rcout << "CR: " << cr << std::endl;
   NumericVector y(times.size());
   
   for(int i = 0; i < times.size(); ++i){
@@ -150,15 +152,16 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
     // Get exposures for this group
     A = exposure_i_lengths[i];
     B = exposure_i_lengths[i+1] - 1;
+    //Rcpp::Rcout << A << " " << B << std::endl;
     tmp_exposures_group = exposure_indices[Range(A,B)];
     // For each strain, a subset of these exposures apply
     tmp_strains = strain_indices[Range(A,B)];
-    tmp_strain_lengths = strain_i_lengths[Range((i*5),(i*5)+5)];
+    tmp_strain_lengths = strain_i_lengths[Range((i*6),((i*6)+5))];
     //Rcpp::Rcout << "Tmp strain lengths: " << tmp_strain_lengths << std::endl;
     //Rcpp::Rcout << "Tmp strain indices: " << tmp_strains << std::endl; 
     // For each strain in this group
     for(int j = 0; j < strains.size(); ++j){
-      //Rcpp::Rcout << "Strain: " << j << std::endl;
+      Rcpp::Rcout << "Strain: " << j << std::endl;
       A = tmp_strain_lengths[j];
       B = tmp_strain_lengths[j+1] - 1;
       //Rcpp::Rcout << A << "  " << B << std::endl;
@@ -173,31 +176,39 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	tmpTimes = times;
 	/* The par_lengths vector should be the same size as
 	   the number of exposures (+1 for the first index of 0)
-	   Use this to get subset of parameters.
-	*/
+	   Use this to get subset of parameters. */
+	
 	A = par_lengths[tmp_exposures[k]];
 	B = par_lengths[tmp_exposures[k]+1] - 1;
 	//Rcpp::Rcout << A << "  " << B << std::endl;
 	//Rcpp::Rcout << "Length: " << par_inds.size() << std::endl;
+
 	fullPars = pars[par_inds[Range(A,B)]];
-	
+	//Rcpp::Rcout << "pars: " << fullPars << std::endl;	
+	//Rcpp::Rcout << "Exposure times: " << exposure_times << std::endl;	
+
+
 	index = tmp_exposures[k];
 	t_i = exposure_times[index];
 	next_t = exposure_next[index];
+
 	exposure_strain = exposure_strains[index]-1;
 	measured_strain = exposure_measured[index]-1;
+
 	order = exposure_orders[index];
-	mod = pars[order_inds[order]];
+
+	mod = pars[order_inds[order-1]];
 	isPrimed = exposure_primes[index];
 
 	cr = pars[cr_inds[cr_lengths[measured_strain] + exposure_strain]];
-	
+	//Rcpp::Rcout << "Measured strain: " << measured_strain << ", exposure strain: " <<exposure_strain << ", cr: " << cr << std::endl;
+
 	fullPars.push_back(isPrimed);
 	fullPars.push_back(mod);
 	fullPars.push_back(cr);
 	fullPars.push_back(t_i);
 	fullPars.push_back(y0);
-	
+
 	// Depending on model version, use effective y0 of zero or 
 	// actual y0 at start of exposure
 	if(version == 0){
@@ -218,13 +229,13 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	  }
 	}
 	tmpTimes.push_back(next_t);
-
 	// Solve the model
+	//Rcpp::Rcout << "pars: " << fullPars << std::endl;
 	y = model_trajectory_cpp(fullPars, tmpTimes, TRUE);
 	
 	/* Add model solutions to the correct row in the results matrix. If version 0, this will
 	   be all time points. If version 1, this will correspond to the times relating to the
-	   current exposure */
+	   current exposure */ 
 	for(int ii = 0; ii < tmp_time_indices.size(); ++ii){
 	  results(index_dat, tmp_time_indices[ii]-1) += y[ii];
 	}
