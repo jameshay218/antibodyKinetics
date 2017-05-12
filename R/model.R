@@ -55,7 +55,7 @@ model_trajectory <- function(pars, times, logSigma=TRUE){
     prime_cr <- pars["c"]*exp(-beta*pars["x"])*pars["primed"]
 
     mu <- mu*cr*pars["mod"] + prime_cr
-    print(paste0("CR: ",cr))
+    #print(paste0("CR: ",cr))
     y <- numeric(length(times))
     i <- 1
     ## Loops through all times and calculate titre based on time relative to time of infection

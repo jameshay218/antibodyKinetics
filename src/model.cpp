@@ -44,24 +44,29 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
     beta = pars[9];
     sigma = pars[11];
     y0_mod = pars[12];
-
-}
+  }
 
   // We have y0 twice. In the non-additive version (one antibody producing process),
   // eff_y0 is zero. Otherwise, it's the titre at the time of exposure.
   double y0 = pars[17];
+  if(y0 < 0) y0 = 0;
   double eff_y0 = pars[18];
 
   double t = 0;
   double tmp = 0;
 
   double cr = exp(-sigma*x);
-  //Rcpp::Rcout << "x: " << x << "sigma: " << sigma << ", cr: " << cr << std::endl;
+  //Rcpp::Rcout << "x: " << x << ", sigma: " << sigma << ", cr: " << cr << std::endl;
   double prime_cr = c*exp(-beta*x)*primed;
   double mod_boost = exp(-y0_mod*y0);
-
+  //Rcpp::Rcout << "Titre dependence: " << mod_boost << std::endl;
+  //Rcpp::Rcout << "Prime boost: " << prime_cr << std::endl;
+  //Rcpp::Rcout << "Normal boost: " << mu*cr << std::endl;
   mu = mu*cr*mod*mod_boost + prime_cr;
-  //Rcpp::Rcout << "CR: " << cr << std::endl;
+  //Rcpp::Rcout << "Total mu: " << mu << std::endl << std::endl << std::endl;
+  //Rcpp::Rcout << "Sigma: " << sigma << std::endl;
+  //Rcpp::Rcout << "cr: " << cr << std::endl;
+  
   NumericVector y(times.size());
   
   for(int i = 0; i < times.size(); ++i){
@@ -161,7 +166,7 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
     //Rcpp::Rcout << "Tmp strain indices: " << tmp_strains << std::endl; 
     // For each strain in this group
     for(int j = 0; j < strains.size(); ++j){
-      Rcpp::Rcout << "Strain: " << j << std::endl;
+      //Rcpp::Rcout << "Strain: " << j << std::endl;
       A = tmp_strain_lengths[j];
       B = tmp_strain_lengths[j+1] - 1;
       //Rcpp::Rcout << A << "  " << B << std::endl;

@@ -1,14 +1,14 @@
-setwd("~/Documents/Ferret_Model/antibodyKinetics")
-devtools::load_all()
-parTab <- read.csv("scripts/parTab_grp1_typeA_cr.csv",stringsAsFactors = FALSE)
-exposureTab <- read.csv("scripts/infections_typeA.csv",stringsAsFactors=FALSE)
+#setwd("~/Documents/Ferret_Model/antibodyKinetics")
+devtools::load_all("~/Documents/antibodyKinetics")
+parTab <- read.csv("~/Documents/antibodyKinetics/scripts/parTab_grp1_typeB_cr.csv",stringsAsFactors = FALSE)
+exposureTab <- read.csv("~/Documents/antibodyKinetics/scripts/infections_typeA.csv",stringsAsFactors=FALSE)
 f <- create_model_group_func_cpp(parTab,exposureTab,form="competitive",
                                  cross_reactivity=TRUE,typing=TRUE)
 times <- seq(0,100,by=1)
 y <- f(parTab$values, times)
 y <- as.data.frame(y)
-y$group <- rep(c(1,2),each=5)
-y$strain <- rep(c(1,2,3,4,5),2)
+y$group <- rep(c(1,2,3),each=5)
+y$strain <- rep(c(1,2,3,4,5),3)
 colnames(y) <- c(times,"group","strain")
 dat <- reshape2::melt(y,id.vars=c("group","strain"))
 colnames(dat) <- c("group","strain","times","value")
@@ -50,3 +50,4 @@ for(group in unique(dat$group)){
   }
 }
 sum
+
