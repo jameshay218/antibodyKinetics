@@ -39,8 +39,8 @@ run_MCMC <- function(parTab,
     par_names <- parTab$names
 
     ## Parameter constraints
-    lower_bounds <- parTab$lower_bounds
-    upper_bounds <- parTab$upper_bounds
+    lower_bounds <- parTab$lower_bound
+    upper_bounds <- parTab$upper_bound
     steps <- parTab$steps
     fixed <- parTab$fixed
     
@@ -58,8 +58,9 @@ run_MCMC <- function(parTab,
     }
 
 
-    posterior_simp <- protect(CREATE_POSTERIOR_FUNC(parTab,data, PRIOR_FUNC,...))
-
+    posterior_simp <- protect(CREATE_POSTERIOR_FUNC(parTab,data, 
+                                                    PRIOR_FUNC,...))
+    
     ## Setup MCMC chain file with correct column names
     mcmc_chain_file <- paste(filename,"_chain.csv",sep="")
     chain_colnames <- c("sampno",par_names,"lnlike")
@@ -98,7 +99,7 @@ run_MCMC <- function(parTab,
             par_i <- par_i + 1
             if(par_i > unfixed_par_length) par_i <- 1
             proposal <- univ_proposal(current_pars, lower_bounds, upper_bounds, steps,j)
-            
+            #print(proposal)
             tempiter[j] <- tempiter[j] + 1
             ## If using multivariate proposals
         } else {

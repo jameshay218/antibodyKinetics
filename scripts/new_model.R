@@ -56,11 +56,15 @@ real_trajectory <- rbind(seq(0,100,by=1), real_trajectory)
 
 startTab <- parTab
 for(i in which(parTab$fixed == 0)){
-  startTab[i,"values"] <- runif(1,startTab[i,"lower_bounds"],startTab[i,"upper_bounds"])
+  startTab[i,"values"] <- runif(1,startTab[i,"lower_bound"],startTab[i,"upper_bound"])
 }
 
-mcmcPars1 <- c("iterations"=10000000,"popt"=0.44,"opt_freq"=5000,"thin"=10,"adaptive_period"=1000000,"save_block"=5000)
-run_1 <- run_MCMC(startTab,dat, mcmcPars1, "log_scale_comp",create_model_group_func_cpp,NULL,NULL, version="posterior",form=form,individuals=individuals)
+mcmcPars1 <- c("iterations"=100000,"popt"=0.44,"opt_freq"=50000,"thin"=1,
+               "adaptive_period"=10000,"save_block"=1000)
+run_1 <- run_MCMC(startTab,data, mcmcPars1, "log_scale_comp",create_model_group_func_cpp,
+                  NULL,NULL, version="posterior",form=form,
+                  individuals=individuals,exposureTab=exposureTab,
+                  cross_reactivity=TRUE,typing=TRUE)
 chain <- read.csv(run_1$file)
 bestPars <- get_best_pars(chain)
 
@@ -72,18 +76,24 @@ mvrPars <- list(covMat,2.38/sqrt(nrow(parTab[parTab$fixed==0,])),w=0.8)
 parTab1 <- parTab
 parTab1$values <- bestPars
 
-mcmcPars1 <- c("iterations"=10000000,"popt"=0.234,"opt_freq"=10000,"thin"=100,"adaptive_period"=2000000,"save_block"=5000)
-run_2 <- run_MCMC(parTab1,dat, mcmcPars1, "test2_comp",create_model_group_func_cpp,mvrPars,NULL, form = "form",version="posterior",individuals=individuals)
+mcmcPars1 <- c("iterations"=100000,"popt"=0.234,"opt_freq"=1000,"thin"=1,"adaptive_period"=20000,
+               "save_block"=500)
+run_2 <- run_MCMC(parTab1,data, mcmcPars1, "test2_comp",create_model_group_func_cpp,
+                  mvrPars,NULL, version="posterior",form=form,
+                  individuals=individuals,exposureTab=exposureTab,
+                  cross_reactivity=TRUE,typing=TRUE)
+  
+  #run_MCMC(parTab1,dat, mcmcPars1, "test2_comp",create_model_group_func_cpp,mvrPars,NULL, form = "form",version="posterior",individuals=individuals)
 chain1 <- read.csv("test2_comp_chain.csv")
 chain1 <- chain1[chain1$sampno > mcmcPars1["adaptive_period"],]
 
-mod <- generate_prediction_intervals(chain1, 1000,seq(0,100,by=1),f_new_cpp,5,5)
+mod <- generate_prediction_intervals(chain1, 1000,seq(0,100,by=1),f,5,3)
 
-meltedDat <- as.data.frame(dat[2:nrow(dat),])
-dat <- floor(dat)
+meltedDat <- as.data.frame(data[2:nrow(data),])
+data <- floor(data)
 colnames(meltedDat) <- times
-meltedDat$strain <- rep(rep(seq(1,5,by=1),5),each=n_indiv)
-meltedDat$group <- rep(seq(1,5,by=1),each=5*n_indiv)
+meltedDat$strain <- rep(rep(seq(1,5,by=1),3),each=n_indiv)
+meltedDat$group <- rep(seq(1,3,by=1),each=5*n_indiv)
 meltedDat <- reshape2::melt(meltedDat,id.vars=c("group","strain"))
 meltedDat$variable <- as.numeric(as.character(meltedDat$variable))
 meltedDat$group <- as.factor(meltedDat$group)
@@ -91,8 +101,8 @@ meltedDat$strain <- as.factor(meltedDat$strain)
 
 realTraj <- as.data.frame(real_trajectory[2:nrow(real_trajectory),])
 colnames(realTraj) <- seq(0,100,by=1)
-realTraj$strain <- rep(seq(1,5,by=1),5)
-realTraj$group <- rep(seq(1,5,by=1),each=5)
+realTraj$strain <- rep(seq(1,5,by=1),3)
+realTraj$group <- rep(seq(1,3,by=1),each=5)
 realTraj <- reshape2::melt(realTraj,id.vars=c("group","strain"))
 realTraj$variable <- as.numeric(as.character(realTraj$variable))
 realTraj$group <- as.factor(realTraj$group)
@@ -100,7 +110,7 @@ realTraj$strain <- as.factor(realTraj$strain)
 
 
 ggplot() + 
-  geom_ribbon(data = mod, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.4) +
+  geom_ribbon(data = mod, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.4) #+
   #geom_line(data=realTraj,aes(x=variable,y=value,col=strain)) +
   geom_point(data = meltedDat,aes(x=variable,y=value,col=strain),position=position_jitter(w=1,h=0.5)) +
   facet_wrap(~group) +

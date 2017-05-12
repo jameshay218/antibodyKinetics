@@ -2,10 +2,16 @@
 devtools::load_all("~/Documents/antibodyKinetics")
 parTab <- read.csv("~/Documents/antibodyKinetics/scripts/parTab_grp1_typeB_cr.csv",stringsAsFactors = FALSE)
 exposureTab <- read.csv("~/Documents/antibodyKinetics/scripts/infections_typeA.csv",stringsAsFactors=FALSE)
-f <- create_model_group_func_cpp(parTab,exposureTab,form="competitive",
+f <- create_model_group_func_cpp(parTab,exposureTab,form="isolated",
                                  cross_reactivity=TRUE,typing=TRUE)
+
 times <- seq(0,100,by=1)
 y <- f(parTab$values, times)
+data <- y
+post <- create_model_group_func_cpp(parTab,exposureTab,dat=data,version="posterior",form="isolated",
+                                    cross_reactivity=TRUE,typing=TRUE)
+
+post(parTab$values)
 y <- as.data.frame(y)
 y$group <- rep(c(1,2,3),each=5)
 y$strain <- rep(c(1,2,3,4,5),3)
@@ -23,7 +29,7 @@ ggplot(dat) + geom_line(aes(x=times,col=strain,y=value)) + facet_wrap(~group)
 
 
 
-f1 <- create_model_group_func(parTab,exposureTab,form="competitive",cross_reactivity=TRUE,typing=TRUE)
+f1 <- create_model_group_func(parTab,exposureTab,form="isolated",cross_reactivity=TRUE,typing=TRUE)
 y1 <- f1(parTab$values,times)
 dat1 <- reshape2::melt(y1,id.vars=c("times","group"))
 colnames(dat1) <- c("times","group","strain","value")
