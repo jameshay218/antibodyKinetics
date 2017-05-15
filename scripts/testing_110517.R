@@ -1,9 +1,9 @@
-#setwd("~/Documents/Ferret_Model/antibodyKinetics")
-devtools::load_all("~/Documents/antibodyKinetics")
-parTab <- read.csv("~/Documents/antibodyKinetics/scripts/parTab_grp1_typeB_cr.csv",stringsAsFactors = FALSE)
-exposureTab <- read.csv("~/Documents/antibodyKinetics/scripts/infections_typeA.csv",stringsAsFactors=FALSE)
+setwd("~/Documents/Ferret_Model/antibodyKinetics")
+devtools::load_all("~/Documents/Ferret_Model/antibodyKinetics")
+parTab <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/scripts/parTab_grp1_base.csv",stringsAsFactors = FALSE)
+exposureTab <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/scripts/infections.csv",stringsAsFactors=FALSE)
 f <- create_model_group_func_cpp(parTab,exposureTab,form="isolated",
-                                 cross_reactivity=TRUE,typing=TRUE)
+                                 cross_reactivity=FALSE,typing=FALSE)
 
 times <- seq(0,100,by=1)
 y <- f(parTab$values, times)

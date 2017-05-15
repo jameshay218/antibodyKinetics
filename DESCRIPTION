@@ -10,7 +10,8 @@ URL: https://github.com/jameshay218/antibodyKinetics
 BugReports: https://github.com/jameshay218/antibodyKinetics/issues
 RoxygenNote: 6.0.1
 Suggests:
-    testthat
+    testthat,
+    shiny
 LinkingTo: Rcpp
 Imports:
 	ggplot2,
