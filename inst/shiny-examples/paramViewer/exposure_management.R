@@ -1,0 +1,92 @@
+###########################################################
+## EXPOSURE INPUT MANAGEMENT
+## This file is needed to allow users to modify values relating to exposures
+## This all relates to the "Exposures" tab
+###########################################################
+
+#############
+## INPUTS
+#############
+## Choose exposure ID input. This should be a list of all of the IDs in the
+## current exposure table. If nothing else in there, then this should be set to
+## "New". Possibly use this in other tab too
+output$choose_exposure_id <- renderUI({
+    choices <- c("New",get_ids(parameters))
+    selectInput("exposure_id","ID",
+                choices=choices)
+})
+
+## Choose exposure type
+output$choose_exposure_type <- renderUI({
+    types <- get_types(inputs)
+    selectInput("exposure_type","Type",choices=types)
+})
+
+## Choose the exposure infection time
+output$choose_exposure_ti <- renderUI({numericInput("exposure_ti","Time",0,min=0,max=inputs$tmax)})
+
+## Choose the exposure group from 1 to 10
+output$choose_exposure_group <- renderUI({numericInput("exposure_group","Group",1,min=1,max=10)})
+
+## When choosing which exposure strain to use, only display the number of strains we have
+output$choose_exposure_strain <- renderUI({
+    selectInput("exposure_strain","Exposure",
+                choices=as.list(exposure_strains[1:inputs$n_strains]),
+                selected=1)
+})
+
+## Similarly, only display the present strains when determining which titres an exposure
+## affects
+output$choose_exposure_affects <- renderUI({
+    checkboxGroupInput("exposure_affects","Affects",
+                       choices=as.list(exposure_strains[1:inputs$n_strains]),
+                       selected=1,
+                       inline=TRUE)
+})
+
+## Check box - if ticked, this exposure is primed
+output$choose_is_primed <- renderUI({checkboxInput("is_primed","Primed",FALSE)})
+
+## Sliders for exposure specific inputs
+output$select_mu <- renderUI({sliderInput("mu", "Boost", value=8, min=0, max=max_mu,step=0.1)})
+output$select_tp <- renderUI({sliderInput("tp", "Time to peak", value=12, min=0, max=max_tp,step=0.1)})
+output$select_dp <- renderUI({sliderInput("dp", "Proportional drop", value=0.5, min=0, max=1,step=0.001)})
+output$select_ts <- renderUI({sliderInput("ts", "Time to 2nd waning phase", value=10, min=0, max=max_ts,step=0.1)})
+output$select_m <- renderUI({sliderInput("m", "Long term waning (log)", value=log(0.003), min=min_m, max=0,step=0.01)})
+
+
+
+##########
+## EVENTS
+##########
+## Related to the main panel exposure selection
+observeEvent(inputs$exposure_table_id,{})
+
+
+## When we update the selected exposure ID here, we need to update the parameter entries
+observeEvent(inputs$exposure_id,{
+    ## Get the exposure table subset related to this ID
+    id_choices <- get_ids(parameters)
+    tmpTab <- parameters$exposureTab
+    tmpTab <- tmpTab[tmpTab$id == inputs$exposure_id,]
+    parameters$selectedID <- which(id_choices == inputs$exposure_id)
+    
+    ## Get available type choices - note that each ID should be only one type!
+    type_choices <- get_types(inputs)
+    cur_type <- unique(tmpTab$type)[1]
+    parameters$selectedType <- which(type_choices == cur_type)
+
+    
+    ti <- unique(tmpTab$values)[1] ## Get exposure time - note that each ID should be one exposure time
+    exposure_strain <- unique(tmpTab$exposure)[1]  ## Get exposure strain - note that this should also be only one strain
+    affected_strains <- unique(tmpTab$strain)  ## Get strains affected
+    group <- unique(tmpTab$group) ## Get group
+    primed <- unique(tmpTab$primed)            
+    
+    updateSelectInput(session,inputId="exposure_type",selected=cur_type)
+    updateNumericInput(session,inputId="exposure_ti",value=ti)
+    updateNumericInput(session,inputId="exposure_group",value=group)
+    updateSelectInput(session,inputId="exposure_strain",selected=exposure_strain)
+    updateCheckboxGroupInput(session,inputId="exposure_affects",selected=affected_strains)
+    updateCheckboxInput(session,"is_primed",value=primed)
+})
