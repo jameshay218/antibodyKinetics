@@ -2,7 +2,8 @@
 ## PLOTS
 ###########################################################
 output$protocol_plot <- renderPlot({
-    if(!is.null(parameters[["exposureTab"]])){
+    if(!is.null(parameters[["exposureTab"]]) && nrow(parameters[["exposureTab"]]) > 0){
+        print(parameters[["exposureTab"]])
         tmpTab <- parameters[["exposureTab"]]
         ggplot(tmpTab) +
             geom_vline(aes(xintercept=values,col=exposure,group=exposure)) +

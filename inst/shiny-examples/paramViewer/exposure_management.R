@@ -3,7 +3,6 @@
 ## This file is needed to allow users to modify values relating to exposures
 ## This all relates to the "Exposures" tab
 ###########################################################
-
 #############
 ## INPUTS
 #############
@@ -60,7 +59,10 @@ output$select_m <- renderUI({sliderInput("m", "Long term waning (log)", value=lo
 ## EVENTS
 ##########
 ## Related to the main panel exposure selection
-observeEvent(inputs$exposure_table_id,{})
+observeEvent(inputs$exposure_table_id,{
+
+
+})
 
 
 ## When we update the selected exposure ID here, we need to update the parameter entries

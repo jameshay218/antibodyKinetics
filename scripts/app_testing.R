@@ -1,0 +1,5 @@
+setwd("~/Documents/Ferret_Model/antibodyKinetics")
+library(devtools)
+library(shiny)
+load_all()
+paramViewer()

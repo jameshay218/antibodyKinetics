@@ -9,6 +9,57 @@ tmax=100
 shinyUI(    
     navbarPage("Antibody Kinetics Model",
                #' Parameter exploration panel
+               tabPanel("Exposures",
+                        ## ISOLATE EXPOSURE PARAMETERS
+                        sidebarPanel(
+                             
+                            fluidRow(
+                                selectInput("typing_flags",
+                                            "Type options",
+                                            choices=c(
+                                                "None"=0,
+                                                "Strong typing"=1,
+                                                "Weak typing"=2),
+                                            selected=0),
+                                bsTooltip("typing_flags","No typing means that each exposure has unique parameters. Weak typing means that the order and type matter. Strong typing means that parameters are exposure type specific only","top",options=list(container="body"))),
+                            fluidRow(
+                                selectInput("form","Model form",
+                                            c("Competitive"=1,
+                                              "Isolated"=2),
+                                            selected=1)),
+                            fluidRow(numericInput("n_strains","No. strains",5,min=1,max=10)),
+                            h4(strong("Exposures")),
+                            fluidRow(uiOutput("choose_exposure_id")),
+                            fluidRow(uiOutput("choose_exposure_type")),
+                            fluidRow(uiOutput("choose_exposure_ti")),
+                            fluidRow(uiOutput("choose_exposure_group")),
+                            fluidRow(uiOutput("choose_exposure_strain")),
+                            fluidRow(uiOutput("choose_exposure_affects")),
+                            fluidRow(uiOutput("choose_is_primed")),
+                            hr(),
+                            fluidRow(actionButton("add_exposure",strong("Add")),
+                                     actionButton("remove_exposure",strong("Remove")),
+                                     actionButton("clear_exposures",strong("Clear")),
+                                     downloadButton("export_exposures",strong("Download"))
+                                     ),
+                            br(),
+                            fluidRow(
+                                fileInput("exposure_tab_input",strong("Exposure table input")),
+                                actionButton("upload_exposures","Upload")
+                            )
+                        ),
+                        mainPanel(
+                            h4(strong("Protocol")),
+                            fluidRow(
+                                plotOutput("protocol_plot")
+                            ),
+                            hr(),
+                            h4(strong("Exposure table")),
+                            fluidRow(
+                                rHandsontableOutput("exposure_table")
+                            )
+                        )
+                        ),
                tabPanel("Trajectories",
                         sidebarPanel(
                             h4(strong("Main parameters")),
@@ -39,59 +90,6 @@ shinyUI(
                             fluidRow(
                                 plotOutput("main_plot")
                             )                           
-                        )
-                        ),
-               
-               tabPanel("Exposures",
-                        ## ISOLATE EXPOSURE PARAMETERS
-                        sidebarPanel(
-                             
-                            fluidRow(
-                                selectInput("typing_flags",
-                                            "Type options",
-                                            choices=c(
-                                                "None"=0,
-                                                "Strong typing"=1,
-                                                "Weak typing"=2),
-                                            selected=0),
-                                bsTooltip("typing_flags","No typing means that each exposure has unique parameters. Weak typing means that the order and type matter. Strong typing means that parameters are exposure type specific only","top",options=list(container="body"))),
-                            fluidRow(
-                                selectInput("form","Model form",
-                                            c("Competitive"=1,
-                                              "Isolated"=2),
-                                            selected=1)),
-                            fluidRow(numericInput("n_strains","No. strains",5,min=1,max=10)),
-                            h4(strong("Exposures")),
-                            fluidRow(uiOutput("choose_exposure_id")),
-                            fluidRow(uiOutput("choose_exposure_type")),
-                            fluidRow(uiOutput("choose_exposure_ti")),
-                            fluidRow(uiOutput("choose_exposure_group")),
-                            fluidRow(uiOutput("choose_exposure_strain")),
-                            fluidRow(uiOutput("choose_exposure_affects")),
-                            fluidRow(uiOutput("choose_is_primed")),
-                            hr(),
-                            fluidRow(actionButton("add_exposure",strong("Add")),
-                                     actionButton("update_exposure",strong("Update")),
-                                     actionButton("remove_exposure",strong("Remove")),
-                                     actionButton("clear_exposures",strong("Clear")),
-                                     downloadButton("export_exposures",strong("Download"))
-                                     ),
-                            br(),
-                            fluidRow(
-                                fileInput("exposure_tab_input",strong("Exposure table input")),
-                                actionButton("upload_exposures","Upload")
-                            )
-                        ),
-                        mainPanel(
-                            h4(strong("Protocol")),
-                            fluidRow(
-                                plotOutput("protocol_plot")
-                            ),
-                            hr(),
-                            h4(strong("Exposure table")),
-                            fluidRow(
-                                rHandsontableOutput("exposure_table")
-                            )
                         )
                         ),
                tabPanel("Cross reactivity",
