@@ -1,7 +1,7 @@
 ##################################
 ## Exposure Handsontable
 ##################################
-## This bit of code makes the exposureTab an interactive table that we can edit. You can still add and remove exposures from         
+## This bit of code makes the exposureTab an interactive table that we can edit.
 observe({
     if(!is.null(inputs$exposure_table)){
         parameters[["previous"]] <- isolate(parameters[["exposureTab"]])

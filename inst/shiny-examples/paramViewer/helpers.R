@@ -16,6 +16,10 @@ get_ids <- function(parameters){
     unique(parameters$exposureTab$id)
 }
 
+generate_id <- function(inputs, order){
+    return(paste0("G",inputs$exposure_group,"E",order,"S",inputs$exposure_strain))
+}
+
 ## Correctly update exposure table when new exposures added
 add_order_nextt<- function(inputs, parameters){
     ## get exposures at same time, before or after
@@ -42,7 +46,7 @@ add_order_nextt<- function(inputs, parameters){
         ## Just add in naively
         new_order <- 1
         next_t <- inputs$tmax
-        new_id <- paste0("G",inputs$exposure_group,"E",new_order,"S",inputs$exposure_strain)
+        new_id <- generate_id(inputs,new_order)
         return(list("next_t"=next_t,"order"=new_order,"new_id"=new_id,"newTab"=tmpTab))
     }
 
@@ -67,7 +71,7 @@ add_order_nextt<- function(inputs, parameters){
             tmpTab[next_exposure_indices,"order"] <- tmpTab[next_exposure_indices,"order"] + 1
             for(i in next_exposure_indices) tmpTab[i,"id"] <- paste0("G",tmpTab[i,"group"],"E",tmpTab[i,"order"],"S",tmpTab[i,"exposure"])
         }
-        new_id <- paste0("G",inputs$exposure_group,"E",new_order,"S",inputs$exposure_strain)
+        new_id <- generate_id(inputs, new_order)
     } else {
         ## Otherwise, if there are previous exposure, new order is max of previous exposure
         ## orders +1. And previous exposure "next_t" is set to current exposure time       
@@ -78,13 +82,14 @@ add_order_nextt<- function(inputs, parameters){
                tmpTab$order == (new_order - 1) &
                tmpTab$group == inputs$exposure_group,
                "next_t"] <- inputs$exposure_ti
+    
         ## If there are exposures afterwards
         if(!is.null(next_infection)){
             next_t <- next_infection[1,"values"]
             tmpTab[next_exposure_indices,"order"] <- tmpTab[next_exposure_indices,"order"] + 1
             for(i in next_exposure_indices) tmpTab[i,"id"] <- paste0("G",tmpTab[i,"group"],"E",tmpTab[i,"order"],"S",tmpTab[i,"exposure"])
         }
-        new_id <- paste0("G",inputs$exposure_group,"E",new_order,"S",inputs$exposure_strain)
+        new_id <- generate_id(inputs, new_order)
     }
     return(list("next_t"=next_t,"order"=new_order,"new_id"=new_id,"newTab"=tmpTab))
 }
@@ -114,6 +119,7 @@ remove_order_nextt<- function(inputs, parameters){
     ## If this is the only exposure, exposure table is now empty
     if(is.null(next_infection) & is.null(previous_infection)){
         ## Just remove naively
+        if(nrow(tmpTab) == 0) tmpTab <- NULL
         return(tmpTab)
     }
     ## If there are subsequent exposures, need to reduce their order and ID
