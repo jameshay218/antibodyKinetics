@@ -67,16 +67,17 @@ shinyUI(
                                 column(4,numericInput("tmax","Max time", 100, min=10,max=1000)),
                                 column(4,numericInput("lower_bound","Lower bound",0,min=-1000,max=0)),
                                 column(4,numericInput("max_titre","Max Titre",15,min=0,max=25))
-                                ##column(4,numericInput("S","S",0.79,min=0,max=1)),
-                                ##column(4,numericInput("EA","EA",0.2,min=0,max=1))),
                             ),
                             hr(),
-                            fluidRow(uiOutput("exposure_table_ids")),
-                            fluidRow(uiOutput("select_mu")),
-                            fluidRow(uiOutput("select_tp")),
-                            fluidRow(uiOutput("select_dp")),
-                            fluidRow(uiOutput("select_ts")),
-                            fluidRow(uiOutput("select_m")),
+                            fluidRow(uiOutput("exposure_table_id")),
+                            fluidRow(selectInput("exposure_exposure_select","Exposure strain","none",selected=1)),
+                            fluidRow(selectInput("exposure_strain_select","Affected strain","none",selected=1)),
+                            fluidRow(column(8,uiOutput("select_mu")),column(2,actionButton("randomise_mu","Random"))),
+                            fluidRow(column(8,uiOutput("select_tp")),column(2,actionButton("randomise_tp","Random"))),
+                            fluidRow(column(8,uiOutput("select_dp")),column(2,actionButton("randomise_dp","Random"))),
+                            fluidRow(column(8,uiOutput("select_ts")),column(2,actionButton("randomise_ts","Random"))),
+                            fluidRow(column(8,uiOutput("select_m")),column(2,actionButton("randomise_m","Random"))),
+                            fluidRow(actionButton("randomise_all","Randomise all")),
                             hr(),
                             h4(strong("Antigenic seniority modifiers")),
                             fluidRow(
@@ -113,6 +114,11 @@ shinyUI(
                                 column(4,numericInput("sigma_value","Sigma value",-3,min=-20,max=2))
                             ),
                             hr()
+                        ),
+                        mainPanel(
+                            fluidRow(
+                                rHandsontableOutput("antigenic_table")
+                            )
                         )
                         )
                

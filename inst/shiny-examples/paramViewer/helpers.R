@@ -13,7 +13,9 @@ get_types <- function(inputs){
 
 ## Display available exposure IDs
 get_ids <- function(parameters){
-    unique(parameters$exposureTab$id)
+    ids <- unique(parameters$exposureTab$id)
+    if(is.null(ids)) ids <- c("none")
+    ids
 }
 
 generate_id <- function(inputs, order){

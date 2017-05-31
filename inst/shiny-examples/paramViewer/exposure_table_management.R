@@ -59,25 +59,25 @@ observeEvent(inputs$add_exposure,{
             ## If typing but no cross reactivity, add entry for each unique
             ## strain/exposure/type combo
         } else if(inputs$typing_flags != 0 & inputs$cr_flags == 0){
-            parTabRow <- do.call("rbind",lapply(inputs$exposure_affects, ## For each strain this affects
-                                                function(affects){
-                                                    newRow <- NULL
-                                                    if(is.null(parameters$parTab) || nrow(parameters$parTab[parameters$parTab$exposure == inputs$exposure_strain &
-                                                                                                            parameters$parTab$strain == affects &
-                                                                                                            parameters$parTab$type == inputs$exposure_type,]) == 0){
-                                                        newRow <- data.frame(names=c("mu","tp","dp","ts","m"),
-                                                                             id=new_id,
-                                                                             values=c(mu,tp,dp,ts,m),
-                                                                             type=inputs$exposure_type,
-                                                                             exposure=inputs$exposure_strain,
-                                                                             strain=affects,
-                                                                             order=NA,
-                                                                             fixed=1,steps=0.1,lower_bound=0,upper_bound=c(max_mu,max_tp,1,max_ts,1),
-                                                                             stringsAsFactors=FALSE
-                                                                             )
-                                                    }
-                                                    newRow
-                                                }))
+            parTabRow <- do.call("rbind",lapply(inputs$exposure_affects, function(affects){
+                ## For each strain this affects
+                newRow <- NULL
+                if(is.null(parameters$parTab) || nrow(parameters$parTab[parameters$parTab$exposure == inputs$exposure_strain &
+                                                                        parameters$parTab$strain == affects &
+                                                                        parameters$parTab$type == inputs$exposure_type,]) == 0){
+                    newRow <- data.frame(names=c("mu","tp","dp","ts","m"),
+                                         id=new_id,
+                                         values=c(mu,tp,dp,ts,m),
+                                         type=inputs$exposure_type,
+                                         exposure=inputs$exposure_strain,
+                                         strain=affects,
+                                         order=NA,
+                                         fixed=1,steps=0.1,lower_bound=0,upper_bound=c(max_mu,max_tp,1,max_ts,1),
+                                         stringsAsFactors=FALSE
+                                         )
+                }
+                newRow
+            }))
             ## If no typing but cross reactivity, need entry for each unique
             ## exposure/time combination
         } else if(inputs$typing_flags == 0 & inputs$cr_flags != 0){
@@ -103,7 +103,7 @@ observeEvent(inputs$add_exposure,{
                                         id=new_id,
                                         values=c(mu,tp,dp,ts,m),
                                         type=inputs$exposure_type,
-                                        exposure=inputs$exposure_strain,
+                                        exposure="all",
                                         strain="all",
                                         order=NA,
                                         fixed=1,steps=0.1,lower_bound=0,upper_bound=c(max_mu,max_tp,1,max_ts,1),
@@ -115,47 +115,37 @@ observeEvent(inputs$add_exposure,{
         parameters$exposureTab <- isolate(rbind(parameters$exposureTab, exposureRow))
         parameters$exposureTab <- parameters$exposureTab[order(parameters$exposureTab$group, parameters$exposureTab$values),]
         parameters$parTab <- isolate(rbind(parameters$parTab, parTabRow))
-        print(parameters$parTab)
     }
 })
 
 observeEvent(inputs$remove_exposure,{
-    print("Removing exposure")
-    print(inputs$exposure_id)
     removed_exposure <- parameters$exposureTab[parameters$exposureTab$id == inputs$exposure_id,]
     parameters$exposureTab <- remove_order_nextt(inputs,parameters)
     newParTab <- parameters$parTab
-    ## If no typing and no cross-reactivity, just remove this ID
-    if(inputs$typing_flags == 0 & inputs$cr_flags == 0){
-        print("1")
+    if(is.null(parameters$exposureTab) | nrow(parameters$exposureTab) == 0){
+        newParTab <- NULL
+    } else if(inputs$typing_flags == 0 & inputs$cr_flags == 0){
+        ## If no typing and no cross-reactivity, just remove this ID
         newParTab <- isolate(parameters$parTab[parameters$parTab$id != inputs$exposure_id,])
     } else if(inputs$typing_flags != 0 & inputs$cr_flags == 0){
         ## If typing but no cross reactivity, remove entry if this is the last
         ## strain/exposure/type combo
-        print("2")
-        print(merge(removed_exposure[,c("strain","exposure","type")],parameters$exposureTab[,c("strain","exposure","type")]))
-        if(nrow(merge(removed_exposure[,c("strain","exposure","type")],parameters$exposureTab[,c("strain","exposure","type")])) == 0){
-            newParTab <- parameters$parTab[!(parameters$parTab$strain %in% removed_exposure[,"strain"] &
-                                             parameters$parTab$exposure == removed_exposure[1,"exposure"] &
-                                             parameters$parTab$type == removed_exposure[1,"type"]),]
-        }
+        newParTab <- dplyr::semi_join(newParTab,parameters$exposureTab,by=c("exposure","type","strain"))
     } else if(inputs$typing_flags == 0 & inputs$cr_flags != 0){
         ## If no typing but cross reactivity, remove entry entry is this is the last
         ## exposure of this strain
-        print("3")
-        if(nrow(parameters$exposureTab[parameters$exposureTab$exposure == removed_exposure[1,"exposure"],])==0){
-            newParTab <- parameters$parTab[!(parameters$parTab$exposure == removed_exposure[1,"exposure"]),]
-        }
+        newParTab <- isolate(parameters$parTab[parameters$parTab$id != inputs$exposure_id,])
     } else {
         ## Otherwise, we have typing and cross reactivity, in which case we need entry remove
         ## only if this is the last of this exposure type
-        print("4")
         if(nrow(parameters$exposureTab[parameters$exposureTab$type == removed_exposure[1,"type"],])==0){
             newParTab <- parameters$parTab[!(parameters$parTab$type == removed_exposure[1,"type"]),]
         }
     }
-    parameters$parTab <- newParTab
-    print(parameters$parTab)
+    if(is.null(newParTab))
+        parameters$parTab <- NULL
+    else
+        parameters$parTab <- newParTab
 })
 
 observeEvent(inputs$clear_exposures,{

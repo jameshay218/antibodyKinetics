@@ -29,19 +29,83 @@ output$export_exposures <- downloadHandler(
 
 observeEvent(inputs$upload_exposures,{
     newTab <- read.csv(isolate(inputs$exposure_tab_input$datapath),stringsAsFactors=FALSE)
-    
-    ## If the new parameter table has types in it, need to set the flags etc correctly
-    if(any(strong_types%in% newTab$type)){
-        updateSelectInput(session,"typing_flags",selected=2)
-    } else if(any(weak_types %in% newTab$type)){
-        updateSelectInput(session,"typing_flags",selected=1)
-    } else {
-        updateSelectInput(session,"typing_flags",selected=0)
-    }
-    updateNumericInput(session,"tmax",value=max(newTab$end))
-    updateNumericInput(session,"n_strains",value=length(unique((newTab$strain))))
-    parameters$exposureTab <- newTab
+    if(!is.null(newTab)){
+        ## If the new parameter table has types in it, need to set the flags etc correctly
+        if(any(strong_types%in% newTab$type)){
+            updateSelectInput(session,"typing_flags",selected=2)
+        } else if(any(weak_types %in% newTab$type)){
+            updateSelectInput(session,"typing_flags",selected=1)
+        } else {
+            updateSelectInput(session,"typing_flags",selected=0)
+        }
+        updateNumericInput(session,"tmax",value=max(newTab$end))
+        updateNumericInput(session,"n_strains",value=length(unique((newTab$strain))))
+        parameters$exposureTab <- newTab
 
-    ## THEN NEED TO UPDATE THE OVERALL PARAMETER TABLE
-    
+        newParTab <- NULL
+        
+        ## THEN NEED TO UPDATE THE OVERALL PARAMETER TABLE
+        if(inputs$typing_flags == 0 & inputs$cr_flags == 0){
+            ## If no typing and no CR add entry for each ID and strain
+            for(id in unique(newTab$id)){
+                tmp <- newTab[newTab$id == id,]
+                exposure <- tmp$exposure[1]
+                for(strain in unique(tmp$strain)){
+                    newParTab <- rbind(newParTab, data.frame(names=c("mu","tp","dp","ts","m"),
+                                                             id=id,
+                                                             values=c(mu,tp,dp,ts,m),
+                                                             type="all",
+                                                             exposure=exposure,
+                                                             strain=strain,
+                                                             order=NA,
+                                                             fixed=1,steps=0.1,lower_bound=0,
+                                                             upper_bound=c(max_mu,max_tp,1,max_ts,1),
+                                                             stringsAsFactors=FALSE
+                                                             ))
+                    
+                }
+            }
+        } else if(inputs$typing_flags == 0 & inputs$cr_flags != 0){
+            ## If no typing and CR, add entry for each ID
+            for(id in unique(newTab$id)){
+                tmp <- newTab[newTab$id == id,]
+                exposure <- tmp$exposure[1]
+                newParTab <- rbind(newParTab, data.frame(names=c("mu","tp","dp","ts","m"),
+                                                         id=id,
+                                                         values=c(mu,tp,dp,ts,m),
+                                                         type="all",
+                                                         exposure=exposure,
+                                                         strain="all",
+                                                         order=NA,
+                                                         fixed=1,steps=0.1,lower_bound=0,
+                                                         upper_bound=c(max_mu,max_tp,1,max_ts,1),
+                                                         stringsAsFactors=FALSE
+                                                         ))
+            }
+        } else if(inputs$typing_flags != 0 & inputs$cr_flags == 0){
+            ## If typing but no CR, add entry for each type, exposure and strain combo
+            tmp <- unique(newTab[,c("type","exposure","strain")])
+            for(i in 1:nrow(tmp)){
+                newParTab <- rbind(newParTab, data.frame(names=c("mu","tp","dp","ts","m"),id="all",
+                                                         values=c(mu,tp,dp,ts,m),type=tmp[i,"type"],
+                                                         exposure=tmp[i,"exposure"],strain=tmp[i,"strain"],
+                                                         order=NA,fixed=1,steps=0.1,lower_bound=0,
+                                                         upper_bound=c(max_mu,max_tp,1,max_ts,1),
+                                                         stringsAsFactors=FALSE
+                                                         ))
+                
+            }
+        } else {
+            ## Otherwise, just add entry for each type
+            for(type in unique(newTab$type)){
+                newParTab <- rbind(newParTab, data.frame(names=c("mu","tp","dp","ts","m"),id="all",
+                                                         values=c(mu,tp,dp,ts,m),type=type,
+                                                         exposure="all",strain="all",
+                                                         order=NA,fixed=1,steps=0.1,lower_bound=0,
+                                                         upper_bound=c(max_mu,max_tp,1,max_ts,1),
+                                                         stringsAsFactors=FALSE
+                                                         ))
+            }
+        }
+    }
 })
