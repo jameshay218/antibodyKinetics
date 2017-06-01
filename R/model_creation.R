@@ -138,24 +138,22 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
         tmp <- which(exposureTab$group == group)
         exposure_indices <- c(exposure_indices, tmp)
         exposure_i_lengths <- c(exposure_i_lengths, length(tmp))
-        
         ## For each strain
         tmpExposures <- exposureTab[tmp,]
         strain_i_lengths_tmp <- NULL
         
         for(strain in strains){
-          tmp <- which(tmpExposures$strain == strain)
-          strain_indices <- c(strain_indices, tmp)
-          strain_i_lengths_tmp <- c(strain_i_lengths_tmp, length(tmp))
+            tmp <- which(tmpExposures$strain == strain)
+            strain_indices <- c(strain_indices, tmp)
+            strain_i_lengths_tmp <- c(strain_i_lengths_tmp, length(tmp))
         }
         strain_i_lengths <- c(strain_i_lengths, c(0,cumsum(strain_i_lengths_tmp)))
     }
-    
+
     ## The length of this vector is the number of groups plus 1
     ## Index starts at 0
     exposure_i_lengths <- c(1,exposure_i_lengths)
     exposure_i_lengths <- cumsum(exposure_i_lengths)
-  
     
 #########################################################
     ## Order modifier parameters
@@ -194,24 +192,24 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     par_inds <- NULL
     par_lengths <- NULL
     for(i in 1:nrow(exposureTab)){
-      tmpType <- exposureTab[i,"type"]
-      tmpExp <- exposureTab[i,"exposure"]
-      tmpStrain <- exposureTab[i,"strain"]
-      tmpID <- exposureTab[i, "id"]
-      if(typing){
-        if(!cross_reactivity){
-          tmp <- param_indices[which(parTab$type %in% c("all",tmpType) & parTab$exposure %in% c(NA,tmpExp) & 
-                                     parTab$strain %in% c(NA,tmpStrain,"all") & !(parTab$names %in% c("mod","x")))]
+        tmpType <- exposureTab[i,"type"]
+        tmpExp <- exposureTab[i,"exposure"]
+        tmpStrain <- exposureTab[i,"strain"]
+        tmpID <- exposureTab[i, "id"]
+        if(typing){
+            if(!cross_reactivity){
+                tmp <- param_indices[which(parTab$type %in% c("all",tmpType) & parTab$exposure %in% c(NA,tmpExp) & 
+                                           parTab$strain %in% c(NA,tmpStrain,"all") & !(parTab$names %in% c("mod","x")))]
+            } else {
+                tmp <- param_indices[which(parTab$type %in% c("all",tmpType) & 
+                                           parTab$strain %in% c(NA,tmpStrain,"all") & !(parTab$names %in% c("mod","x")))]
+                
+            }
         } else {
-          tmp <- param_indices[which(parTab$type %in% c("all",tmpType) & 
-                                       parTab$strain %in% c(NA,tmpStrain,"all") & !(parTab$names %in% c("mod","x")))]
-          
+            tmp <- param_indices[which(parTab$id %in% c("all",tmpID) & parTab$strain %in% c("all",tmpStrain,NA) & !(parTab$names %in% c("mod","x")))]
         }
-        } else {
-        tmp <- param_indices[which(parTab$id %in% c("all",tmpID) & !(parTab$names %in% c("mod","x")))]
-      }
-      par_inds <- c(par_inds, tmp)
-      par_lengths <- c(par_lengths, length(tmp))
+        par_inds <- c(par_inds, tmp)
+        par_lengths <- c(par_lengths, length(tmp))
         
     }
     par_lengths <- c(0, cumsum(par_lengths))

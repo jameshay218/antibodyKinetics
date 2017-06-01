@@ -21,3 +21,17 @@ output$antigenic_table <- renderRHandsontable({
     if(!is.null(antigenicTab)){
         rhandsontable(antigenicTab, useTypes = FALSE, stretchH="all")
     }})
+
+output$export_cr <- downloadHandler(
+    filename = "antigenicDistTab.csv",
+    content=function(file){
+        write.csv(parameters$antigenicDistTab,file,row.names=FALSE)
+    })
+
+observeEvent(inputs$upload_antigenic_distances,{
+    newTab <- read.csv(isolate(inputs$antigenic_tab_input$datapath),stringsAsFactors=FALSE)
+    if(!is.null(newTab)){
+        updateNumericInput(session,"n_strains",value=length(unique(newTab[,1])))
+        parameters$antigenicDistTab <- newTab
+    }
+})

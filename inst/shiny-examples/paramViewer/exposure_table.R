@@ -7,7 +7,7 @@ observe({
         parameters[["previous"]] <- isolate(parameters[["exposureTab"]])
         exposureTab = hot_to_r(inputs$exposure_table)
     } else {
-        if (is.null(parameters[["exposureTab"]]))
+        if(is.null(parameters[["exposureTab"]]))
             exposureTab <- NULL
         else
             exposureTab <- parameters[["exposureTab"]]

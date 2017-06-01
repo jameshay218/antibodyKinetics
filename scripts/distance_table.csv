@@ -1,0 +1,16 @@
+Strain.1,Strain.2,Distance
+A,A,0
+A,B,50
+A,C,60
+A,D,1000
+A,E,1000
+B,B,0
+B,C,10
+B,D,1000
+B,E,1000
+C,C,0
+C,D,1000
+C,E,1000
+D,D,0
+D,E,200
+E,E,0

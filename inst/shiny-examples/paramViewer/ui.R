@@ -20,8 +20,7 @@ shinyUI(
                                                 "None"=0,
                                                 "Strong typing"=1,
                                                 "Weak typing"=2),
-                                            selected=0),
-                                bsTooltip("typing_flags","No typing means that each exposure has unique parameters. Weak typing means that the order and type matter. Strong typing means that parameters are exposure type specific only","top",options=list(container="body"))),
+                                            selected=0)),
                             fluidRow(
                                 selectInput("form","Model form",
                                             c("Competitive"=1,
@@ -85,6 +84,9 @@ shinyUI(
                                 column(3,numericInput("mod2","2",1,min=0,max=1)),
                                 column(3,numericInput("mod3","3",1,min=0,max=1)),
                                 column(3,numericInput("mod4","4",1,min=0,max=1))
+                            ),
+                            fluidRow(
+                                downloadButton("download_all",strong("Download Parameters"))
                             )
                         ),
                         mainPanel(
@@ -107,15 +109,23 @@ shinyUI(
                             fluidRow(
                                 column(4, numericInput("beta","(log) Beta",-20,min=-20,max=2)),
                                 column(4, numericInput("c","(log) c",4,min=-20,max=2)),
-                                column(4, numericInput("y0_mod","y0 mod",1,min=0,max=1))
+                                column(4, numericInput("y0_mod","y0 mod",-20,min=0,max=1))
                             ),
                             fluidRow(
                                 column(8,uiOutput("choose_exposure_type_cr")),
                                 column(4,numericInput("sigma_value","Sigma value",-3,min=-20,max=2))
                             ),
+                            fluidRow(
+                                fileInput("antigenic_tab_input",strong("Antigenic distanceinput")),
+                                actionButton("upload_antigenic_distances","Upload")
+                            ),
+                            fluidRow(
+                                downloadButton("export_cr",strong("Download"))
+                            ),
                             hr()
                         ),
                         mainPanel(
+                            h4(strong("Exposure distances")),
                             fluidRow(
                                 rHandsontableOutput("antigenic_table")
                             )

@@ -143,7 +143,7 @@ observeEvent(inputs$dp,{
             isolate(parameters$parTab[parameters$parTab$type == inputs$exposure_select &
                                       parameters$parTab$exposure == inputs$exposure_exposure_select &
                                       parameters$parTab$strain == inputs$exposure_strain_select &
-                                      parameters$parTab$names == "dp","values"] <- inputs$mu)
+                                      parameters$parTab$names == "dp","values"] <- inputs$dp)
         }
     }
     }
