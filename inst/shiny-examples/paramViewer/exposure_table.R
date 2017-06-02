@@ -51,6 +51,12 @@ observeEvent(inputs$upload_exposures,{
                 tmp <- newTab[newTab$id == id,]
                 exposure <- tmp$exposure[1]
                 for(strain in unique(tmp$strain)){
+                    mu <- runif(1,min_mu,max_mu)
+                    dp <- runif(1,min_dp,max_dp)
+                    tp <- runif(1,min_tp,max_tp)
+                    ts <- runif(1,min_ts,max_ts)
+                    m <- runif(1,min_m,max_m)
+                    
                     newParTab <- rbind(newParTab, data.frame(names=c("mu","tp","dp","ts","m"),
                                                              id=id,
                                                              values=c(mu,tp,dp,ts,m),
@@ -68,6 +74,12 @@ observeEvent(inputs$upload_exposures,{
         } else if(inputs$typing_flags == 0 & inputs$cr_flags != 0){
             ## If no typing and CR, add entry for each ID
             for(id in unique(newTab$id)){
+                     mu <- runif(1,min_mu,max_mu)
+                    dp <- runif(1,min_dp,max_dp)
+                    tp <- runif(1,min_tp,max_tp)
+                    ts <- runif(1,min_ts,max_ts)
+                    m <- runif(1,min_m,max_m)
+                    
                 tmp <- newTab[newTab$id == id,]
                 exposure <- tmp$exposure[1]
                 newParTab <- rbind(newParTab, data.frame(names=c("mu","tp","dp","ts","m"),
@@ -86,6 +98,12 @@ observeEvent(inputs$upload_exposures,{
             ## If typing but no CR, add entry for each type, exposure and strain combo
             tmp <- unique(newTab[,c("type","exposure","strain")])
             for(i in 1:nrow(tmp)){
+                     mu <- runif(1,min_mu,max_mu)
+                    dp <- runif(1,min_dp,max_dp)
+                    tp <- runif(1,min_tp,max_tp)
+                    ts <- runif(1,min_ts,max_ts)
+                    m <- runif(1,min_m,max_m)
+                    
                 newParTab <- rbind(newParTab, data.frame(names=c("mu","tp","dp","ts","m"),id="all",
                                                          values=c(mu,tp,dp,ts,m),type=tmp[i,"type"],
                                                          exposure=tmp[i,"exposure"],strain=tmp[i,"strain"],
@@ -93,11 +111,17 @@ observeEvent(inputs$upload_exposures,{
                                                          upper_bound=c(max_mu,max_tp,1,max_ts,1),
                                                          stringsAsFactors=FALSE
                                                          ))
-                
+                     
             }
         } else {
             ## Otherwise, just add entry for each type
             for(type in unique(newTab$type)){
+                mu <- runif(1,min_mu,max_mu)
+                dp <- runif(1,min_dp,max_dp)
+                tp <- runif(1,min_tp,max_tp)
+                ts <- runif(1,min_ts,max_ts)
+                m <- runif(1,min_m,max_m)
+                
                 newParTab <- rbind(newParTab, data.frame(names=c("mu","tp","dp","ts","m"),id="all",
                                                          values=c(mu,tp,dp,ts,m),type=type,
                                                          exposure="all",strain="all",
@@ -108,4 +132,5 @@ observeEvent(inputs$upload_exposures,{
             }
         }
     }
+    parameters$parTab <- newParTab
 })

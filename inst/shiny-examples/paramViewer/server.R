@@ -30,15 +30,15 @@ shinyServer(
             out <- NULL
             if(inputs$typing_flags == 0){
                 ids <- get_ids(parameters)
-                out <- selectInput("exposure_select","Exposure",
-                                   ids)
+                out <- isolate(selectInput("exposure_select","Exposure",
+                                   ids))
             } else {
                 out <- "none"
                 if(!is.null(parameters$parTab)){
                     #types <- get_types(inputs)
                     types <- unique(parameters$parTab$type)
-                    out <- selectInput("exposure_select","Exposure",
-                                       types)
+                    out <- isolate(selectInput("exposure_select","Exposure",
+                                       types))
                 }
             }
             out
@@ -114,11 +114,6 @@ shinyServer(
                                               strain=parameters$antigenicDistTab$Strain.2,
                                               order=NA,fixed=1,steps=0.1,lower_bound=0,upper_bound=10000,
                                               stringsAsFactors=FALSE)
-                print(colnames(top_parTab))
-                print(colnames(parameters$parTab))
-                print(colnames(bot_parTab))
-                print(colnames(distance_parTab))
-                print(colnames(mod_parTab))
                 tmpTab <- parameters$parTab
                 tmpTab[tmpTab$names == "m","values"] <- exp(tmpTab[tmpTab$names == "m","values"])
                 parTab <- rbind(top_parTab,tmpTab,bot_parTab,distance_parTab,mod_parTab)

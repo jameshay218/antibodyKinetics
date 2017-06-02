@@ -12,11 +12,11 @@ observeEvent(inputs$add_exposure,{
     ## The new entry needs the right ID and parameter values. If the given ID exists,
     ## then need to just update rather than add.
     ## The ID is created from the inputs
-    mu <- runif(1,0,max_mu)
-    tp <- runif(1,0,max_tp)
-    dp <- runif(1,0,1)
-    ts <- runif(1,0,max_ts)
-    m <- runif(1,min_m,0)
+    mu <- runif(1,min_mu,max_mu)
+    tp <- runif(1,min_tp,max_tp)
+    dp <- runif(1,min_dp,max_dp)
+    ts <- runif(1,min_ts,max_ts)
+    m <- runif(1,min_m,max_m)
 
     if(any(c(length(inputs$exposure_affects) == 0),
            is.na(inputs$exposure_ti),

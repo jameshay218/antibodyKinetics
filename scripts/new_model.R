@@ -76,7 +76,7 @@ mvrPars <- list(covMat,2.38/sqrt(nrow(parTab[parTab$fixed==0,])),w=0.8)
 parTab1 <- parTab
 parTab1$values <- bestPars
 
-mcmcPars1 <- c("iterations"=100000,"popt"=0.234,"opt_freq"=1000,"thin"=1,"adaptive_period"=20000,
+mcmcPars1 <- c("iterations"=500000,"popt"=0.234,"opt_freq"=2000,"thin"=10,"adaptive_period"=50000,
                "save_block"=500)
 run_2 <- run_MCMC(parTab1,data, mcmcPars1, "test2_comp",create_model_group_func_cpp,
                   mvrPars,NULL, version="posterior",form=form,
@@ -87,17 +87,17 @@ run_2 <- run_MCMC(parTab1,data, mcmcPars1, "test2_comp",create_model_group_func_
 chain1 <- read.csv("test2_comp_chain.csv")
 chain1 <- chain1[chain1$sampno > mcmcPars1["adaptive_period"],]
 
-mod <- generate_prediction_intervals(chain1, 1000,seq(0,100,by=1),f,5,3)
+mod <- generate_prediction_intervals(chain1, 1000,seq(0,100,by=1),f_isolated,5,5)
 
-meltedDat <- as.data.frame(data[2:nrow(data),])
+meltedDat <- as.data.frame(data_isolated[2:nrow(data_isolated),])
 data <- floor(data)
 colnames(meltedDat) <- times
-meltedDat$strain <- rep(rep(seq(1,5,by=1),3),each=n_indiv)
-meltedDat$group <- rep(seq(1,3,by=1),each=5*n_indiv)
-meltedDat <- reshape2::melt(meltedDat,id.vars=c("group","strain"))
+meltedDat <- cbind(meltedDat,expand.grid("indiv"=1:nindiv,"strain"=1:nstrain,"group"=1:ngroup))
+meltedDat <- reshape2::melt(meltedDat,id.vars=c("indiv","strain","group"))
 meltedDat$variable <- as.numeric(as.character(meltedDat$variable))
 meltedDat$group <- as.factor(meltedDat$group)
 meltedDat$strain <- as.factor(meltedDat$strain)
+meltedDat$indiv <- as.factor(meltedDat$indiv)
 
 realTraj <- as.data.frame(real_trajectory[2:nrow(real_trajectory),])
 colnames(realTraj) <- seq(0,100,by=1)
@@ -110,8 +110,7 @@ realTraj$strain <- as.factor(realTraj$strain)
 
 
 ggplot() + 
-  geom_ribbon(data = mod, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.4) #+
-  #geom_line(data=realTraj,aes(x=variable,y=value,col=strain)) +
+  geom_ribbon(data = mod, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.4)+
   geom_point(data = meltedDat,aes(x=variable,y=value,col=strain),position=position_jitter(w=1,h=0.5)) +
   facet_wrap(~group) +
   #coord_cartesian(ylim=c(0,20)) + 

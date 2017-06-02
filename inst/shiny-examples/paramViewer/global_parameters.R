@@ -7,7 +7,17 @@ weak_types <- c("Infection 1"="infection1","Infection 2"="infection2", "Vaccine 
                 "Vaccine 2"="vacc2","Adjuvanted 1"="adj1","Adjuvanted 2"="adj2")
 strong_types <- c("Infection"="infection","Vaccine"="vacc","Adjuvanted"="adj")
 
-max_mu <- 20
-max_tp <- 100
-max_ts <- 100
-min_m <- -10
+max_mu <- 8
+min_mu <- 2
+
+max_dp <- 0.7
+min_dp <- 0.4
+
+max_tp <- 17
+min_tp <- 10
+
+max_ts <- 15
+min_ts <- 5
+
+max_m <- -4.6
+min_m <- -8

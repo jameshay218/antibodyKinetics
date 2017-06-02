@@ -23,8 +23,8 @@ shinyUI(
                                             selected=0)),
                             fluidRow(
                                 selectInput("form","Model form",
-                                            c("Competitive"=1,
-                                              "Isolated"=2),
+                                            c("Competitive"="competitive",
+                                              "Isolated"="isolated"),
                                             selected=1)),
                             fluidRow(numericInput("n_strains","No. strains",5,min=1,max=10)),
                             h4(strong("Exposures")),

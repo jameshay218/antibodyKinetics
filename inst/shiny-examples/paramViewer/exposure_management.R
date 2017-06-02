@@ -329,7 +329,7 @@ observeEvent(inputs$exposure_id,{
 
 ## Randomise mu
 observeEvent(inputs$randomise_mu,{
-    new_mu <- runif(1,0,max_mu)
+    new_mu <- runif(1,min_mu,max_mu)
     if(!is.null(parameters$parTab)){
         if(inputs$cr_flags == 0){
             if(inputs$typing_flags == 0){
@@ -362,7 +362,7 @@ observeEvent(inputs$randomise_mu,{
     
 ## Randomise tp
 observeEvent(inputs$randomise_tp,{
-    new_tp <- runif(1,0,max_tp)
+    new_tp <- runif(1,min_tp,max_tp)
     if(!is.null(parameters$parTab)){
         if(inputs$cr_flags == 0){
             if(inputs$typing_flags == 0){
@@ -395,7 +395,7 @@ observeEvent(inputs$randomise_tp,{
     
 ## Randomise mu
 observeEvent(inputs$randomise_dp,{
-    new_dp <- runif(1,0,1)
+    new_dp <- runif(1,min_dp,max_dp)
     if(!is.null(parameters$parTab)){
         if(inputs$cr_flags == 0){
             if(inputs$typing_flags == 0){
@@ -428,7 +428,7 @@ observeEvent(inputs$randomise_dp,{
     
 ## Randomise mu
 observeEvent(inputs$randomise_ts,{
-    new_ts <- runif(1,0,max_ts)
+    new_ts <- runif(1,min_ts,max_ts)
     if(!is.null(parameters$parTab)){
         if(inputs$cr_flags == 0){
             if(inputs$typing_flags == 0){
@@ -461,7 +461,7 @@ observeEvent(inputs$randomise_ts,{
     
 ## Randomise m
 observeEvent(inputs$randomise_m,{
-    new_m <- runif(1,min_m,0)
+    new_m <- runif(1,min_m,max_m)
     if(!is.null(parameters$parTab)){
         if(inputs$cr_flags == 0){
             if(inputs$typing_flags == 0){
@@ -493,14 +493,14 @@ observeEvent(inputs$randomise_m,{
 })
     
 observeEvent(inputs$randomise_all,{
-    new_mu <- runif(1,0,max_mu)
-    new_dp <- runif(1,0,1)
-    new_tp <- runif(1,0,max_tp)
-    new_ts <- runif(1,0,max_ts)
-    new_m <- runif(1,min_m,0)
+    new_mu <- runif(1,min_mu,max_mu)
+    new_dp <- runif(1,min_dp,max_dp)
+    new_tp <- runif(1,max_tp,max_tp)
+    new_ts <- runif(1,min_ts,max_ts)
+    new_m <- runif(1,min_m,max_m)
 
     new_values <- c(new_mu, new_tp,new_dp,new_ts,new_m)
-if(!is.null(parameters$parTab)){
+    if(!is.null(parameters$parTab)){
         if(inputs$cr_flags == 0){
             if(inputs$typing_flags == 0){
                 isolate(parameters$parTab[parameters$parTab$id == inputs$exposure_select &

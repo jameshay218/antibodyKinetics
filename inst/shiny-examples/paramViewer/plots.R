@@ -59,10 +59,11 @@ output$main_plot <- renderPlot({
 
         typing <- inputs$typing_flags != 0
         cross_reactivity <- inputs$cr_flags != 0
+        print(inputs$form)
         
         f <- create_model_group_func_cpp(parTab,parameters$exposureTab,version="model",form=as.character(inputs$form),typing=typing,cross_reactivity=cross_reactivity)
 
-        times <- seq(0,100,by=1)
+        times <- seq(0,100,by=0.1)
         
         y <- f(parTab$values, times)
         y <- as.data.frame(y)
@@ -73,10 +74,9 @@ output$main_plot <- renderPlot({
         y$strain <- rep(1:n_strains,n_groups)
 
         colnames(y) <- c(times,"group","strain")
-        print(y)
         dat <- reshape2::melt(y,id.vars=c("group","strain"))
         colnames(dat) <- c("group","strain","times","value")
-        dat$times <- as.numeric(dat$times) -1
+        dat$times <- as.numeric(as.character(dat$times))
         dat$strain <- as.factor(dat$strain)
         dat$group <- as.factor(dat$group)
         ggplot(dat) + geom_line(aes(x=times,col=strain,y=value)) + facet_wrap(~group) + theme_bw()
