@@ -45,6 +45,12 @@ observeEvent(inputs$add_exposure,{
         ## combination
         if(inputs$typing_flags == 0 & inputs$cr_flags == 0){
             parTabRow <- do.call("rbind",lapply(inputs$exposure_affects, function(affects){
+                mu <- runif(1,min_mu,max_mu)
+                tp <- runif(1,min_tp,max_tp)
+                dp <- runif(1,min_dp,max_dp)
+                 ts <- runif(1,min_ts,max_ts)
+                 m <- runif(1,min_m,max_m)
+                 
                 data.frame(names=c("mu","tp","dp","ts","m"),
                            id=new_id,
                            values=c(mu,tp,dp,ts,m),
@@ -60,6 +66,12 @@ observeEvent(inputs$add_exposure,{
             ## strain/exposure/type combo
         } else if(inputs$typing_flags != 0 & inputs$cr_flags == 0){
             parTabRow <- do.call("rbind",lapply(inputs$exposure_affects, function(affects){
+                mu <- runif(1,min_mu,max_mu)
+                tp <- runif(1,min_tp,max_tp)
+                dp <- runif(1,min_dp,max_dp)
+                ts <- runif(1,min_ts,max_ts)
+                m <- runif(1,min_m,max_m)
+
                 ## For each strain this affects
                 newRow <- NULL
                 if(is.null(parameters$parTab) || nrow(parameters$parTab[parameters$parTab$exposure == inputs$exposure_strain &
@@ -84,6 +96,12 @@ observeEvent(inputs$add_exposure,{
             parTabRow <- NULL
             if(is.null(parameters$parTab) || nrow(parameters$parTab[parameters$parTab$exposure == inputs$exposure_strain &
                                                                     parameters$parTab$values == inputs$exposure_ti,]) == 0){
+                mu <- runif(1,min_mu,max_mu)
+                 tp <- runif(1,min_tp,max_tp)
+                 dp <- runif(1,min_dp,max_dp)
+                 ts <- runif(1,min_ts,max_ts)
+                 m <- runif(1,min_m,max_m)
+                 
                 parTabRow <- data.frame(names=c("mu","tp","dp","ts","m"),
                                         id=new_id,
                                         values=c(mu,tp,dp,ts,m),
@@ -99,6 +117,12 @@ observeEvent(inputs$add_exposure,{
         } else {
             parTabRow <- NULL
             if(is.null(parameters$parTab) || nrow(parameters$parTab[parameters$parTab$type == inputs$exposure_type,]) == 0){
+                mu <- runif(1,min_mu,max_mu)
+                tp <- runif(1,min_tp,max_tp)
+                dp <- runif(1,min_dp,max_dp)
+                ts <- runif(1,min_ts,max_ts)
+                m <- runif(1,min_m,max_m)
+                
                 parTabRow <- data.frame(names=c("mu","tp","dp","ts","m"),
                                         id=new_id,
                                         values=c(mu,tp,dp,ts,m),

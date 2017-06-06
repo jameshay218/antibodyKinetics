@@ -168,14 +168,15 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     cr_inds <- NULL
     
     ## In blocks of length(strains),
-    cr_lengths <- rep(length(strains),length(strains))
+    all_strains <- unique(c(exposureTab$strain, exposureTab$exposure))
+    cr_lengths <- rep(length(all_strains),length(all_strains))
     cr_lengths <- c(0,cumsum(cr_lengths))
   
     ## This is just creating a vectorised matrix, where the size of each "block"
     ## corresponds to the number of strains. Thus, to find the cross reactivity between
     ## say the second and third strain, we can look at the 3rd element of the 2nd block
-    for(strain1 in strains){
-        for(strain2 in strains){
+    for(strain1 in all_strains){
+        for(strain2 in all_strains){
             ## The parameter table should only have one row entry for each cross reactivity because I'm assuming
             ## symmetric distance
             tmpStrains <- sort(c(strain1,strain2))
@@ -265,6 +266,9 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
         times <- dat[1,]
         dat <- dat[2:nrow(dat),]
         f <- function(pars){
+    if(is.null(nrow(dat))){
+      dat <- matrix(dat,nrow=1)
+    }
             ln <- posterior_func_group_cpp(pars, times, groups, strains,
                                            exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths,
                                            exposure_times, exposure_strains, exposure_next, exposure_measured,

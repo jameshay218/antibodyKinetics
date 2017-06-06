@@ -24,30 +24,31 @@ generate_id <- function(inputs, order){
 
 ## Correctly update exposure table when new exposures added
 add_order_nextt<- function(inputs, parameters){
+    tmpTab <- parameters$exposureTab
+    
     ## get exposures at same time, before or after
     next_exposure_indices <- which(parameters$exposureTab$values > inputs$exposure_ti &
-                                    parameters$exposureTab$group == inputs$exposure_group)
+                                   parameters$exposureTab$group == inputs$exposure_group)
     prev_exposure_indices <- which(parameters$exposureTab$values < inputs$exposure_ti &
-                                    parameters$exposureTab$group == inputs$exposure_group)
+                                   parameters$exposureTab$group == inputs$exposure_group)
     same_exposure_indices <- which(parameters$exposureTab$values == inputs$exposure_ti &
                                    parameters$exposureTab$group == inputs$exposure_group)
     
     next_infection <- parameters$exposureTab[next_exposure_indices,]
     previous_infection <- parameters$exposureTab[prev_exposure_indices,]
     same_infection <- parameters$exposureTab[same_exposure_indices,]
-
-    tmpTab <- parameters$exposureTab
+    
     
     ## If instead we get a data frame of 0 rows, just set to NULL
     if(!is.null(next_infection) && nrow(next_infection)== 0) next_infection <- NULL
     if(!is.null(previous_infection) && nrow(previous_infection)== 0) previous_infection <- NULL
     if(!is.null(same_infection) && nrow(same_infection)== 0) same_infection <- NULL
     
-    ## If this is the only exposure, this is number 1
+    ## If this is the only exposure for this strain, this is number 1
     if(is.null(same_infection) & is.null(next_infection) & is.null(previous_infection)){
         ## Just add in naively
         new_order <- 1
-        next_t <- inputs$tmax
+        next_t <- NULL
         new_id <- generate_id(inputs,new_order)
         return(list("next_t"=next_t,"order"=new_order,"new_id"=new_id,"newTab"=tmpTab))
     }
