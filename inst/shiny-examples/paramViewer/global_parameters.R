@@ -19,5 +19,5 @@ min_tp <- 10
 max_ts <- 15
 min_ts <- 5
 
-max_m <- -4.6
+max_m <- -3
 min_m <- -8
