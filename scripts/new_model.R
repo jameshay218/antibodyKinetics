@@ -87,12 +87,13 @@ run_2 <- run_MCMC(parTab1,data, mcmcPars1, "test2_comp",create_model_group_func_
 chain1 <- read.csv("test2_comp_chain.csv")
 chain1 <- chain1[chain1$sampno > mcmcPars1["adaptive_period"],]
 
-mod <- generate_prediction_intervals(chain1, 1000,seq(0,100,by=1),f_isolated,3,1)
+
+nindiv <- 3
+nstrain <- 5
+ngroup <- 5
+mod <- generate_prediction_intervals(chain1, 1000,seq(0,100,by=1),f_isolated,nstrains=nstrain,ngroups=ngroup)
 
 
-nindiv <- 5
-nstrain <- 3
-ngroup <- 1
 meltedDat <- as.data.frame(data_isolated[2:nrow(data_isolated),])
 data <- floor(data)
 colnames(meltedDat) <- times
@@ -103,6 +104,15 @@ meltedDat$group <- as.factor(meltedDat$group)
 meltedDat$strain <- as.factor(meltedDat$strain)
 meltedDat$indiv <- as.factor(meltedDat$indiv)
 
+ggplot() + 
+  geom_ribbon(data = mod, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.4)+
+  geom_point(data = meltedDat,aes(x=variable,y=value,col=strain),position=position_jitter(w=0.1,h=0.)) +
+  facet_wrap(~group) +
+  #coord_cartesian(ylim=c(0,20)) + 
+  theme_bw()
+
+
+
 realTraj <- as.data.frame(real_trajectory[2:nrow(real_trajectory),])
 colnames(realTraj) <- seq(0,100,by=1)
 realTraj$strain <- rep(seq(1,5,by=1),3)
@@ -112,11 +122,4 @@ realTraj$variable <- as.numeric(as.character(realTraj$variable))
 realTraj$group <- as.factor(realTraj$group)
 realTraj$strain <- as.factor(realTraj$strain)
 
-
-ggplot() + 
-  geom_ribbon(data = mod, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.4)+
-  geom_point(data = meltedDat,aes(x=variable,y=value,col=strain),position=position_jitter(w=1,h=0.5)) +
-  facet_wrap(~group) +
-  #coord_cartesian(ylim=c(0,20)) + 
-  theme_bw()
 

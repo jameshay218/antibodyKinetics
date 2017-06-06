@@ -1,27 +1,30 @@
-setwd("~/Documents/antibodyKinetics")
+setwd("~/Documents/Ferret_Model/antibodyKinetics")
 library(devtools)
 load_all()
-parTab <- read.csv("~/Documents/antibodyKinetics/inst/shiny-examples/paramViewer/Parameters/parTab_base.csv",stringsAsFactors = FALSE)
-exposures <- read.csv("~/Documents/antibodyKinetics/inst/shiny-examples/paramViewer/Parameters/exposureTab_base.csv",stringsAsFactors=FALSE)
+parTab <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inst/shiny-examples/paramViewer/Parameters/parTab_base.csv",stringsAsFactors = FALSE)
+exposures <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inst/shiny-examples/paramViewer/Parameters/exposureTab_base.csv",stringsAsFactors=FALSE)
 
 group <- 1
-strain <- "A"
 cr <- FALSE
 typing <- FALSE
-form <- "isolated"
+form <- "competitive"
 
-exposureTab <- exposures[exposures$group == group & exposures$strain == strain,]
-parTab <- parTab[parTab$strain %in% c(NA,strain,"all") & parTab$id %in% c(NA,"all",unique(exposureTab$id)) | parTab$names == "x",]
+exposureTab <- exposures[exposures$group == group,]
+parTab <- parTab[parTab$id %in% c(NA,"all",unique(exposureTab$id)) | parTab$names == "x",]
 
 parTab[parTab$names %in% c("mu","dp","ts","m"),"fixed"] <- 0
 parTab[parTab$names %in% c("mu","dp","ts","m"),"upper_bound"] <- c(15,1,25,1)
 
 ## Create data
-times <- seq(0,100,by=1)
-f <- create_model_group_func_cpp(parTab,exposureTab,version="model",typing = typing,cross_reactivity = cr)
-f(parTab$values,times)
+times <- seq(0,100,by=0.11)
+f <- create_model_group_func_cpp(parTab,exposureTab,version="model",form=form,typing = typing,cross_reactivity = cr)
+dat <- f(parTab$values,times)
 
-
+plot(dat[1,],ylim=c(0,15),type='l')
+lines(dat[2,])
+lines(dat[3,])
+lines(dat[4,])
+lines(dat[5,])
 
 
 startTab <- parTab
