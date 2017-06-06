@@ -34,9 +34,9 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   double mod = pars[14];
   double x = pars[15];
   double t_i = pars[16];
-
+ 
   double sigma, beta, y0_mod;
-  // Rcpp::Rcout << "sigma: " << pars[11] << std::endl;
+  //Rcpp::Rcout << "x: " << x << std::endl;
   if(logSigma){
     beta = exp(pars[9]);
     sigma  = exp(pars[11]);
@@ -157,7 +157,7 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
   // For each group
   for(int i = 0; i < groups.size(); ++i){
     group = groups[i];
-    //Rcpp::Rcout << group << std::endl;
+    // Rcpp::Rcout << "Group: " << group << std::endl;
     // Get exposures for this group
     A = exposure_i_lengths[i];
     B = exposure_i_lengths[i+1];
@@ -180,7 +180,7 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
       
       // For each exposure for this strain
       for(int k = 0; k < tmp_exposures.size(); ++k){
-	//	Rcpp::Rcout << "Exposure: " << k << std::endl;
+	//Rcpp::Rcout << "Exposure: " << k << std::endl;
 	//Rcpp::Rcout << "Overall exposure: " << tmp_exposures[k] << std::endl;
 	tmpTimes = times;
 	/* The par_lengths vector should be the same size as

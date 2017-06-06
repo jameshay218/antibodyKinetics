@@ -53,7 +53,7 @@ model_trajectory <- function(pars, times, logSigma=TRUE){
     mu <- mu*exp(-max(y0,0)*y0_mod)
     cr <- exp(-sigma*pars["x"])
     prime_cr <- pars["c"]*exp(-beta*pars["x"])*pars["primed"]
-
+    print(pars["x"])
     mu <- mu*cr*pars["mod"] + prime_cr
     #print(paste0("CR: ",cr))
     y <- numeric(length(times))
@@ -172,6 +172,7 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
             }
             pars <- tmpParTab$values
             names(pars) <- tmpParTab$names
+
             ## Get the correct modifier for this exposure order
             mod <- order_tab[order_tab$order == order,"values"]
 
@@ -190,6 +191,7 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
               
             ## Solve model
             pars <- c("t_i"=t_i,pars,"mod"=mod,"x"=x,y0=y0,"primed"=isPrimed,"eff_y0"=eff_y0)
+            print(pars)
             y <- model_trajectory(pars, tmpTimes)
             trajectories[tmpTimesI,index] <-  trajectories[tmpTimesI,index] + y[1:(length(y)-1)]
         }

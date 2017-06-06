@@ -87,8 +87,12 @@ run_2 <- run_MCMC(parTab1,data, mcmcPars1, "test2_comp",create_model_group_func_
 chain1 <- read.csv("test2_comp_chain.csv")
 chain1 <- chain1[chain1$sampno > mcmcPars1["adaptive_period"],]
 
-mod <- generate_prediction_intervals(chain1, 1000,seq(0,100,by=1),f_isolated,5,5)
+mod <- generate_prediction_intervals(chain1, 1000,seq(0,100,by=1),f_isolated,3,1)
 
+
+nindiv <- 5
+nstrain <- 3
+ngroup <- 1
 meltedDat <- as.data.frame(data_isolated[2:nrow(data_isolated),])
 data <- floor(data)
 colnames(meltedDat) <- times

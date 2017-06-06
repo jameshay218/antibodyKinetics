@@ -39,6 +39,7 @@ double obs_likelihood(NumericVector y, NumericVector data, NumericVector params)
   for(int i = 0; i < y.length();++i){
     if(y(i) < 0) y(i) = 0;
     if(y(i) >= MAX_TITRE) y(i) = MAX_TITRE;
+    //ln += R::dnorm(data(i),y(i),1,1);
     ln += log(obs_error(floor(y(i)), floor(data(i)),params(1),params(2),MAX_TITRE));
   }
   return ln;

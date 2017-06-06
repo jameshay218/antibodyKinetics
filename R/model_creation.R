@@ -51,7 +51,7 @@ create_model_func <- function(parTab, exposures,form="isolated",cross_reactivity
 #' @seealso \code{\link{create_model_func}}
 create_model_group_func <- function(parTab, exposures, form = "isolated",
                                     cross_reactivity=FALSE,typing=FALSE){
-  strains <- unique(parTab$strain)
+  strains <- unique(exposures$strain)
   strains <- strains[complete.cases(strains)]
   strains <- strains[strains != "all"]
   
@@ -63,6 +63,7 @@ create_model_group_func <- function(parTab, exposures, form = "isolated",
   
   order_tab <- parTab[parTab$names == "mod",]
   order_indices <- which(parTab$names == "mod")
+  print(order_tab)
   
   parTab1 <- parTab[!(parTab$names %in% c("t_i","x","mod")),]
   parTab_indices <- which(!(parTab$names %in% c("t_i","x","mod")))
