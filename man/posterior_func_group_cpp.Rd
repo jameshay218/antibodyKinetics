@@ -67,3 +67,4 @@ for the given data set. This is a complex function, so should only really be cal
 going on! The key confusing thing is that the length of the vectors has to match the number
 of rows from the overall parameter table
 }
+

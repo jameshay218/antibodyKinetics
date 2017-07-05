@@ -23,6 +23,30 @@ double obs_error(int actual, int obs, double S, double EA, int MAX_TITRE){
   return((1.0/(MAX_TITRE-2.0))*(1.0-S-EA));
 }
 
+
+//' Discretised normal error
+//'
+//' Gives the probability of a titre observation given a true titre.
+//' @param actual the assumed true titre
+//' @param obs the observed titre
+//' @param sd standard deviation of the observation error function
+//' @param MAX_TITRE the maximum observable titre
+//' @export
+//[[Rcpp::export]]
+double norm_error(double actual, int obs, double sd, int MAX_TITRE){
+  double lik = 0;
+
+  if(obs > MAX_TITRE || obs < 0){
+  
+    return 0;
+  }
+  lik = R::pnorm(obs+1, actual, sd, 1, 0) - R::pnorm(obs, actual, sd, 1, 0);
+
+  lik = lik/(R::pnorm(MAX_TITRE,actual,sd,1,0) - R::pnorm(0, actual, sd, 1, 0));
+  return lik;  
+}
+
+
 //' Observation error function
 //'
 //' Given a vector of believed true titres and a vector of observed data, 
@@ -35,12 +59,23 @@ double obs_error(int actual, int obs, double S, double EA, int MAX_TITRE){
 //[[Rcpp::export]]
 double obs_likelihood(NumericVector y, NumericVector data, NumericVector params){
   double ln = 0;
+  double tmp = 0;
   int MAX_TITRE = params(3);
   for(int i = 0; i < y.length();++i){
     if(y(i) < 0) y(i) = 0;
     if(y(i) >= MAX_TITRE) y(i) = MAX_TITRE;
-    //ln += R::dnorm(data(i),y(i),1,1);
-    ln += log(obs_error(floor(y(i)), floor(data(i)),params(1),params(2),MAX_TITRE));
+    //ln += R::dnorm(data(i),y(i),params(1),1);
+    tmp = norm_error(y(i),data(i),params(1),MAX_TITRE);
+    if(tmp == 0){
+      ln += -10000;
+    } else {
+      ln += log(tmp);
+    }
+    //Rcpp::Rcout << "Data: " << data(i) << "; Model: " << y(i) << "; Lik: " << log(norm_error(y(i),data(i),1.2,MAX_TITRE)) << std::endl;
+    //ln += log(obs_error(floor(y(i)), floor(data(i)),params(1),params(2),MAX_TITRE));
+    //Rcpp::Rcout << data(i) << " " << y(i) << ": " << R::dpois(data(i),floor(y(i)),1) << std::endl;
+    
+    //ln += R::dpois(y(i),data(i),1);
   }
   return ln;
 }
@@ -49,7 +84,7 @@ double obs_likelihood(NumericVector y, NumericVector data, NumericVector params)
 //'
 //' Solves the antibody kinetics model for given parameters, and then calculates a likelihood
 //' for the given data set. This is a complex function, so should only really be called through
-//' \code{\link{create_model_group_func_cpp}}. Look at this code to really understand what's
+//' \code{\link{create_model_group_func_cpp}}. Lookx at this code to really understand what's
 //' going on! The key confusing thing is that the length of the vectors has to match the number
 //' of rows from the overall parameter table
 //' @param pars the vector of model parameters as in parTab

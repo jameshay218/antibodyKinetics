@@ -11,6 +11,10 @@ create_model_group_func(parTab, exposures, form = "isolated",
 \item{parTab}{the full parameter table - see example csv file}
 
 \item{form}{a string to indicate the form of the model ("isolated" or "competitive")}
+
+\item{cross_reactivity}{if TRUE, then uses cross-reactive boosting rather than ID based boosting}
+
+\item{typing}{if TRUE, then uses the type specific parameters rather than universal parameters}
 }
 \value{
 a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_competitive}}
@@ -21,3 +25,4 @@ Creaters a function pointer for \code{\link{model_func_groups}} to save passing 
 \seealso{
 \code{\link{create_model_func}}
 }
+

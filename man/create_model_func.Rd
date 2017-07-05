@@ -18,3 +18,4 @@ a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_fu
 \description{
 Creaters a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_additive}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
 }
+

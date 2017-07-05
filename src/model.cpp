@@ -36,14 +36,13 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   double t_i = pars[16];
  
   double sigma, beta, y0_mod;
-  //Rcpp::Rcout << "x: " << x << std::endl;
+  sigma = pars[11];
+  beta = pars[9];
   if(logSigma){
-    beta = exp(pars[9]);
-    sigma  = exp(pars[11]);
+    //beta = exp(pars[9]);
+    //sigma  = exp(pars[11]);
     y0_mod = exp(pars[12]);
   } else {
-    beta = pars[9];
-    sigma = pars[11];
     y0_mod = pars[12];
   }
 
@@ -56,18 +55,21 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   double t = 0;
   double tmp = 0;
 
-  double cr = exp(-sigma*x);
-  //Rcpp::Rcout << "x: " << x << ", sigma: " << sigma << ", cr: " << cr << std::endl;
-  double prime_cr = c*exp(-beta*x)*primed;
+  //double cr = exp(-sigma*x);
+  //double prime_cr = c*exp(-beta*x)*primed;
   double mod_boost = exp(-y0_mod*y0);
-  //Rcpp::Rcout << "Titre dependence: " << mod_boost << std::endl;
-  //Rcpp::Rcout << "Prime boost: " << prime_cr << std::endl;
-  //Rcpp::Rcout << "Normal boost: " << mu*cr << std::endl;
-  mu = mu*cr*mod*mod_boost + prime_cr;
-  //Rcpp::Rcout << "Total mu: " << mu << std::endl << std::endl << std::endl;
-  //Rcpp::Rcout << "Sigma: " << sigma << std::endl;
-  //Rcpp::Rcout << "cr: " << cr << std::endl;
-  
+  // mu = mu*cr*mod*mod_boost + prime_cr;
+
+  double cr = mu - sigma*x;
+
+  //Rcpp::Rcout << "cr: " << cr << "; sigma: " << sigma << "; x: " << x << std::endl;
+  double prime_cr = c - beta*x;
+  if(cr < 0) cr = 0;
+  if(prime_cr < 0) prime_cr = 0;
+  mu = mod*mod_boost*cr + prime_cr*primed;
+
+
+
   NumericVector y(times.size());
   
   for(int i = 0; i < times.size(); ++i){
@@ -157,31 +159,25 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
   // For each group
   for(int i = 0; i < groups.size(); ++i){
     group = groups[i];
-    // Rcpp::Rcout << "Group: " << group << std::endl;
+
     // Get exposures for this group
     A = exposure_i_lengths[i];
     B = exposure_i_lengths[i+1];
-    //Rcpp::Rcout << A << " " << B << std::endl;
     tmp_exposures_group = exposure_indices[Range(A,B)];
+
     // For each strain, a subset of these exposures apply
     tmp_strains = strain_indices[Range(A,B)];
     tmp_strain_lengths = strain_i_lengths[Range((i*(n_strain+1)),((i*(n_strain+1))+n_strain))];
-    //Rcpp::Rcout << "Tmp strain lengths: " << tmp_strain_lengths << std::endl;
-    //Rcpp::Rcout << "Tmp strain indices: " << tmp_strains << std::endl; 
+
     // For each strain in this group
     for(int j = 0; j < strains.size(); ++j){
-      //Rcpp::Rcout << "Strain: " << j << std::endl;
       A = tmp_strain_lengths[j];
       B = tmp_strain_lengths[j+1] - 1;
-      //Rcpp::Rcout << A << "  " << B << std::endl;
       tmp_exposures = tmp_exposures_group[tmp_strains[Range(A,B)]];
-      // Rcpp::Rcout << "Strain indices: " << tmp_exposures << std::endl;
       y0 = 0;
       
       // For each exposure for this strain
       for(int k = 0; k < tmp_exposures.size(); ++k){
-	//Rcpp::Rcout << "Exposure: " << k << std::endl;
-	//Rcpp::Rcout << "Overall exposure: " << tmp_exposures[k] << std::endl;
 	tmpTimes = times;
 	/* The par_lengths vector should be the same size as
 	   the number of exposures (+1 for the first index of 0)
@@ -189,18 +185,11 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	
 	A = par_lengths[tmp_exposures[k]];
 	B = par_lengths[tmp_exposures[k]+1] - 1;
-	//Rcpp::Rcout << A << "  " << B << std::endl;
-	//Rcpp::Rcout << "Length: " << par_inds.size() << std::endl;
 
 	fullPars = pars[par_inds[Range(A,B)]];
-	//Rcpp::Rcout << "pars: " << fullPars << std::endl;	
-	//Rcpp::Rcout << "Exposure times: " << exposure_times << std::endl;	
-
-
 	index = tmp_exposures[k];
 	t_i = exposure_times[index];
 	next_t = exposure_next[index];
-	//Rcpp::Rcout << "ti: " << t_i << std::endl;
 	exposure_strain = exposure_strains[index]-1;
 	measured_strain = exposure_measured[index]-1;
 
@@ -210,7 +199,6 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	isPrimed = exposure_primes[index];
 
 	cr = pars[cr_inds[cr_lengths[measured_strain] + exposure_strain]];
-	//Rcpp::Rcout << "Measured strain: " << measured_strain << ", exposure strain: " <<exposure_strain << ", cr: " << cr << std::endl;
 
 	fullPars.push_back(isPrimed);
 	fullPars.push_back(mod);
@@ -239,7 +227,6 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	}
 	tmpTimes.push_back(next_t);
 	// Solve the model
-	//Rcpp::Rcout << "pars: " << fullPars << std::endl;
 	y = model_trajectory_cpp(fullPars, tmpTimes, TRUE);
 	/* Add model solutions to the correct row in the results matrix. If version 0, this will
 	   be all time points. If version 1, this will correspond to the times relating to the
@@ -253,7 +240,6 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
       index_dat++;
     }
   }
-  //Rcpp::Rcout << "lol" << std::endl;
   return results;
 }
 

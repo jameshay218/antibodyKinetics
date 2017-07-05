@@ -168,7 +168,7 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
     cr_inds <- NULL
     
     ## In blocks of length(strains),
-    all_strains <- unique(c(exposureTab$strain, exposureTab$exposure))
+    all_strains <- c("A","B","C","D","E") #unique(c(exposureTab$strain, exposureTab$exposure))
     cr_lengths <- rep(length(all_strains),length(all_strains))
     cr_lengths <- c(0,cumsum(cr_lengths))
   

@@ -96,6 +96,18 @@ obs_error <- function(actual, obs, S, EA, MAX_TITRE) {
     .Call('antibodyKinetics_obs_error', PACKAGE = 'antibodyKinetics', actual, obs, S, EA, MAX_TITRE)
 }
 
+#' Discretised normal error
+#'
+#' Gives the probability of a titre observation given a true titre.
+#' @param actual the assumed true titre
+#' @param obs the observed titre
+#' @param sd standard deviation of the observation error function
+#' @param MAX_TITRE the maximum observable titre
+#' @export
+norm_error <- function(actual, obs, sd, MAX_TITRE) {
+    .Call('antibodyKinetics_norm_error', PACKAGE = 'antibodyKinetics', actual, obs, sd, MAX_TITRE)
+}
+
 #' Observation error function
 #'
 #' Given a vector of believed true titres and a vector of observed data, 
@@ -113,7 +125,7 @@ obs_likelihood <- function(y, data, params) {
 #'
 #' Solves the antibody kinetics model for given parameters, and then calculates a likelihood
 #' for the given data set. This is a complex function, so should only really be called through
-#' \code{\link{create_model_group_func_cpp}}. Look at this code to really understand what's
+#' \code{\link{create_model_group_func_cpp}}. Lookx at this code to really understand what's
 #' going on! The key confusing thing is that the length of the vectors has to match the number
 #' of rows from the overall parameter table
 #' @param pars the vector of model parameters as in parTab

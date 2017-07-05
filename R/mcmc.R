@@ -57,7 +57,6 @@ run_MCMC <- function(parTab,
         w <- mvrPars[[3]]
     }
 
-
     posterior_simp <- protect(CREATE_POSTERIOR_FUNC(parTab,data, 
                                                     PRIOR_FUNC,...))
     
@@ -90,7 +89,6 @@ run_MCMC <- function(parTab,
     no_recorded <- 1
     sampno <- 2
     par_i <- 1
-
     for (i in 1:(iterations+adaptive_period)){
         ## If using univariate proposals
         if(is.null(mvrPars)) {

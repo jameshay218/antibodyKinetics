@@ -89,6 +89,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// norm_error
+double norm_error(double actual, int obs, double sd, int MAX_TITRE);
+RcppExport SEXP antibodyKinetics_norm_error(SEXP actualSEXP, SEXP obsSEXP, SEXP sdSEXP, SEXP MAX_TITRESEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type actual(actualSEXP);
+    Rcpp::traits::input_parameter< int >::type obs(obsSEXP);
+    Rcpp::traits::input_parameter< double >::type sd(sdSEXP);
+    Rcpp::traits::input_parameter< int >::type MAX_TITRE(MAX_TITRESEXP);
+    rcpp_result_gen = Rcpp::wrap(norm_error(actual, obs, sd, MAX_TITRE));
+    return rcpp_result_gen;
+END_RCPP
+}
 // obs_likelihood
 double obs_likelihood(NumericVector y, NumericVector data, NumericVector params);
 RcppExport SEXP antibodyKinetics_obs_likelihood(SEXP ySEXP, SEXP dataSEXP, SEXP paramsSEXP) {
@@ -133,4 +147,21 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(posterior_func_group_cpp(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version, individuals, data));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"antibodyKinetics_toUnitScale", (DL_FUNC) &antibodyKinetics_toUnitScale, 3},
+    {"antibodyKinetics_fromUnitScale", (DL_FUNC) &antibodyKinetics_fromUnitScale, 3},
+    {"antibodyKinetics_model_trajectory_cpp", (DL_FUNC) &antibodyKinetics_model_trajectory_cpp, 3},
+    {"antibodyKinetics_model_func_group_cpp", (DL_FUNC) &antibodyKinetics_model_func_group_cpp, 20},
+    {"antibodyKinetics_obs_error", (DL_FUNC) &antibodyKinetics_obs_error, 5},
+    {"antibodyKinetics_norm_error", (DL_FUNC) &antibodyKinetics_norm_error, 4},
+    {"antibodyKinetics_obs_likelihood", (DL_FUNC) &antibodyKinetics_obs_likelihood, 3},
+    {"antibodyKinetics_posterior_func_group_cpp", (DL_FUNC) &antibodyKinetics_posterior_func_group_cpp, 22},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_antibodyKinetics(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

@@ -23,3 +23,4 @@ generate_prediction_intervals(chain, samp_no = 1000, ts, MODEL_FUNCTION,
 \description{
 Produces a data frame of lower 2.5%, upper 97.5% and median prediction intervals for a given model function.
 }
+

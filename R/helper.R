@@ -20,31 +20,39 @@ read_ferret_data <- function(data_file){
 #'
 #' @param pars vector of parameters with S, EA and MAX_TITRE
 #' @param y the titre to add observation error
+#' @param normal indicates if data is from the discretised normal or not
 #' @return a single, modified titre value
 #' @export
 #' @useDynLib
-add_noise <- function(pars, y){
+add_noise <- function(pars, y, normal=FALSE){
     MAX_TITRE <- pars["MAX_TITRE"]
     S <- pars["S"]
     EA <- pars["EA"]
 
     if(y < 0) y <- 0
     if(y > MAX_TITRE) y <- MAX_TITRE
-    
-    probs <- numeric(MAX_TITRE+1)
 
-    probs[] <- (1.0/(MAX_TITRE-2.0))*(1.0-S-EA)
-
-    if(y == MAX_TITRE){
-       probs[y+1] <- S + EA/2.0 - (1.0/(MAX_TITRE-2.0))*(1.0-S-EA)
-       probs[y] <- EA/2.0
-    } else if (y == 0){
-        probs[y+1] <- S + EA/2.0 - (1.0/(MAX_TITRE-2.0))*(1.0-S-EA)
-        probs[y+2] <- EA/2.0        
+    if(!normal){
+        probs <- numeric(MAX_TITRE+1)
+        
+        probs[] <- (1.0/(MAX_TITRE-2.0))*(1.0-S-EA)
+        
+        if(y == MAX_TITRE){
+            probs[y+1] <- S + EA/2.0 - (1.0/(MAX_TITRE-2.0))*(1.0-S-EA)
+            probs[y] <- EA/2.0
+        } else if (y == 0){
+            probs[y+1] <- S + EA/2.0 - (1.0/(MAX_TITRE-2.0))*(1.0-S-EA)
+            probs[y+2] <- EA/2.0        
+        } else {
+            probs[y+1] <- S
+            probs[y] <- EA/2.0
+            probs[y+2] <- EA/2.0
+        }
     } else {
-        probs[y+1] <- S
-        probs[y] <- EA/2.0
-        probs[y+2] <- EA/2.0
+        probs <- numeric(MAX_TITRE + 1)
+        for(i in 1:length(probs)){
+            probs[i] <- norm_error(y, i-1, S, MAX_TITRE)
+        }
     }
     probs <- cumsum(probs)
 
