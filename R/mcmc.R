@@ -23,7 +23,7 @@ run_MCMC <- function(parTab,
                      ...){
     ## Allowable error in scale tuning
     TUNING_ERROR <- 0.1
-
+    
     ## Extract MCMC parameters
     iterations <- mcmcPars["iterations"]
     popt <- mcmcPars["popt"]
@@ -36,7 +36,7 @@ run_MCMC <- function(parTab,
     unfixed_pars <- which(parTab$fixed == 0)
     unfixed_par_length <- nrow(parTab[parTab$fixed== 0,])
     current_pars <- parTab$values
-    par_names <- parTab$names
+    par_names <- as.character(parTab$names)
 
     ## Parameter constraints
     lower_bounds <- parTab$lower_bound
@@ -62,24 +62,34 @@ run_MCMC <- function(parTab,
     
     ## Setup MCMC chain file with correct column names
     mcmc_chain_file <- paste(filename,"_chain.csv",sep="")
-    chain_colnames <- c("sampno",par_names,"lnlike")
 
     ## Create empty chain to store every iteration for the adaptive period
     opt_chain <- matrix(nrow=adaptive_period,ncol=unfixed_par_length)
     chain_index <- 1
     
-    ## Create empty chain to store "save_block" iterations at a time
-    save_chain <- empty_save_chain <- matrix(nrow=save_block,ncol=param_length+2)
-
     ## Initial conditions ------------------------------------------------------
     ## Initial likelihood
-    probab <- posterior_simp(current_pars)
+    list.out <- posterior_simp(current_pars)
+    ## added feature by ada-w-yan: for each recorded iteration,
+    ## we can now write a vector with miscellaneous output to file in addition
+    ## to the parameter values and likelihood
+    ## (for example, predicted model output)
+    probab <- list.out$lik
+    misc <- list.out$misc
+    misc_length <- length(misc)
+    
+    ## Create empty chain to store "save_block" iterations at a time
+    save_chain <- empty_save_chain <- matrix(nrow=save_block,ncol=param_length+2+misc_length)
 
     ## Set up initial csv file
+    misc_colnames <- rep("misc",misc_length)
+    misc_colnames <- paste0(misc_colnames,1:misc_length)
+    chain_colnames <- c("sampno",par_names,misc_colnames,"lnlike")
+    
     tmp_table <- array(dim=c(1,length(chain_colnames)))
     tmp_table <- as.data.frame(tmp_table)
-  
-    tmp_table[1,] <- c(1,current_pars,probab)
+    tmp_table[1,] <- c(1,current_pars,misc,probab)
+    
     colnames(tmp_table) <- chain_colnames
     
     ## Write starting conditions to file
@@ -112,8 +122,9 @@ run_MCMC <- function(parTab,
             )
            ){
             ## Calculate new likelihood and find difference to old likelihood
-            new_probab <- posterior_simp(proposal)
-
+            list.out <- posterior_simp(proposal)
+            new_probab <- list.out$lik
+            
             log_prob <- min(new_probab-probab,0)
          
             ## Accept with probability 1 if better, or proportional to
@@ -121,6 +132,7 @@ run_MCMC <- function(parTab,
             if(is.finite(log_prob) && log(runif(1)) < log_prob){
                 current_pars <- proposal
                 probab <- new_probab
+                misc <- list.out$misc
                 
                 ## Store acceptances
                 if(is.null(mvrPars)){
@@ -136,7 +148,8 @@ run_MCMC <- function(parTab,
         ## save this block of chain to file and reset chain
         if(i %% thin ==0){
             save_chain[no_recorded,1] <- sampno
-            save_chain[no_recorded,2:(ncol(save_chain)-1)] <- current_pars
+            save_chain[no_recorded,2:(ncol(save_chain)-1-misc_length)] <- current_pars
+            save_chain[no_recorded,(ncol(save_chain)-1-misc_length+1):(ncol(save_chain)-1)] <- misc
             save_chain[no_recorded,ncol(save_chain)] <- probab
             no_recorded <- no_recorded + 1
         }
