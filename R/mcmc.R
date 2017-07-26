@@ -78,14 +78,14 @@ run_MCMC <- function(parTab,
     ## the likelihood as a numeric vector of length 1, 
     ## or a list with elements
     ## list$lik: the likelihood as a numeric vector of length 1
-    ## list$misc: any additional output as a numeric vector
+    ## list$misc: any additional output as a vector
     ## the length of list$misc has to be the same for all proposal values
     if(is.atomic(posterior.out)){
       probab <- posterior.out
       misc <- numeric()
     } else {
       probab <- posterior.out$lik
-      misc <- posterior.out$misc
+      misc <- unname(posterior.out$misc)
     }
     misc_length <- length(misc)
 
@@ -93,9 +93,13 @@ run_MCMC <- function(parTab,
     save_chain <- empty_save_chain <- matrix(nrow=save_block,ncol=param_length+2+misc_length)
 
     ## Set up initial csv file
-    misc_colnames <- rep("misc",misc_length)
-    if(misc_length > 0){
-      misc_colnames <- paste0(misc_colnames,1:misc_length)
+    if(is.atomic(posterior.out) || is.null(names(posterior.out$misc))){
+      misc_colnames <- rep("misc",misc_length)
+      if(misc_length > 0){
+        misc_colnames <- paste0(misc_colnames,1:misc_length)
+      }
+    } else {
+      misc_colnames <- names(posterior.out$misc)
     }
     chain_colnames <- c("sampno",par_names,misc_colnames,"lnlike")
     tmp_table <- array(dim=c(1,length(chain_colnames)))
@@ -168,7 +172,7 @@ run_MCMC <- function(parTab,
             save_chain[no_recorded,1] <- sampno
             save_chain[no_recorded,2:(ncol(save_chain)-1-misc_length)] <- current_pars
             if(misc_length > 0){
-              save_chain[no_recorded,(ncol(save_chain)-1-misc_length+1):(ncol(save_chain)-1)] <- misc
+              save_chain[no_recorded,(ncol(save_chain)-1-misc_length+1):(ncol(save_chain)-1)] <- unname(misc)
             }
             save_chain[no_recorded,ncol(save_chain)] <- probab
             no_recorded <- no_recorded + 1
