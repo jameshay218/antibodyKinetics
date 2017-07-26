@@ -69,27 +69,39 @@ run_MCMC <- function(parTab,
     
     ## Initial conditions ------------------------------------------------------
     ## Initial likelihood
-    list.out <- posterior_simp(current_pars)
+    posterior.out <- posterior_simp(current_pars)
     ## added feature by ada-w-yan: for each recorded iteration,
     ## we can now write a vector with miscellaneous output to file in addition
     ## to the parameter values and likelihood
     ## (for example, predicted model output)
-    probab <- list.out$lik
-    misc <- list.out$misc
+    ## usage: posterior_simp(proposal) should either return 
+    ## the likelihood as a numeric vector of length 1, 
+    ## or a list with elements
+    ## list$lik: the likelihood as a numeric vector of length 1
+    ## list$misc: any additional output as a numeric vector
+    ## the length of list$misc has to be the same for all proposal values
+    if(is.atomic(posterior.out)){
+      probab <- posterior.out
+      misc <- numeric()
+    } else {
+      probab <- posterior.out$lik
+      misc <- posterior.out$misc
+    }
     misc_length <- length(misc)
-    
+
     ## Create empty chain to store "save_block" iterations at a time
     save_chain <- empty_save_chain <- matrix(nrow=save_block,ncol=param_length+2+misc_length)
 
     ## Set up initial csv file
     misc_colnames <- rep("misc",misc_length)
-    misc_colnames <- paste0(misc_colnames,1:misc_length)
+    if(misc_length > 0){
+      misc_colnames <- paste0(misc_colnames,1:misc_length)
+    }
     chain_colnames <- c("sampno",par_names,misc_colnames,"lnlike")
-    
     tmp_table <- array(dim=c(1,length(chain_colnames)))
     tmp_table <- as.data.frame(tmp_table)
     tmp_table[1,] <- c(1,current_pars,misc,probab)
-    
+
     colnames(tmp_table) <- chain_colnames
     
     ## Write starting conditions to file
@@ -122,8 +134,14 @@ run_MCMC <- function(parTab,
             )
            ){
             ## Calculate new likelihood and find difference to old likelihood
-            list.out <- posterior_simp(proposal)
-            new_probab <- list.out$lik
+            posterior.out <- posterior_simp(proposal)
+            if(is.atomic(posterior.out)){
+              new_probab <- posterior.out
+              new_misc <- numeric()
+            } else {
+              new_probab <- posterior.out$lik
+              new_misc <- posterior.out$misc
+            }
             
             log_prob <- min(new_probab-probab,0)
          
@@ -132,7 +150,7 @@ run_MCMC <- function(parTab,
             if(is.finite(log_prob) && log(runif(1)) < log_prob){
                 current_pars <- proposal
                 probab <- new_probab
-                misc <- list.out$misc
+                misc <- new_misc
                 
                 ## Store acceptances
                 if(is.null(mvrPars)){
@@ -149,7 +167,9 @@ run_MCMC <- function(parTab,
         if(i %% thin ==0){
             save_chain[no_recorded,1] <- sampno
             save_chain[no_recorded,2:(ncol(save_chain)-1-misc_length)] <- current_pars
-            save_chain[no_recorded,(ncol(save_chain)-1-misc_length+1):(ncol(save_chain)-1)] <- misc
+            if(misc_length > 0){
+              save_chain[no_recorded,(ncol(save_chain)-1-misc_length+1):(ncol(save_chain)-1)] <- misc
+            }
             save_chain[no_recorded,ncol(save_chain)] <- probab
             no_recorded <- no_recorded + 1
         }
