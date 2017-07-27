@@ -83,7 +83,8 @@ protect <- function(f){
     function(...){
         tryCatch(f(...),error=function(e){
             message("caught error: ", e$message)
-            -100000
+            list.out <- list(lik = -100000, misc = NA)
+            list.out
         })
     }
 }
