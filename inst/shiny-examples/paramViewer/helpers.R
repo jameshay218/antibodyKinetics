@@ -48,7 +48,7 @@ add_order_nextt<- function(inputs, parameters){
     if(is.null(same_infection) & is.null(next_infection) & is.null(previous_infection)){
         ## Just add in naively
         new_order <- 1
-        next_t <- NULL
+        next_t <- inputs$tmax
         new_id <- generate_id(inputs,new_order)
         return(list("next_t"=next_t,"order"=new_order,"new_id"=new_id,"newTab"=tmpTab))
     }

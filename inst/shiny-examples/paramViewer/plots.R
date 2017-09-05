@@ -35,13 +35,13 @@ output$main_plot <- renderPlot({
                                      values=c(inputs$beta,inputs$c,cr_values,inputs$y0_mod),
                                      type=c("all","all",cr_names,"all"),
                                      exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
-                                     lower_bound=c(-20,0,rep(-20,length(cr_names)),-20),upper_bound=c(2,20,rep(2,length(cr_names)),2),stringsAsFactors=FALSE)
+                                     lower_bound=c(0,0,rep(0,length(cr_names)),-20),upper_bound=c(100,20,rep(100,length(cr_names)),2),stringsAsFactors=FALSE)
         } else {
             bot_parTab <- data.frame(names=c("beta","c","sigma","y0_mod"),id="all",
-                                     values=c(inputs$beta,inputs$c,-Inf,inputs$y0_mod),
+                                     values=c(inputs$beta,inputs$c,0,inputs$y0_mod),
                                      type=c("all","all","all","all"),
                                      exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
-                                     lower_bound=c(-20,0,-20,-20),upper_bound=c(2,20,2,2),stringsAsFactors=FALSE)
+                                     lower_bound=c(0,0,0,-20),upper_bound=c(100,20,100,2),stringsAsFactors=FALSE)
         }
 
         mod_parTab <- data.frame(names="mod",id=NA,values=c(inputs$mod1,inputs$mod2,inputs$mod3,inputs$mod4),
@@ -51,13 +51,13 @@ output$main_plot <- renderPlot({
         distance_parTab <- data.frame(names="x",id=NA,values=parameters$antigenicDistTab$Distance,
                                       type="all",exposure=parameters$antigenicDistTab$Strain.1,
                                       strain=parameters$antigenicDistTab$Strain.2,
-                                      order=NA,fixed=1,steps=0.1,lower_bound=0,upper_bound=10000,
+                                      order=NA,fixed=1,steps=0.1,lower_bound=0,upper_bound=13,
                                       stringsAsFactors=FALSE)
         tmpTab <- parameters$parTab
         tmpTab[tmpTab$names == "m","values"] <- exp(tmpTab[tmpTab$names == "m","values"])
         
         parTab <- rbind(top_parTab,tmpTab,bot_parTab,distance_parTab,mod_parTab)
-
+        #print(parTab)
         typing <- inputs$typing_flags != 0
         cross_reactivity <- inputs$cr_flags != 0
         print(inputs$form)
@@ -65,9 +65,10 @@ output$main_plot <- renderPlot({
         f <- create_model_group_func_cpp(parTab,parameters$exposureTab,version="model",form=as.character(inputs$form),typing=typing,cross_reactivity=cross_reactivity)
 
         times <- seq(0,100,by=0.1)
-        
+
         y <- f(parTab$values, times)
         y <- as.data.frame(y)
+
         n_strains <- length(unique(parameters$exposureTab$strain))
         n_groups <- length(unique(parameters$exposureTab$group))
 

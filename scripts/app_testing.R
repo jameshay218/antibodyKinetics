@@ -1,5 +1,0 @@
-setwd("~/Documents/antibodyKinetics")
-library(devtools)
-library(shiny)
-load_all()
-paramViewer()

@@ -9,7 +9,6 @@
 #' @useDynLib antibodyKinetics
 mvr_proposal <- function(values, fixed, covMat){
     proposed <- values
-    #proposed[fixed] <- MASS::mvrnorm(n=1,mu=proposed[fixed],Sigma=covMat)
     proposed[fixed] <- MASS::mvrnorm(n=1,mu=proposed[fixed],Sigma=(5.6644/length(fixed))*covMat)
     return(proposed)
 }

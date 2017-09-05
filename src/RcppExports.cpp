@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // toUnitScale
 double toUnitScale(double x, double min, double max);
-RcppExport SEXP antibodyKinetics_toUnitScale(SEXP xSEXP, SEXP minSEXP, SEXP maxSEXP) {
+RcppExport SEXP _antibodyKinetics_toUnitScale(SEXP xSEXP, SEXP minSEXP, SEXP maxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,7 +20,7 @@ END_RCPP
 }
 // fromUnitScale
 double fromUnitScale(double x, double min, double max);
-RcppExport SEXP antibodyKinetics_fromUnitScale(SEXP xSEXP, SEXP minSEXP, SEXP maxSEXP) {
+RcppExport SEXP _antibodyKinetics_fromUnitScale(SEXP xSEXP, SEXP minSEXP, SEXP maxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -33,7 +33,7 @@ END_RCPP
 }
 // model_trajectory_cpp
 NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool logSigma);
-RcppExport SEXP antibodyKinetics_model_trajectory_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP logSigmaSEXP) {
+RcppExport SEXP _antibodyKinetics_model_trajectory_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP logSigmaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -46,7 +46,7 @@ END_RCPP
 }
 // model_func_group_cpp
 NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times, IntegerVector groups, IntegerVector strains, IntegerVector exposure_indices, IntegerVector exposure_i_lengths, IntegerVector strain_indices, IntegerVector strain_i_lengths, NumericVector exposure_times, IntegerVector exposure_strains, NumericVector exposure_next, IntegerVector exposure_measured, IntegerVector exposure_orders, IntegerVector exposure_primes, IntegerVector cr_inds, IntegerVector par_inds, IntegerVector order_inds, IntegerVector par_lengths, IntegerVector cr_lengths, int version);
-RcppExport SEXP antibodyKinetics_model_func_group_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP groupsSEXP, SEXP strainsSEXP, SEXP exposure_indicesSEXP, SEXP exposure_i_lengthsSEXP, SEXP strain_indicesSEXP, SEXP strain_i_lengthsSEXP, SEXP exposure_timesSEXP, SEXP exposure_strainsSEXP, SEXP exposure_nextSEXP, SEXP exposure_measuredSEXP, SEXP exposure_ordersSEXP, SEXP exposure_primesSEXP, SEXP cr_indsSEXP, SEXP par_indsSEXP, SEXP order_indsSEXP, SEXP par_lengthsSEXP, SEXP cr_lengthsSEXP, SEXP versionSEXP) {
+RcppExport SEXP _antibodyKinetics_model_func_group_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP groupsSEXP, SEXP strainsSEXP, SEXP exposure_indicesSEXP, SEXP exposure_i_lengthsSEXP, SEXP strain_indicesSEXP, SEXP strain_i_lengthsSEXP, SEXP exposure_timesSEXP, SEXP exposure_strainsSEXP, SEXP exposure_nextSEXP, SEXP exposure_measuredSEXP, SEXP exposure_ordersSEXP, SEXP exposure_primesSEXP, SEXP cr_indsSEXP, SEXP par_indsSEXP, SEXP order_indsSEXP, SEXP par_lengthsSEXP, SEXP cr_lengthsSEXP, SEXP versionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -76,7 +76,7 @@ END_RCPP
 }
 // obs_error
 double obs_error(int actual, int obs, double S, double EA, int MAX_TITRE);
-RcppExport SEXP antibodyKinetics_obs_error(SEXP actualSEXP, SEXP obsSEXP, SEXP SSEXP, SEXP EASEXP, SEXP MAX_TITRESEXP) {
+RcppExport SEXP _antibodyKinetics_obs_error(SEXP actualSEXP, SEXP obsSEXP, SEXP SSEXP, SEXP EASEXP, SEXP MAX_TITRESEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -91,7 +91,7 @@ END_RCPP
 }
 // norm_error
 double norm_error(double actual, int obs, double sd, int MAX_TITRE);
-RcppExport SEXP antibodyKinetics_norm_error(SEXP actualSEXP, SEXP obsSEXP, SEXP sdSEXP, SEXP MAX_TITRESEXP) {
+RcppExport SEXP _antibodyKinetics_norm_error(SEXP actualSEXP, SEXP obsSEXP, SEXP sdSEXP, SEXP MAX_TITRESEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -105,7 +105,7 @@ END_RCPP
 }
 // obs_likelihood
 double obs_likelihood(NumericVector y, NumericVector data, NumericVector params);
-RcppExport SEXP antibodyKinetics_obs_likelihood(SEXP ySEXP, SEXP dataSEXP, SEXP paramsSEXP) {
+RcppExport SEXP _antibodyKinetics_obs_likelihood(SEXP ySEXP, SEXP dataSEXP, SEXP paramsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -118,7 +118,7 @@ END_RCPP
 }
 // posterior_func_group_cpp
 double posterior_func_group_cpp(NumericVector pars, NumericVector times, IntegerVector groups, IntegerVector strains, IntegerVector exposure_indices, IntegerVector exposure_i_lengths, IntegerVector strain_indices, IntegerVector strain_i_lengths, NumericVector exposure_times, IntegerVector exposure_strains, NumericVector exposure_next, IntegerVector exposure_measured, IntegerVector exposure_orders, IntegerVector exposure_primes, IntegerVector cr_inds, IntegerVector par_inds, IntegerVector order_inds, IntegerVector par_lengths, IntegerVector cr_lengths, int version, IntegerVector individuals, NumericMatrix data);
-RcppExport SEXP antibodyKinetics_posterior_func_group_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP groupsSEXP, SEXP strainsSEXP, SEXP exposure_indicesSEXP, SEXP exposure_i_lengthsSEXP, SEXP strain_indicesSEXP, SEXP strain_i_lengthsSEXP, SEXP exposure_timesSEXP, SEXP exposure_strainsSEXP, SEXP exposure_nextSEXP, SEXP exposure_measuredSEXP, SEXP exposure_ordersSEXP, SEXP exposure_primesSEXP, SEXP cr_indsSEXP, SEXP par_indsSEXP, SEXP order_indsSEXP, SEXP par_lengthsSEXP, SEXP cr_lengthsSEXP, SEXP versionSEXP, SEXP individualsSEXP, SEXP dataSEXP) {
+RcppExport SEXP _antibodyKinetics_posterior_func_group_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP groupsSEXP, SEXP strainsSEXP, SEXP exposure_indicesSEXP, SEXP exposure_i_lengthsSEXP, SEXP strain_indicesSEXP, SEXP strain_i_lengthsSEXP, SEXP exposure_timesSEXP, SEXP exposure_strainsSEXP, SEXP exposure_nextSEXP, SEXP exposure_measuredSEXP, SEXP exposure_ordersSEXP, SEXP exposure_primesSEXP, SEXP cr_indsSEXP, SEXP par_indsSEXP, SEXP order_indsSEXP, SEXP par_lengthsSEXP, SEXP cr_lengthsSEXP, SEXP versionSEXP, SEXP individualsSEXP, SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -150,14 +150,14 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"antibodyKinetics_toUnitScale", (DL_FUNC) &antibodyKinetics_toUnitScale, 3},
-    {"antibodyKinetics_fromUnitScale", (DL_FUNC) &antibodyKinetics_fromUnitScale, 3},
-    {"antibodyKinetics_model_trajectory_cpp", (DL_FUNC) &antibodyKinetics_model_trajectory_cpp, 3},
-    {"antibodyKinetics_model_func_group_cpp", (DL_FUNC) &antibodyKinetics_model_func_group_cpp, 20},
-    {"antibodyKinetics_obs_error", (DL_FUNC) &antibodyKinetics_obs_error, 5},
-    {"antibodyKinetics_norm_error", (DL_FUNC) &antibodyKinetics_norm_error, 4},
-    {"antibodyKinetics_obs_likelihood", (DL_FUNC) &antibodyKinetics_obs_likelihood, 3},
-    {"antibodyKinetics_posterior_func_group_cpp", (DL_FUNC) &antibodyKinetics_posterior_func_group_cpp, 22},
+    {"_antibodyKinetics_toUnitScale", (DL_FUNC) &_antibodyKinetics_toUnitScale, 3},
+    {"_antibodyKinetics_fromUnitScale", (DL_FUNC) &_antibodyKinetics_fromUnitScale, 3},
+    {"_antibodyKinetics_model_trajectory_cpp", (DL_FUNC) &_antibodyKinetics_model_trajectory_cpp, 3},
+    {"_antibodyKinetics_model_func_group_cpp", (DL_FUNC) &_antibodyKinetics_model_func_group_cpp, 20},
+    {"_antibodyKinetics_obs_error", (DL_FUNC) &_antibodyKinetics_obs_error, 5},
+    {"_antibodyKinetics_norm_error", (DL_FUNC) &_antibodyKinetics_norm_error, 4},
+    {"_antibodyKinetics_obs_likelihood", (DL_FUNC) &_antibodyKinetics_obs_likelihood, 3},
+    {"_antibodyKinetics_posterior_func_group_cpp", (DL_FUNC) &_antibodyKinetics_posterior_func_group_cpp, 22},
     {NULL, NULL, 0}
 };
 

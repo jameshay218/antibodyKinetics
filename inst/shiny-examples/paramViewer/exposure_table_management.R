@@ -33,6 +33,19 @@ observeEvent(inputs$add_exposure,{
         order <- new_pars[["order"]]
         newTab <- new_pars[["newTab"]]
         new_id <- new_pars[["new_id"]]
+
+        #print(paste0("New id: ",new_id))
+        #print(paste0("Next t:" , next_t))
+        #print(paste0("New pars:", new_pars))
+        #print(paste0("Order: ",order))
+        #print(paste0("new tab: ",newTab))
+        #print(paste0("Exposure ti: ", inputs$exposure_ti))
+        #print(paste0("Exposure type: ", inputs$exposure_type))
+        #print(paste0("Exposure strain: ", inputs$exposure_strain))
+        #print(paste0("Exposure affects: ", inputs$exposure_affects))
+        #print(paste0("Exposure group: ", inputs$exposure_group))
+        #print(paste0("Exposure inputs$tmax: ", inputs$tmax))
+
         
         exposureRow <- isolate(data.frame(id=new_id,values=inputs$exposure_ti,type=inputs$exposure_type,
                                           exposure=inputs$exposure_strain,
@@ -146,7 +159,7 @@ observeEvent(inputs$remove_exposure,{
     removed_exposure <- parameters$exposureTab[parameters$exposureTab$id == inputs$exposure_id,]
     parameters$exposureTab <- remove_order_nextt(inputs,parameters)
     newParTab <- parameters$parTab
-    if(is.null(parameters$exposureTab) | nrow(parameters$exposureTab) == 0){
+    if(is.null(parameters$exposureTab) || nrow(parameters$exposureTab) == 0){
         newParTab <- NULL
     } else if(inputs$typing_flags == 0 & inputs$cr_flags == 0){
         ## If no typing and no cross-reactivity, just remove this ID

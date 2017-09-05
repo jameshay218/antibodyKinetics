@@ -107,13 +107,13 @@ shinyUI(
                                             selected=0)),
                             h4(strong("Priming and CR parameters")),
                             fluidRow(
-                                column(4, numericInput("beta","(log) Beta",-20,min=-20,max=2)),
-                                column(4, numericInput("c","(log) c",4,min=-20,max=2)),
-                                column(4, numericInput("y0_mod","y0 mod",-20,min=0,max=1))
+                                column(4, numericInput("beta","Beta",0,min=0,max=100)),
+                                column(4, numericInput("c","c",4,min=0,max=20)),
+                                column(4, numericInput("y0_mod","y0 mod",-20,min=-20,max=2))
                             ),
                             fluidRow(
                                 column(8,uiOutput("choose_exposure_type_cr")),
-                                column(4,numericInput("sigma_value","Sigma value",-3,min=-20,max=2))
+                                column(4,numericInput("sigma_value","Sigma value",1,min=0,max=2))
                             ),
                             fluidRow(
                                 fileInput("antigenic_tab_input",strong("Antigenic distanceinput")),

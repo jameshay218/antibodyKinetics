@@ -64,3 +64,35 @@ add_noise <- function(pars, y, normal=FALSE){
     }
     return(i-1)
 }
+
+
+#' Modify parameter table
+#'
+#' Modifies the parTab data frame depending on the model settings
+#' @param parTab the data frame of parTab as read in by a typical parTab file
+#' @param typing boolean to indicate if "typing" is used in the model
+#' @param cr boolean to indicate if cross reactivity is included
+#' @param priming boolean for priming
+#' @param monophasic_waning boolean for monophasic waning. FALSE if biphasic waning
+#' @param y0_mod boolean if titre dependent boosting is used
+#' @param antigenic_seniority boolean if antigenic seniority is included
+#' @param form string argument for which model form is used
+#' @return the correct parTab data frame
+#' @export
+parTab_modification <- function(parTab, typing=TRUE, cr=TRUE, priming=TRUE,
+                                monophasic_waning=FALSE, y0_mod=FALSE,antigenic_seniority=FALSE
+                                form="competitive"){
+    if(biphasic_waning){
+        parTab[parTab$names %in% c("ts","dp"),"fixed"] <- 1
+        parTab[parTab$names %in% c("ts","dp"),"values"] <- 0
+    }
+    if(y0_mod){
+        parTab[parTab$names =="y0_mod","fixed"] <- 0
+    }
+    if(antigenic_seniority){
+        parTab[parTab$names == "mod","fixed"] <- 0      
+    }
+
+
+    return(parTab)
+}

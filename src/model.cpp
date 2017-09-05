@@ -38,13 +38,14 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   double sigma, beta, y0_mod;
   sigma = pars[11];
   beta = pars[9];
-  if(logSigma){
+  y0_mod = pars[12];
+  //if(logSigma){
     //beta = exp(pars[9]);
     //sigma  = exp(pars[11]);
-    y0_mod = exp(pars[12]);
-  } else {
-    y0_mod = pars[12];
-  }
+  //  y0_mod = exp(pars[12]);
+  //} else {
+  // y0_mod = pars[12];
+  //}
 
   // We have y0 twice. In the non-additive version (one antibody producing process),
   // eff_y0 is zero. Otherwise, it's the titre at the time of exposure.
@@ -57,7 +58,7 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
 
   //double cr = exp(-sigma*x);
   //double prime_cr = c*exp(-beta*x)*primed;
-  double mod_boost = exp(-y0_mod*y0);
+  //double mod_boost = exp(-y0_mod*y0);
   // mu = mu*cr*mod*mod_boost + prime_cr;
 
   double cr = mu - sigma*x;
@@ -66,8 +67,11 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   double prime_cr = c - beta*x;
   if(cr < 0) cr = 0;
   if(prime_cr < 0) prime_cr = 0;
-  mu = mod*mod_boost*cr + prime_cr*primed;
-
+  mu = mod*cr + prime_cr*primed;
+  if(y0_mod >= 0){
+    mu = (-mu/y0_mod)*y0 + mu;
+    if(mu < 0) mu = 0;
+  }
 
 
   NumericVector y(times.size());

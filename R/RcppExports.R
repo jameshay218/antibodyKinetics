@@ -9,7 +9,7 @@
 #' @return the value converted to a unit scale
 #' @export
 toUnitScale <- function(x, min, max) {
-    .Call('antibodyKinetics_toUnitScale', PACKAGE = 'antibodyKinetics', x, min, max)
+    .Call('_antibodyKinetics_toUnitScale', PACKAGE = 'antibodyKinetics', x, min, max)
 }
 
 #' Converts to linear scale
@@ -20,7 +20,7 @@ toUnitScale <- function(x, min, max) {
 #' @return the value converted to a linear scale
 #' @export
 fromUnitScale <- function(x, min, max) {
-    .Call('antibodyKinetics_fromUnitScale', PACKAGE = 'antibodyKinetics', x, min, max)
+    .Call('_antibodyKinetics_fromUnitScale', PACKAGE = 'antibodyKinetics', x, min, max)
 }
 
 #' Model trajectory calc cpp
@@ -43,7 +43,7 @@ fromUnitScale <- function(x, min, max) {
 #' y <- model_trajectory_cpp(pars,times)
 #' @export
 model_trajectory_cpp <- function(pars, times, logSigma) {
-    .Call('antibodyKinetics_model_trajectory_cpp', PACKAGE = 'antibodyKinetics', pars, times, logSigma)
+    .Call('_antibodyKinetics_model_trajectory_cpp', PACKAGE = 'antibodyKinetics', pars, times, logSigma)
 }
 
 #' Model calculation cpp implementation
@@ -78,7 +78,7 @@ model_trajectory_cpp <- function(pars, times, logSigma) {
 #' @export
 #' @useDynLib antibodyKinetics
 model_func_group_cpp <- function(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version) {
-    .Call('antibodyKinetics_model_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version)
+    .Call('_antibodyKinetics_model_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version)
 }
 
 #' Observation error matrix solver
@@ -93,7 +93,7 @@ model_func_group_cpp <- function(pars, times, groups, strains, exposure_indices,
 #' @export
 #' @useDynLib antibodyKinetics
 obs_error <- function(actual, obs, S, EA, MAX_TITRE) {
-    .Call('antibodyKinetics_obs_error', PACKAGE = 'antibodyKinetics', actual, obs, S, EA, MAX_TITRE)
+    .Call('_antibodyKinetics_obs_error', PACKAGE = 'antibodyKinetics', actual, obs, S, EA, MAX_TITRE)
 }
 
 #' Discretised normal error
@@ -105,7 +105,7 @@ obs_error <- function(actual, obs, S, EA, MAX_TITRE) {
 #' @param MAX_TITRE the maximum observable titre
 #' @export
 norm_error <- function(actual, obs, sd, MAX_TITRE) {
-    .Call('antibodyKinetics_norm_error', PACKAGE = 'antibodyKinetics', actual, obs, sd, MAX_TITRE)
+    .Call('_antibodyKinetics_norm_error', PACKAGE = 'antibodyKinetics', actual, obs, sd, MAX_TITRE)
 }
 
 #' Observation error function
@@ -118,7 +118,7 @@ norm_error <- function(actual, obs, sd, MAX_TITRE) {
 #' @export
 #' @useDynLib antibodyKinetics
 obs_likelihood <- function(y, data, params) {
-    .Call('antibodyKinetics_obs_likelihood', PACKAGE = 'antibodyKinetics', y, data, params)
+    .Call('_antibodyKinetics_obs_likelihood', PACKAGE = 'antibodyKinetics', y, data, params)
 }
 
 #' Posterior calculation cpp implementation
@@ -155,6 +155,6 @@ obs_likelihood <- function(y, data, params) {
 #' @export
 #' @useDynLib antibodyKinetics
 posterior_func_group_cpp <- function(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version, individuals, data) {
-    .Call('antibodyKinetics_posterior_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version, individuals, data)
+    .Call('_antibodyKinetics_posterior_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version, individuals, data)
 }
 
