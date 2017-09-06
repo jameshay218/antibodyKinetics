@@ -63,7 +63,7 @@ a single likelihood of observing the data given the model parameters
 \description{
 Solves the antibody kinetics model for given parameters, and then calculates a likelihood
 for the given data set. This is a complex function, so should only really be called through
-\code{\link{create_model_group_func_cpp}}. Look at this code to really understand what's
+\code{\link{create_model_group_func_cpp}}. Lookx at this code to really understand what's
 going on! The key confusing thing is that the length of the vectors has to match the number
 of rows from the overall parameter table
 }

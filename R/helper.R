@@ -79,20 +79,120 @@ add_noise <- function(pars, y, normal=FALSE){
 #' @param form string argument for which model form is used
 #' @return the correct parTab data frame
 #' @export
-parTab_modification <- function(parTab, typing=TRUE, cr=TRUE, priming=TRUE,
-                                monophasic_waning=FALSE, y0_mod=FALSE,antigenic_seniority=FALSE
-                                form="competitive"){
-    if(biphasic_waning){
+parTab_modification <- function(parTab, options,fixed_S=FALSE){
+    form=options$form
+    antigenic_seniority=options$antigenic_seniority
+    cr=options$cr
+    typed_cr=options$typed_cr
+    priming=options$priming
+    types=options$types
+    monophasic_waning=options$monophasic_waning
+    y0_mod=options$y0_mod
+    
+    ## Modify if monophasic waning
+    if(monophasic_waning){
         parTab[parTab$names %in% c("ts","dp"),"fixed"] <- 1
         parTab[parTab$names %in% c("ts","dp"),"values"] <- 0
+    } else {
+        parTab[parTab$names %in% c("ts","dp"),"fixed"] <- 1
     }
+
+    ## Modify if titre dependent boosting
     if(y0_mod){
         parTab[parTab$names =="y0_mod","fixed"] <- 0
+    } else {
+        parTab[parTab$names =="y0_mod","fixed"] <- 1
+        parTab[parTab$names =="y0_mod","values"] <- -20
     }
+
+    ## Modify if antigenic seniority
     if(antigenic_seniority){
         parTab[parTab$names == "mod","fixed"] <- 0      
+    } else {
+        parTab[parTab$names == "mod","fixed"] <- 1
+        parTab[parTab$names == "mod","values"] <- 1   
     }
 
+    ## Modify if estimating error variance
+    if(!fixed_S){
+        parTab[parTab$names == "S","fixed"] <- 0
+    } else {
+        parTab[parTab$names == "S","fixed"] <- 1
+    }
 
+    ## Modify if priming
+    if(priming){
+        parTab[parTab$names %in% c("beta","c"),"fixed"] <- 0
+    } else {
+        parTab[parTab$names %in% c("beta","c"),"fixed"] <- 1
+    }
     return(parTab)
+}
+
+#' @export
+convert_runName_to_options <- function(runName){
+    options <- substring(runName, seq(1,nchar(runName),1), seq(1,nchar(runName),1))
+    names(options) <- c("form","as","cr","priming","types","wane","y0")
+
+    form <- "isolated"
+    if(options["form"] == "C") form <- "competitive"
+
+    antigenic_seniority <- FALSE
+    if(options["as"] == "Y") antigenic_seniority <- TRUE
+    
+    cr <- FALSE
+    typed_cr <- FALSE
+    if(options["cr"] == "A"){
+        cr <- TRUE
+    } else if(options["cr"] == "T"){
+        cr <- TRUE
+        typed_cr <- TRUE
+    }
+
+    priming <- FALSE
+    if(options["priming"] == "Y") priming <- TRUE
+
+    types <- 6
+    if(options["types"] == 3) types <- 3
+    if(options["types"] == 0) types <- 0
+
+    monophasic_waning <- FALSE
+    if(options["wane"] == "M") monophasic_waning <- TRUE
+
+    y0_mod <- FALSE
+    if(options["y0"] == "Y") y0_mod <- TRUE
+
+    return(list(form=form,antigenic_seniority=antigenic_seniority,cr=cr,typed_cr=typed_cr,
+                priming=priming,types=types,monophasic_waning=monophasic_waning,
+                y0_mod=y0_mod))
+}
+
+#' @export
+convert_options_to_runName <- function(options){
+
+    form <- "C"
+    if(options$form == "isolated") form <- "I"
+
+    as <- "Y"
+    if(options$antigenic_seniority == FALSE) as <- "N"
+    
+    cr <- "N"
+    if(options$cr == TRUE){
+        cr <- "T"
+        if(options$typed_cr == FALSE) cr <- "A"
+    }
+
+    priming <- "Y"
+    if(options$priming == FALSE) priming <- "N"
+
+    types <- as.character(options$types)
+
+    wane <- "B"
+    if(options$monophasic_waning == TRUE) wane <- "M"
+
+    y0_mod <- "Y"
+    if(options$y0_mod == FALSE) y0_mod <- "N"
+
+    runName <- paste(c(form,as,cr,priming,types,wane,y0_mod),sep="",collapse="")
+    return(runName)
 }

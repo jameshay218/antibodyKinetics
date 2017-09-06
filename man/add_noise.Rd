@@ -4,12 +4,14 @@
 \alias{add_noise}
 \title{Add noise to a titre observation}
 \usage{
-add_noise(pars, y)
+add_noise(pars, y, normal = FALSE)
 }
 \arguments{
 \item{pars}{vector of parameters with S, EA and MAX_TITRE}
 
 \item{y}{the titre to add observation error}
+
+\item{normal}{indicates if data is from the discretised normal or not}
 }
 \value{
 a single, modified titre value
