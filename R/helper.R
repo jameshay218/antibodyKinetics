@@ -94,7 +94,7 @@ parTab_modification <- function(parTab, options,fixed_S=FALSE){
         parTab[parTab$names %in% c("ts","dp"),"fixed"] <- 1
         parTab[parTab$names %in% c("ts","dp"),"values"] <- 0
     } else {
-        parTab[parTab$names %in% c("ts","dp"),"fixed"] <- 1
+        parTab[parTab$names %in% c("ts","dp"),"fixed"] <- 0
     }
 
     ## Modify if titre dependent boosting
