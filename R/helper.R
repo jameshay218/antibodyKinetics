@@ -100,14 +100,28 @@ parTab_modification <- function(parTab, options,fixed_S=FALSE){
     ## Modify if titre dependent boosting
     if(y0_mod){
         parTab[parTab$names =="y0_mod","fixed"] <- 0
+        parTab[parTab$names == "y0_mod","upper_bound"] <- 1
+        parTab[parTab$names == "y0_mod","lower_bound"] <- -1
+        
+        parTab[parTab$names =="boost_limit","fixed"] <- 0
+        parTab[parTab$names =="boost_limit","upper_bound"] <- 12
+        parTab[parTab$names =="boost_limit","lower_bound"] <- 0
     } else {
         parTab[parTab$names =="y0_mod","fixed"] <- 1
-        parTab[parTab$names =="y0_mod","values"] <- -20
+        parTab[parTab$names =="boost_limit","fixed"] <- 1
+        parTab[parTab$names =="y0_mod","values"] <- -1000
+        parTab[parTab$names =="boost_limit","values"] <- -20
+
+        parTab[parTab$names == "y0_mod","upper_bound"] <- 10000
+        parTab[parTab$names == "y0_mod","lower_bound"] <- -10000
+        parTab[parTab$names =="boost_limit","upper_bound"] <- 1000
+        parTab[parTab$names =="boost_limit","lower_bound"] <- -1000
     }
 
     ## Modify if antigenic seniority
     if(antigenic_seniority){
-        parTab[parTab$names == "mod","fixed"] <- 0      
+        parTab[parTab$names == "mod","fixed"] <- 0
+        parTab[parTab$names == "mod","fixed"][1] <- 1
     } else {
         parTab[parTab$names == "mod","fixed"] <- 1
         parTab[parTab$names == "mod","values"] <- 1   
@@ -126,6 +140,7 @@ parTab_modification <- function(parTab, options,fixed_S=FALSE){
     } else {
         parTab[parTab$names %in% c("beta","c"),"fixed"] <- 1
     }
+    parTab[parTab$names == "m","upper_bound"] <- 12
     return(parTab)
 }
 

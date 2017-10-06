@@ -30,18 +30,23 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   double ts = pars[7];
   double m = pars[8];
   double c = pars[10];
-  double primed = pars[13];
-  double mod = pars[14];
-  double x = pars[15];
-  double t_i = pars[16];
- 
-  double sigma, beta, y0_mod;
+  double primed = pars[14];
+  double mod = pars[15];
+  double x = pars[16];
+  double t_i = pars[17];
+  
+  double sigma, beta, y0_mod, boost_limit;
   sigma = pars[11];
   beta = pars[9];
+  //y0_mod = exp(pars[12]);
   y0_mod = pars[12];
+  boost_limit = pars[13];
+  Rcpp::Rcout << "par size: " << pars.size() << std::endl;
+  //Rcpp::Rcout << "boost limit: " << boost_limit << std::endl;
+
   //if(logSigma){
-    //beta = exp(pars[9]);
-    //sigma  = exp(pars[11]);
+  //beta = exp(pars[9]);
+  //sigma  = exp(pars[11]);
   //  y0_mod = exp(pars[12]);
   //} else {
   // y0_mod = pars[12];
@@ -49,9 +54,9 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
 
   // We have y0 twice. In the non-additive version (one antibody producing process),
   // eff_y0 is zero. Otherwise, it's the titre at the time of exposure.
-  double y0 = pars[17];
+  double y0 = pars[18];
   if(y0 < 0) y0 = 0;
-  double eff_y0 = pars[18];
+  double eff_y0 = pars[19];
 
   double t = 0;
   double tmp = 0;
@@ -67,12 +72,21 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   double prime_cr = c - beta*x;
   if(cr < 0) cr = 0;
   if(prime_cr < 0) prime_cr = 0;
-  mu = mod*cr + prime_cr*primed;
-  if(y0_mod >= 0){
-    mu = (-mu/y0_mod)*y0 + mu;
-    if(mu < 0) mu = 0;
+  mu = mod*cr + prime_cr*primed;  
+  //if(y0_mod >= 0){
+  //if(y0_mod > 0) y0_mod = 0;
+  if(y0_mod >= -999){
+    Rcpp::Rcout << "wtf:" << y0_mod << std::endl;
+    if(y0 >= boost_limit){
+      //mu = (-mu/(mu + y0_mod))*boost_limit + mu;
+      mu = y0_mod*boost_limit + mu;
+    } else { 
+      //mu = (-mu/(mu+y0_mod))*y0 + mu;
+      mu = y0_mod*y0 + mu;
+    }
   }
-
+  if(mu < 0) mu = 0;
+  //mu += prime_cr*primed;
 
   NumericVector y(times.size());
   
@@ -217,6 +231,8 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	} else {
 	  fullPars.push_back(y0);
 	}
+	Rcpp::Rcout << fullPars << std::endl;
+
 	/* Which times we solve over depends on the version. If the isolated boosting version (0), 
 	   solve over all times. If it's the competitive boosting version (1), we need to subset the
 	   times vector to those times between the current and next infection. */
