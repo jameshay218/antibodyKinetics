@@ -41,9 +41,7 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   //y0_mod = exp(pars[12]);
   y0_mod = pars[12];
   boost_limit = pars[13];
-  Rcpp::Rcout << "par size: " << pars.size() << std::endl;
-  //Rcpp::Rcout << "boost limit: " << boost_limit << std::endl;
-
+ 
   //if(logSigma){
   //beta = exp(pars[9]);
   //sigma  = exp(pars[11]);
@@ -76,7 +74,6 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   //if(y0_mod >= 0){
   //if(y0_mod > 0) y0_mod = 0;
   if(y0_mod >= -999){
-    Rcpp::Rcout << "wtf:" << y0_mod << std::endl;
     if(y0 >= boost_limit){
       //mu = (-mu/(mu + y0_mod))*boost_limit + mu;
       mu = y0_mod*boost_limit + mu;
@@ -87,7 +84,6 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   }
   if(mu < 0) mu = 0;
   //mu += prime_cr*primed;
-
   NumericVector y(times.size());
   
   for(int i = 0; i < times.size(); ++i){
@@ -177,7 +173,7 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
   // For each group
   for(int i = 0; i < groups.size(); ++i){
     group = groups[i];
-
+    
     // Get exposures for this group
     A = exposure_i_lengths[i];
     B = exposure_i_lengths[i+1];
@@ -189,6 +185,7 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 
     // For each strain in this group
     for(int j = 0; j < strains.size(); ++j){
+     
       A = tmp_strain_lengths[j];
       B = tmp_strain_lengths[j+1] - 1;
       tmp_exposures = tmp_exposures_group[tmp_strains[Range(A,B)]];
@@ -210,12 +207,9 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	next_t = exposure_next[index];
 	exposure_strain = exposure_strains[index]-1;
 	measured_strain = exposure_measured[index]-1;
-
 	order = exposure_orders[index];
-
 	mod = pars[order_inds[order-1]];
 	isPrimed = exposure_primes[index];
-
 	cr = pars[cr_inds[cr_lengths[measured_strain] + exposure_strain]];
 
 	fullPars.push_back(isPrimed);
@@ -231,7 +225,6 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	} else {
 	  fullPars.push_back(y0);
 	}
-	Rcpp::Rcout << fullPars << std::endl;
 
 	/* Which times we solve over depends on the version. If the isolated boosting version (0), 
 	   solve over all times. If it's the competitive boosting version (1), we need to subset the

@@ -37,11 +37,11 @@ double norm_error(double actual, int obs, double sd, int MAX_TITRE){
   double lik = 0;
 
   if(obs > MAX_TITRE || obs < 0){
-  
     return 0;
   }
+  
   lik = R::pnorm(obs+1, actual, sd, 1, 0) - R::pnorm(obs, actual, sd, 1, 0);
-
+  
   lik = lik/(R::pnorm(MAX_TITRE,actual,sd,1,0) - R::pnorm(0, actual, sd, 1, 0));
   return lik;  
 }
