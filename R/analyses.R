@@ -111,7 +111,10 @@ calculate_WAIC <- function(chain, parTab, dat, f, N){
                 for(q in 1:3){
                     ## Get likelihood for this point
                     wow <- norm_error(y[j,x],dat[(3*(j-1)+1)+(q-1),x],pars["S"],pars["MAX_TITRE"])
-                    ## expectation posterior
+                    print(y[j,x])
+                    print(dat[(3*(j-1)+1)+(q-1),x])
+                    print(log(wow))
+                                     ## expectation posterior
                     expectation_likelihood <- expectation_likelihood + log(wow)
 
                     ## Store this likelihood
