@@ -12,10 +12,15 @@ BugReports: https://github.com/jameshay218/antibodyKinetics/issues
 RoxygenNote: 5.0.1
 Suggests:
     testthat,
-    shiny
+    shiny,
+    shinyBS,
+    rhandsontable,
+    knitr,
+    rmarkdown
 LinkingTo: Rcpp
 Imports:
     ggplot2,
     plyr,
     reshape2,
     Rcpp
+VignetteBuilder: knitr

@@ -26,22 +26,44 @@ output$main_plot <- renderPlot({
                                  lower_bound=c(-1000,0,0,0),upper_bound=c(0,1,1,100),stringsAsFactors=FALSE)
         print(get_available_exposure_types_cr())
 
+        ## If flag is checked for titre dependent boosting, add these entries. Otherwise, use
+        ## values that remove this mechanism
+        if(inputs$titre_dependent_boosting){
+            boost_limit <- inputs$boost_limit
+            y0_mod <- inputs$y0_mod
+            boost_limit_lower <- 0
+            boost_limit_upper <- 12
+
+            y0_mod_lower <- -1
+            y0_mod_upper <- 1
+        } else {
+            boost_limit <- -1
+            y0_mod <- -1000
+
+            boost_limit_lower <- -1
+            boost_limit_upper <- 12
+            
+            y0_mod_lower <- -1000
+            y0_mod_upper <- 1
+            
+        }
+        
         if(inputs$cr_flags != 0){
             tmpCrTab <- parameters$crTab[parameters$crTab$names %in% get_available_exposure_types_cr(),]
             cr_values <- tmpCrTab$values
             cr_names <- tmpCrTab$names
             print(tmpCrTab)
-            bot_parTab <- data.frame(names=c("beta","c",rep("sigma",length(cr_names)),"y0_mod"),id="all",
-                                     values=c(inputs$beta,inputs$c,cr_values,inputs$y0_mod),
-                                     type=c("all","all",cr_names,"all"),
+            bot_parTab <- data.frame(names=c("beta","c",rep("sigma",length(cr_names)),"y0_mod","boost_limit"),id="all",
+                                     values=c(inputs$beta,inputs$c,cr_values,y0_mod,boost_limit),
+                                     type=c("all","all",cr_names,"all","all"),
                                      exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
-                                     lower_bound=c(0,0,rep(0,length(cr_names)),-20),upper_bound=c(100,20,rep(100,length(cr_names)),2),stringsAsFactors=FALSE)
+                                     lower_bound=c(0,0,rep(0,length(cr_names)),y0_mod_lower,boost_limit_lower),upper_bound=c(100,20,rep(100,length(cr_names)),y0_mod_upper,boost_limit_upper),stringsAsFactors=FALSE)
         } else {
-            bot_parTab <- data.frame(names=c("beta","c","sigma","y0_mod"),id="all",
-                                     values=c(inputs$beta,inputs$c,0,inputs$y0_mod),
-                                     type=c("all","all","all","all"),
+            bot_parTab <- data.frame(names=c("beta","c","sigma","y0_mod","boost_limit"),id="all",
+                                     values=c(inputs$beta,inputs$c,0,y0_mod,boost_limit),
+                                     type=c("all","all","all","all","all"),
                                      exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
-                                     lower_bound=c(0,0,0,-20),upper_bound=c(100,20,100,2),stringsAsFactors=FALSE)
+                                     lower_bound=c(0,0,0,y0_mod_lower,boost_limit_lower),upper_bound=c(100,20,100,y0_mod_upper,boost_limit_upper),stringsAsFactors=FALSE)
         }
 
         mod_parTab <- data.frame(names="mod",id=NA,values=c(inputs$mod1,inputs$mod2,inputs$mod3,inputs$mod4),
@@ -61,7 +83,7 @@ output$main_plot <- renderPlot({
         typing <- inputs$typing_flags != 0
         cross_reactivity <- inputs$cr_flags != 0
         print(inputs$form)
-        
+
         f <- create_model_group_func_cpp(parTab,parameters$exposureTab,version="model",form=as.character(inputs$form),typing=typing,cross_reactivity=cross_reactivity)
 
         times <- seq(0,100,by=0.1)

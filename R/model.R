@@ -23,11 +23,14 @@ calculate_x <- function(y, m){
 #' @family model functions
 #' @useDynLib antibodyKinetics
 #' @examples
-#' pars <- c("mu"=8,"dp"=0.5,"tp"=12,"ts"=10,"m"=0.003,"y0"=0,"t_i"=10,
-#'           "sigma"=0.01, "beta"=0.02,"c"=4,"x"=0,"primed"=0,"mod"=1)
+#' pars <- c("lower_bound"=-1000,"S"=1,"EA"=0,"MAX_TITRE"=13,
+#'           "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.02, "c"=4,
+#'           "sigma"=0.01,"y0_mod"=-10000,"boost_limit"=0,
+#'           "primed"=0,"mod"=1,
+#'           "x"=0,"t_i"=10,"y0"=0,"eff_y0"=0)
 #' times <- seq(0,100,by=10)
-#' y <- model_trajectory(pars,times,FALSE)
-model_trajectory <- function(pars, times, logSigma=TRUE){
+#' y <- model_trajectory(pars,times)
+model_trajectory <- function(pars, times, logSigma=FALSE){
     ## Calculate modified mu from cross reactivity and modifiers
     mu <- pars["mu"]
     dp <- pars["dp"]
@@ -37,8 +40,12 @@ model_trajectory <- function(pars, times, logSigma=TRUE){
     y0 <- pars["y0"]
     eff_y0 <- pars["eff_y0"]
     t_i <- pars["t_i"]
+    x <- pars["x"]
+    c <- pars["c"]
+    primed <- pars["primed"]
+    mod <- pars["mod"]
     lower_bound <- pars["lower_bound"]
-
+    
     if(logSigma){
         sigma <- exp(pars["sigma"])
         beta <- exp(pars["beta"])
@@ -48,13 +55,26 @@ model_trajectory <- function(pars, times, logSigma=TRUE){
         beta <- pars["beta"]
         y0_mod <- pars["y0_mod"]
     }
-
+    boost_limit <- pars["boost_limit"]
+    
     ## mu = f(y0)
-    mu <- mu*exp(-max(y0,0)*y0_mod)
-    cr <- exp(-sigma*pars["x"])
-    prime_cr <- pars["c"]*exp(-beta*pars["x"])*pars["primed"]
-    print(pars["x"])
-    mu <- mu*cr*pars["mod"] + prime_cr
+    #mu <- mu*exp(-max(y0,0)*y0_mod)
+    #cr <- exp(-sigma*pars["x"])
+    cr <- mu - sigma*x
+    prime_cr <- c - beta*x
+    if(cr < 0) cr <- 0;
+    if(prime_cr < 0) prime_cr <- 0;
+    mu <- mod*cr + prime_cr*primed;  
+
+    if(y0_mod >= -999){
+        if(y0 >= boost_limit){
+            mu = y0_mod*boost_limit + mu;
+        } else { 
+            mu = y0_mod*y0 + mu;
+        }
+    }
+    if(mu < 0) mu = 0;
+    
     #print(paste0("CR: ",cr))
     y <- numeric(length(times))
     i <- 1
@@ -104,17 +124,19 @@ model_func_groups <- function(parTab, cr_table, order_tab, exposures, strains, t
     return(y)
 }
 
-#' Model solver for one group, competitive process
+#' Model solver for one group
 #'
-#' Solves the antibody kinetics model for a single group, which may have multiple measured and exposure strains. This particular implementation assumes that each subsequent exposure supercedes the previous one
-#' @param parTab the parameter table containing at least a values
-#' column and a names column which can be used to solve \code{\link{model_trajectory}}
+#' Solves the antibody kinetics model for a single group, which may have multiple measured and exposure strains.
+#' @param parTab the parameter table containing at least a column for values
+#'  and a column for names which can be used to solve \code{\link{model_trajectory}}
 #' @param cr_table the cross reactivity part of the parameter table, with values and names for the exposure strain, the measured strain, and the antigenic distance (x)
 #' @param order_tab the table for parameters modifying boosting based on infection order (antigenic seniority)
-#' @param exposures the table for exposure types and times
+#' @param all_exposures the table for exposure types and times
 #' @param strains a vector with the names of all of the strains involved in the model
 #' @param times a vector of times to solve the model over
 #' @param version 0 for isolated, 1 for competitive
+#' @param cross_reactivity if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains
+#' @param trying if TRUE, uses parameters corresponding to the exposure type rather than exposure index
 #' @return a table of antibody titres for the given times, with a column for times and colnames of the measured strain
 #' @export
 #' @useDynLib antibodyKinetics
@@ -124,15 +146,14 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
     index <- 1
     ## For each strain to be measured
     for(strain in strains){
-        print(strain)
         y <- 0
-        ## To avoid problems with having multiple exposures at the same time, we enumerate which
-        ## exposures relate to a particular strain
+        ## To avoid problems with having multiple exposures at the same time, we choose only
+        ## exposures that relate to each strain in turn
         exposures <- all_exposures[all_exposures$strain == strain,]
         ## For each exposure
         for(i in 1:nrow(exposures)){
             tmpTimes <- times
-            y0 <- y[length(y)]
+            y0 <- y[length(y)] ## Get y0 (starting titre) based on titre at end of last exposure dynamics
 
             ## Get exposure time, type and exposure strain
             ## Also end time of trajectory to calculate
@@ -176,13 +197,17 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
             ## Get the correct modifier for this exposure order
             mod <- order_tab[order_tab$order == order,"values"]
 
+            ## If competitive versoin of the model, need to store starting titre
+            ## from previous exposure
             if(version == 1){
-              tmpTimesI <- which(times >= t_i & times < next_t)
-              eff_y0 <- y0
+                ## Solve up to next exposure time. If at the last exposure, solve to the end
+                tmpTimesI <- which(times >= t_i & times < next_t)
+                eff_y0 <- y0
               if(i == nrow(exposures)){
                 tmpTimesI <- which(times >= t_i & times <= next_t)
               }
             } else {
+                ## For isolated form, solve for whole time
               tmpTimesI <- seq_along(times)
               eff_y0 <- 0
             }
@@ -191,7 +216,6 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
               
             ## Solve model
             pars <- c("t_i"=t_i,pars,"mod"=mod,"x"=x,y0=y0,"primed"=isPrimed,"eff_y0"=eff_y0)
-            print(pars)
             y <- model_trajectory(pars, tmpTimes)
             trajectories[tmpTimesI,index] <-  trajectories[tmpTimesI,index] + y[1:(length(y)-1)]
         }

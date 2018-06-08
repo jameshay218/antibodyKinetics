@@ -8,18 +8,15 @@ tmax=100
 
 shinyUI(    
     navbarPage("Antibody Kinetics Model",
-               #' Parameter exploration panel
-               tabPanel("Exposures",
-                        ## ISOLATE EXPOSURE PARAMETERS
+               tabPanel("Model settings",
                         sidebarPanel(
-                             
                             fluidRow(
                                 selectInput("typing_flags",
                                             "Type options",
                                             choices=c(
                                                 "None"=0,
-                                                "Strong typing"=1,
-                                                "Weak typing"=2),
+                                                "Strong typing (6 types)"=1,
+                                                "Weak typing (3 types)"=2),
                                             selected=0)),
                             fluidRow(
                                 selectInput("form","Model form",
@@ -27,6 +24,50 @@ shinyUI(
                                               "Isolated"="isolated"),
                                             selected=1)),
                             fluidRow(numericInput("n_strains","No. strains",5,min=1,max=10)),
+                            fluidRow(
+                                selectInput("cr_flags",
+                                            "CR options",
+                                            choices=c(
+                                                "None"=0,
+                                                "Cross reactivity"=1,
+                                                "Typed CR"=2),
+                                            selected=1)),
+                            checkboxInput("titre_dependent_boosting","Titre dependent boosting",FALSE),
+                            h4(strong("Priming and CR parameters")),
+                            
+                            fluidRow(
+                                column(3, numericInput("beta","Beta",0,min=0,max=100)),
+                                column(3, numericInput("c","c",4,min=0,max=20)),
+                                column(3, numericInput("y0_mod","gamma",0,min=-1,max=1)),
+                                column(3, numericInput("boost_limit","y_switch",0,min=0,max=12))
+                            ),
+                            fluidRow(
+                                column(8,uiOutput("choose_exposure_type_cr")),
+                                column(4,numericInput("sigma_value","Sigma value",1,min=0,max=2))
+                            ),
+                            fluidRow(
+                                fileInput("antigenic_tab_input",strong("Antigenic distance input")),
+                                actionButton("upload_antigenic_distances","Upload")
+                            ),
+                            fluidRow(
+                                downloadButton("export_cr",strong("Download"))
+                            ),
+                            hr()
+                        ),
+                        mainPanel(
+                            h4(strong("Exposure distances")),
+                            fluidRow(
+                                rHandsontableOutput("antigenic_table")
+                            )
+                        )
+                        ),
+               
+               #' Parameter exploration panel
+               tabPanel("Exposures",
+                        ## ISOLATE EXPOSURE PARAMETERS
+                        sidebarPanel(
+                            
+                            
                             h4(strong("Exposures")),
                             fluidRow(uiOutput("choose_exposure_id")),
                             fluidRow(uiOutput("choose_exposure_type")),
@@ -94,44 +135,8 @@ shinyUI(
                                 plotOutput("main_plot")
                             )                           
                         )
-                        ),
-               tabPanel("Cross reactivity",
-                        sidebarPanel(
-                            fluidRow(
-                                selectInput("cr_flags",
-                                            "CR options",
-                                            choices=c(
-                                                "None"=0,
-                                                "Cross reactivity"=1,
-                                                "Typed CR"=2),
-                                            selected=0)),
-                            h4(strong("Priming and CR parameters")),
-                            fluidRow(
-                                column(4, numericInput("beta","Beta",0,min=0,max=100)),
-                                column(4, numericInput("c","c",4,min=0,max=20)),
-                                column(4, numericInput("y0_mod","y0 mod",-20,min=-20,max=2))
-                            ),
-                            fluidRow(
-                                column(8,uiOutput("choose_exposure_type_cr")),
-                                column(4,numericInput("sigma_value","Sigma value",1,min=0,max=2))
-                            ),
-                            fluidRow(
-                                fileInput("antigenic_tab_input",strong("Antigenic distanceinput")),
-                                actionButton("upload_antigenic_distances","Upload")
-                            ),
-                            fluidRow(
-                                downloadButton("export_cr",strong("Download"))
-                            ),
-                            hr()
-                        ),
-                        mainPanel(
-                            h4(strong("Exposure distances")),
-                            fluidRow(
-                                rHandsontableOutput("antigenic_table")
-                            )
                         )
-                        )
-               
+              
                )
 )
 

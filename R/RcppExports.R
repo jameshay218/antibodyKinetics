@@ -35,15 +35,16 @@ fromUnitScale <- function(x, min, max) {
 #' @family model functions
 #' @useDynLib antibodyKinetics
 #' @examples
-#' pars <- c("mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,
-#'           "sigma"=0.01, "beta"=0.02,"c"=4,"y0_mod"=0,
-#'            "primed"=0,"mod"=1,
+#' pars <- c("lower_bound"=-1000,"S"=1,"EA"=0,"MAX_TITRE"=13,
+#'           "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.02, "c"=4,
+#'           "sigma"=0.01,"y0_mod"=-10000,"boost_limit"=0,
+#'           "primed"=0,"mod"=1,
 #'           "x"=0,"t_i"=10,"y0"=0,"eff_y0"=0)
-#' times <- seq(0,100,by=10)
+#' times <- seq(0,100,by=1)
 #' y <- model_trajectory_cpp(pars,times)
 #' @export
-model_trajectory_cpp <- function(pars, times, logSigma) {
-    .Call('_antibodyKinetics_model_trajectory_cpp', PACKAGE = 'antibodyKinetics', pars, times, logSigma)
+model_trajectory_cpp <- function(pars, times) {
+    .Call('_antibodyKinetics_model_trajectory_cpp', PACKAGE = 'antibodyKinetics', pars, times)
 }
 
 #' Model calculation cpp implementation

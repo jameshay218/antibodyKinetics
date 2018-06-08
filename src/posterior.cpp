@@ -34,9 +34,52 @@ double obs_error(int actual, int obs, double S, double EA, int MAX_TITRE){
 //' @export
 //[[Rcpp::export]]
 double norm_error(double actual, int obs, double sd, int MAX_TITRE){
+   double lik = 0;
+  
+     if(obs >= MAX_TITRE){
+     lik = R::pnorm(MAX_TITRE, actual, sd, 0, 0);
+     } 
+     if(obs <= 0){
+     lik = R::pnorm(1, actual, sd, 1, 0);    
+     }
+     else {
+     lik = R::pnorm(obs+1, actual, sd, 1, 0) - R::pnorm(obs, actual, sd, 1, 0);
+     }
+     /*
   double lik = 0;
   
-  if(obs > MAX_TITRE){
+  if(obs > MAX_TITRE || obs < 0){
+    return 0;
+  }
+  
+  lik = R::pnorm(obs+1, actual, sd, 1, 0) - R::pnorm(obs, actual, sd, 1, 0);
+     */
+  
+  //lik = lik/(R::pnorm(MAX_TITRE,actual,sd,1,0) - R::pnorm(0, actual, sd, 1, 0));
+  return lik;  
+}
+
+double norm_error_james(double actual, int obs, double sd, int MAX_TITRE){
+  double lik = 0;
+  
+  if(obs > MAX_TITRE || obs < 0){
+    return 0;
+  }
+
+  if(actual > MAX_TITRE) actual = MAX_TITRE;
+  if(actual < 0) actual = 0;
+  
+  lik = R::pnorm(obs+1, actual, sd, 1, 0) - R::pnorm(obs, actual, sd, 1, 0);
+  
+  // Normalise by observable range
+  lik = lik/(R::pnorm(MAX_TITRE,actual,sd,1,0) - R::pnorm(0, actual, sd, 1, 0));
+  return lik;  
+}
+
+double norm_error_adam(double actual, int obs, double sd, int MAX_TITRE){
+  double lik = 0;
+  
+  if(obs >= MAX_TITRE){
     lik = R::pnorm(MAX_TITRE, actual, sd, 0, 0);
   } 
   if(obs <= 0){
@@ -45,8 +88,7 @@ double norm_error(double actual, int obs, double sd, int MAX_TITRE){
   else {
     lik = R::pnorm(obs+1, actual, sd, 1, 0) - R::pnorm(obs, actual, sd, 1, 0);
   }
-    
-  //lik = lik/(R::pnorm(MAX_TITRE,actual,sd,1,0) - R::pnorm(0, actual, sd, 1, 0));
+  
   return lik;  
 }
 
@@ -66,8 +108,8 @@ double obs_likelihood(NumericVector y, NumericVector data, NumericVector params)
   double tmp = 0;
   int MAX_TITRE = params(3);
   for(int i = 0; i < y.length();++i){
-    if(y(i) < 0) y(i) = 0;
-    if(y(i) >= MAX_TITRE) y(i) = MAX_TITRE;
+    //if(y(i) < 0) y(i) = 0;
+    //if(y(i) >= MAX_TITRE) y(i) = MAX_TITRE;
     //ln += R::dnorm(data(i),y(i),params(1),1);
     tmp = norm_error(y(i),data(i),params(1),MAX_TITRE);
     if(tmp == 0){

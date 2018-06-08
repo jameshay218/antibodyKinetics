@@ -13,42 +13,32 @@ using namespace Rcpp;
 //' @family model functions
 //' @useDynLib antibodyKinetics
 //' @examples
-//' pars <- c("mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,
-//'           "sigma"=0.01, "beta"=0.02,"c"=4,"y0_mod"=0,
-//'            "primed"=0,"mod"=1,
+//' pars <- c("lower_bound"=-1000,"S"=1,"EA"=0,"MAX_TITRE"=13,
+//'           "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.02, "c"=4,
+//'           "sigma"=0.01,"y0_mod"=-10000,"boost_limit"=0,
+//'           "primed"=0,"mod"=1,
 //'           "x"=0,"t_i"=10,"y0"=0,"eff_y0"=0)
-//' times <- seq(0,100,by=10)
+//' times <- seq(0,100,by=1)
 //' y <- model_trajectory_cpp(pars,times)
 //' @export
 //[[Rcpp::export]]
-NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool logSigma){
-  //Rcpp::Rcout << "Pre m: " << pars[8] << std::endl;
+NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times){
+  double sigma, beta, y0_mod, boost_limit;
   double lower_bound = pars[0];
   double mu = pars[4];
   double tp = pars[5];
   double dp = pars[6];
   double ts = pars[7];
   double m = pars[8];
+  beta = pars[9];
   double c = pars[10];
+  sigma = pars[11];
+  y0_mod = pars[12];
+  boost_limit = pars[13];
   double primed = pars[14];
   double mod = pars[15];
   double x = pars[16];
   double t_i = pars[17];
-  
-  double sigma, beta, y0_mod, boost_limit;
-  sigma = pars[11];
-  beta = pars[9];
-  //y0_mod = exp(pars[12]);
-  y0_mod = pars[12];
-  boost_limit = pars[13];
- 
-  //if(logSigma){
-  //beta = exp(pars[9]);
-  //sigma  = exp(pars[11]);
-  //  y0_mod = exp(pars[12]);
-  //} else {
-  // y0_mod = pars[12];
-  //}
 
   // We have y0 twice. In the non-additive version (one antibody producing process),
   // eff_y0 is zero. Otherwise, it's the titre at the time of exposure.
@@ -59,20 +49,13 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool
   double t = 0;
   double tmp = 0;
 
-  //double cr = exp(-sigma*x);
-  //double prime_cr = c*exp(-beta*x)*primed;
-  //double mod_boost = exp(-y0_mod*y0);
-  // mu = mu*cr*mod*mod_boost + prime_cr;
-
   double cr = mu - sigma*x;
-
-  //Rcpp::Rcout << "cr: " << cr << "; sigma: " << sigma << "; x: " << x << std::endl;
   double prime_cr = c - beta*x;
+  
   if(cr < 0) cr = 0;
   if(prime_cr < 0) prime_cr = 0;
   mu = mod*cr + prime_cr*primed;  
-  //if(y0_mod >= 0){
-  //if(y0_mod > 0) y0_mod = 0;
+
   if(y0_mod >= -999){
     if(y0 >= boost_limit){
       //mu = (-mu/(mu + y0_mod))*boost_limit + mu;
@@ -240,7 +223,7 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	}
 	tmpTimes.push_back(next_t);
 	// Solve the model
-	y = model_trajectory_cpp(fullPars, tmpTimes, TRUE);
+	y = model_trajectory_cpp(fullPars, tmpTimes);
 	/* Add model solutions to the correct row in the results matrix. If version 0, this will
 	   be all time points. If version 1, this will correspond to the times relating to the
 	   current exposure */ 

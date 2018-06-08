@@ -32,15 +32,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // model_trajectory_cpp
-NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times, bool logSigma);
-RcppExport SEXP _antibodyKinetics_model_trajectory_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP logSigmaSEXP) {
+NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times);
+RcppExport SEXP _antibodyKinetics_model_trajectory_cpp(SEXP parsSEXP, SEXP timesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type pars(parsSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type times(timesSEXP);
-    Rcpp::traits::input_parameter< bool >::type logSigma(logSigmaSEXP);
-    rcpp_result_gen = Rcpp::wrap(model_trajectory_cpp(pars, times, logSigma));
+    rcpp_result_gen = Rcpp::wrap(model_trajectory_cpp(pars, times));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -152,7 +151,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_antibodyKinetics_toUnitScale", (DL_FUNC) &_antibodyKinetics_toUnitScale, 3},
     {"_antibodyKinetics_fromUnitScale", (DL_FUNC) &_antibodyKinetics_fromUnitScale, 3},
-    {"_antibodyKinetics_model_trajectory_cpp", (DL_FUNC) &_antibodyKinetics_model_trajectory_cpp, 3},
+    {"_antibodyKinetics_model_trajectory_cpp", (DL_FUNC) &_antibodyKinetics_model_trajectory_cpp, 2},
     {"_antibodyKinetics_model_func_group_cpp", (DL_FUNC) &_antibodyKinetics_model_func_group_cpp, 20},
     {"_antibodyKinetics_obs_error", (DL_FUNC) &_antibodyKinetics_obs_error, 5},
     {"_antibodyKinetics_norm_error", (DL_FUNC) &_antibodyKinetics_norm_error, 4},

@@ -99,7 +99,7 @@ shinyServer(
                                              lower_bound=c(0,0,rep(0,length(cr_names)),-20),upper_bound=c(100,20,rep(100,length(cr_names)),2),stringsAsFactors=FALSE)
                 } else {
                     bot_parTab <- data.frame(names=c("beta","c","sigma","y0_mod"),id="all",
-                                             values=c(inputs$beta,inputs$c,-Inf,inputs$y0_mod),
+                                             values=c(inputs$beta,inputs$c,0,inputs$y0_mod),
                                              type=c("all","all","all","all"),
                                              exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
                                              lower_bound=c(0,0,0,-20),upper_bound=c(100,20,100,2),stringsAsFactors=FALSE)

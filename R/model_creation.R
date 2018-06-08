@@ -1,8 +1,10 @@
 #' Create model function pointer
 #'
-#' Creaters a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_additive}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
+#' Creaters a function pointer for \code{\link{model_func}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
 #' @param parTab the full parameter table - see example csv file
 #' @param form string to indicate if this uses the isolated or competitive version of the model. \code{\link{model_func_isolated}}, \code{\link{model_func_competitive}}
+#' @param cross_reactivity if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains
+#' @param trying if TRUE, uses parameters corresponding to the exposure type rather than exposure index
 #' @return a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_competitive}}
 #' @export
 #' @useDynLib antibodyKinetics
@@ -97,6 +99,8 @@ create_model_group_func <- function(parTab, exposures, form = "isolated",
 #' @param convert_groups if the groups are named, used to convert names to integers
 #' @param individuals vector indicating how many individuals are in each group ie. relating to rows in the data matrix
 #' @param form string of "isolated" or "competitive" indicating whether we're using the isolation boosting or competitive boosting version of the model
+#' @param cross_reactivity if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains
+#' @param trying if TRUE, uses parameters corresponding to the exposure type rather than exposure index
 #' @return a function pointer for \code{\link{model_func_group_cpp}} or \code{\link{posterior_func_group_cpp}}
 #' @export
 #' @useDynLib antibodyKinetics
@@ -266,9 +270,9 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
         times <- dat[1,]
         dat <- dat[2:nrow(dat),]
         f <- function(pars){
-    if(is.null(nrow(dat))){
-      dat <- matrix(dat,nrow=1)
-    }
+            if(is.null(nrow(dat))){
+                dat <- matrix(dat,nrow=1)
+            }
             ln <- posterior_func_group_cpp(pars, times, groups, strains,
                                            exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths,
                                            exposure_times, exposure_strains, exposure_next, exposure_measured,
