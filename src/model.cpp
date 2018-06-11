@@ -5,7 +5,7 @@ using namespace Rcpp;
 //'
 //' Calculates the ferret model trajectory for a single infection event.
 //' Uses a Cpp implementation for speed. Need to obey order of parameters as in the
-//' example
+//' example. Run \code{\link{parameter_descriptions}} for documentation of the model parameter vector
 //' @param pars the vector of model parameters
 //' @param times the vector of time in days to solve over
 //' @return a vector of antibody titres

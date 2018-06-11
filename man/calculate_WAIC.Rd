@@ -6,7 +6,21 @@
 \usage{
 calculate_WAIC(chain, parTab, dat, f, N)
 }
+\arguments{
+\item{chain}{the MCMC chain with each row corresponding to an iteration}
+
+\item{parTab}{the parameter table used for this chain}
+
+\item{dat}{the data frame of data used to solve the likelihood}
+
+\item{f}{pointer to the model function used in the MCMC procedure}
+
+\item{N}{number of samples to take from the MCMC chain}
+}
+\value{
+list with WAIC for this model calculated from the MCMC chain, and pwaic which is a constituent of WAIC
+}
 \description{
-WAIC using the pwaic2 in Gelman 2013
+Calculates WAIC using the second method described in Gelman 2013
 }
 

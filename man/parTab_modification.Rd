@@ -9,22 +9,22 @@ parTab_modification(parTab, options, fixed_S = FALSE)
 \arguments{
 \item{parTab}{the data frame of parTab as read in by a typical parTab file}
 
-\item{typing}{boolean to indicate if "typing" is used in the model}
+\item{options}{list with the following elements:
+\enumerate{
+    \item typing: boolean to indicate if "typing" is used in the model
+    \item cr: boolean to indicate if cross reactivity is included
+    \item priming: boolean for priming
+    \item monophasic_waning: boolean for monophasic waning. FALSE if biphasic waning
+    \item y0_mod: boolean if titre dependent boosting is used
+    \item antigenic_seniority: boolean if antigenic seniority is included
+    \item form: string argument for which model form is used
+}
+Set the contents of these elements as described above (mostly booleans) to set the parameter table to include or exclude each model feature}
 
-\item{cr}{boolean to indicate if cross reactivity is included}
-
-\item{priming}{boolean for priming}
-
-\item{monophasic_waning}{boolean for monophasic waning. FALSE if biphasic waning}
-
-\item{y0_mod}{boolean if titre dependent boosting is used}
-
-\item{antigenic_seniority}{boolean if antigenic seniority is included}
-
-\item{form}{string argument for which model form is used}
+\item{fixed_S}{boolean, if TRUE then the standard deviation of the observation error function is estimated}
 }
 \value{
-the correct parTab data frame
+the correct parTab data frame for the given model structure
 }
 \description{
 Modifies the parTab data frame depending on the model settings

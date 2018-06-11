@@ -16,26 +16,30 @@ create_model_group_func_cpp(parTab, exposureTab, dat = NULL,
 
 \item{exposureTab}{table of exposure times etcs - see example csv file}
 
-\item{dat}{if posterior function, need the matrix of data. First row is model times, and subsequent rows are trajectories (each row is trajectory of antibodies for one strain, grouped by exposure group)}
+\item{dat}{can be left as NULL if just solving the model and not the likelihood. If solving the posterior function, need the matrix of data. First row is model times, and subsequent rows are trajectories (each row is trajectory of antibodies for one strain, grouped by exposure group)}
 
 \item{PRIOR_FUNC}{optional pointer to prior calculating function that takes current parameter vector}
 
 \item{version}{string of either "model" (for pure model function) or "posterior" (for posterior calculation)}
 
-\item{convert_types}{optionally, a named vector converting strings of infection types to integers. The Cpp funciton needs these as integers, but the default arguments should be fine}
+\item{convert_types}{optionally, a named vector converting strings of infection types to integers. The Cpp function needs these as integers rather than characters/strings, but the default arguments here should be fine}
 
 \item{convert_strains}{as for convert_types, but relating to the infection strain names}
 
 \item{convert_groups}{if the groups are named, used to convert names to integers}
 
-\item{individuals}{vector indicating how many individuals are in each group ie. relating to rows in the data matrix}
+\item{individuals}{vector indicating how many individuals are in each group ie. relating to rows in the data matrix. This is used to index the data matrix eg. if the first argument of the individuals vector is 3, then the first 3 rows of data will be assumed to correspond to the same group/strain}
 
 \item{form}{string of "isolated" or "competitive" indicating whether we're using the isolation boosting or competitive boosting version of the model}
+
+\item{cross_reactivity}{if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains}
+
+\item{trying}{if TRUE, uses parameters corresponding to the exposure type rather than exposure index}
 }
 \value{
 a function pointer for \code{\link{model_func_group_cpp}} or \code{\link{posterior_func_group_cpp}}
 }
 \description{
-Creaters a function pointer for \code{\link{model_func_group_cpp}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. This function can also be used to create a pointer to the same model function, but solving a likelihood function. This currently uses the "isolated" form of the model. Support could be added to allow either the competitive or isolated form.
+Creaters a function pointer for \code{\link{model_func_group_cpp}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. This function can also be used to create a pointer to the same model function, but solving a likelihood function and returning a single likelihood given data and a set of model parameters.
 }
 

@@ -2,18 +2,20 @@
 % Please edit documentation in R/model.R
 \name{model_func}
 \alias{model_func}
-\title{Model solver for one group, competitive process}
+\title{Model solver for one group}
 \usage{
 model_func(parTab, cr_table, order_tab, all_exposures, strains, times,
   version = 0, cross_reactivity = FALSE, typing = FALSE)
 }
 \arguments{
-\item{parTab}{the parameter table containing at least a values
-column and a names column which can be used to solve \code{\link{model_trajectory}}}
+\item{parTab}{the parameter table containing at least a column for values
+and a column for names which can be used to solve \code{\link{model_trajectory}}}
 
 \item{cr_table}{the cross reactivity part of the parameter table, with values and names for the exposure strain, the measured strain, and the antigenic distance (x)}
 
 \item{order_tab}{the table for parameters modifying boosting based on infection order (antigenic seniority)}
+
+\item{all_exposures}{the table for exposure types and times}
 
 \item{strains}{a vector with the names of all of the strains involved in the model}
 
@@ -21,13 +23,15 @@ column and a names column which can be used to solve \code{\link{model_trajector
 
 \item{version}{0 for isolated, 1 for competitive}
 
-\item{exposures}{the table for exposure types and times}
+\item{cross_reactivity}{if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains}
+
+\item{trying}{if TRUE, uses parameters corresponding to the exposure type rather than exposure index}
 }
 \value{
 a table of antibody titres for the given times, with a column for times and colnames of the measured strain
 }
 \description{
-Solves the antibody kinetics model for a single group, which may have multiple measured and exposure strains. This particular implementation assumes that each subsequent exposure supercedes the previous one
+Solves the antibody kinetics model for a single group, which may have multiple measured and exposure strains.
 }
 \seealso{
 Other model.functions: \code{\link{model_func_groups}},

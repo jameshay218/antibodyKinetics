@@ -8,8 +8,8 @@ model_func_groups(parTab, cr_table, order_tab, exposures, strains, times,
   version = 0, cross_reactivity = FALSE, typing = FALSE)
 }
 \arguments{
-\item{parTab}{the parameter table containing at least a values
-column and a names column which can be used to solve \code{\link{model_trajectory}}}
+\item{parTab}{the parameter table containing at least a column for values
+column and names which can be used to solve \code{\link{model_trajectory}}}
 
 \item{cr_table}{the cross reactivity part of the parameter table, with values and names for the exposure strain, the measured strain, and the antigenic distance (x)}
 
@@ -21,7 +21,11 @@ column and a names column which can be used to solve \code{\link{model_trajector
 
 \item{times}{a vector of times to solve the model over}
 
-\item{MODEL_FUNC}{pointer to the R function that will be used to solve the model.}
+\item{version}{0 for isolated, 1 for competitive}
+
+\item{cross_reactivity}{if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains}
+
+\item{typing}{if TRUE, uses parameters corresponding to the exposure type rather than exposure index}
 }
 \value{
 a table of antibody titres for the given times, with a column for times, group and colnames of the measured strain

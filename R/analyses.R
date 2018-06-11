@@ -82,6 +82,13 @@ calculate_AIC <- function(chain, parTab){
 
 #' WAIC using the pwaic2 in Gelman 2013
 #'
+#' Calculates WAIC using the second method described in Gelman 2013
+#' @param chain the MCMC chain with each row corresponding to an iteration
+#' @param parTab the parameter table used for this chain
+#' @param dat the data frame of data used to solve the likelihood
+#' @param f pointer to the model function used in the MCMC procedure
+#' @param N number of samples to take from the MCMC chain
+#' @return list with WAIC for this model calculated from the MCMC chain, and pwaic which is a constituent of WAIC
 #' @export
 calculate_WAIC <- function(chain, parTab, dat, f, N){
     ## Do this for a subsample of the MCMC chain to save time

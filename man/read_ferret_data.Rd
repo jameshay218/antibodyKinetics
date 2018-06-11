@@ -10,7 +10,7 @@ read_ferret_data(data_file)
 \item{data_file}{the full file path of the data file}
 }
 \value{
-the melted antibody titre data
+the melted antibody titre data to be used in the model fitting
 }
 \description{
 Reads in the csv of ferret antibody titre data from a specified file

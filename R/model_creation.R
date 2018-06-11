@@ -1,11 +1,12 @@
 #' Create model function pointer
 #'
-#' Creaters a function pointer for \code{\link{model_func}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
+#' Creaters a function pointer for \code{\link{model_func}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. Users should use this function to create the interface function from a single parTab, rather than using \code{\link{model_func}} each time.
 #' @param parTab the full parameter table - see example csv file
-#' @param form string to indicate if this uses the isolated or competitive version of the model. \code{\link{model_func_isolated}}, \code{\link{model_func_competitive}}
+#' @param exposures the exposure table - see example csv file
+#' @param form string to indicate if this uses the "isolated" or "competitive" version of the model
 #' @param cross_reactivity if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains
 #' @param trying if TRUE, uses parameters corresponding to the exposure type rather than exposure index
-#' @return a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_competitive}}
+#' @return a function pointer for \code{\link{model_func}}
 #' @export
 #' @useDynLib antibodyKinetics
 create_model_func <- function(parTab, exposures,form="isolated",cross_reactivity=FALSE,typing=FALSE){
@@ -42,12 +43,13 @@ create_model_func <- function(parTab, exposures,form="isolated",cross_reactivity
 
 #' Create model function pointer groups
 #'
-#' Creaters a function pointer for \code{\link{model_func_groups}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
+#' Creaters a function pointer for \code{\link{model_func_groups}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. Users should use this function to create the interface function from a single parTab, rather than using \code{\link{model_func}} each time.
 #' @param parTab the full parameter table - see example csv file
+#' @param exposures the exposure table - see example csv file
 #' @param form a string to indicate the form of the model ("isolated" or "competitive")
 #' @param cross_reactivity if TRUE, then uses cross-reactive boosting rather than ID based boosting
 #' @param typing if TRUE, then uses the type specific parameters rather than universal parameters
-#' @return a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_competitive}}
+#' @return a function pointer for \code{\link{model_func_groups}}
 #' @export
 #' @useDynLib antibodyKinetics
 #' @seealso \code{\link{create_model_func}}
@@ -65,7 +67,6 @@ create_model_group_func <- function(parTab, exposures, form = "isolated",
   
   order_tab <- parTab[parTab$names == "mod",]
   order_indices <- which(parTab$names == "mod")
-  print(order_tab)
   
   parTab1 <- parTab[!(parTab$names %in% c("t_i","x","mod")),]
   parTab_indices <- which(!(parTab$names %in% c("t_i","x","mod")))
@@ -75,11 +76,11 @@ create_model_group_func <- function(parTab, exposures, form = "isolated",
   if(form=="competitive") ver <- 1
 
   f <- function(pars,times){
-      parTab$values <- pars
+      parTab1$values <- pars[parTab_indices]
       cr_table$values <- pars[cr_indices]
       order_tab$values <- pars[order_indices]
       
-      y <- model_func_groups(parTab, cr_table, order_tab, exposures,
+      y <- model_func_groups(parTab1, cr_table, order_tab, exposures,
                              strains, times, ver, cross_reactivity, typing)
       return(y)
   }
@@ -88,16 +89,16 @@ create_model_group_func <- function(parTab, exposures, form = "isolated",
 
 #' Create model function pointer cpp implementation
 #'
-#' Creaters a function pointer for \code{\link{model_func_group_cpp}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. This function can also be used to create a pointer to the same model function, but solving a likelihood function. This currently uses the "isolated" form of the model. Support could be added to allow either the competitive or isolated form.
+#' Creaters a function pointer for \code{\link{model_func_group_cpp}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. This function can also be used to create a pointer to the same model function, but solving a likelihood function and returning a single likelihood given data and a set of model parameters.
 #' @param parTab the full parameter table - see example csv file
 #' @param exposureTab table of exposure times etcs - see example csv file
-#' @param dat if posterior function, need the matrix of data. First row is model times, and subsequent rows are trajectories (each row is trajectory of antibodies for one strain, grouped by exposure group)
+#' @param dat can be left as NULL if just solving the model and not the likelihood. If solving the posterior function, need the matrix of data. First row is model times, and subsequent rows are trajectories (each row is trajectory of antibodies for one strain, grouped by exposure group)
 #' @param PRIOR_FUNC optional pointer to prior calculating function that takes current parameter vector
 #' @param version string of either "model" (for pure model function) or "posterior" (for posterior calculation)
-#' @param convert_types optionally, a named vector converting strings of infection types to integers. The Cpp funciton needs these as integers, but the default arguments should be fine
+#' @param convert_types optionally, a named vector converting strings of infection types to integers. The Cpp function needs these as integers rather than characters/strings, but the default arguments here should be fine
 #' @param convert_strains as for convert_types, but relating to the infection strain names
 #' @param convert_groups if the groups are named, used to convert names to integers
-#' @param individuals vector indicating how many individuals are in each group ie. relating to rows in the data matrix
+#' @param individuals vector indicating how many individuals are in each group ie. relating to rows in the data matrix. This is used to index the data matrix eg. if the first argument of the individuals vector is 3, then the first 3 rows of data will be assumed to correspond to the same group/strain
 #' @param form string of "isolated" or "competitive" indicating whether we're using the isolation boosting or competitive boosting version of the model
 #' @param cross_reactivity if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains
 #' @param trying if TRUE, uses parameters corresponding to the exposure type rather than exposure index

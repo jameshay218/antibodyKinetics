@@ -10,12 +10,18 @@ create_model_func(parTab, exposures, form = "isolated",
 \arguments{
 \item{parTab}{the full parameter table - see example csv file}
 
-\item{form}{string to indicate if this uses the isolated or competitive version of the model. \code{\link{model_func_isolated}}, \code{\link{model_func_competitive}}}
+\item{exposures}{the exposure table - see example csv file}
+
+\item{form}{string to indicate if this uses the "isolated" or "competitive" version of the model}
+
+\item{cross_reactivity}{if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains}
+
+\item{trying}{if TRUE, uses parameters corresponding to the exposure type rather than exposure index}
 }
 \value{
-a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_competitive}}
+a function pointer for \code{\link{model_func}}
 }
 \description{
-Creaters a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_additive}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
+Creaters a function pointer for \code{\link{model_func}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. Users should use this function to create the interface function from a single parTab, rather than using \code{\link{model_func}} each time.
 }
 

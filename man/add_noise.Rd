@@ -11,12 +11,12 @@ add_noise(pars, y, normal = FALSE)
 
 \item{y}{the titre to add observation error}
 
-\item{normal}{indicates if data is from the discretised normal or not}
+\item{normal}{indicates if data is from the discretised normal or not (uses a shouldered observation error function if not)}
 }
 \value{
 a single, modified titre value
 }
 \description{
-Add noise to a titre observation
+Adds observation noise to the provided vector of titres
 }
 

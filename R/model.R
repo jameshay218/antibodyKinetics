@@ -1,10 +1,10 @@
 #' Antigenic distance calc
 #'
 #' Calculates the necessary antigenic distance needed to give a given
-#' percentage cross reactivity with gradient m and percentage y
+#' percentage cross reactivity with gradient m and percentage y.
 #' @param y the desired proportion cross reactivity
 #' @param m the rate of the exponential function for cross reactivity
-#' @return a single value, x#'
+#' @return a single value, x
 #' @export
 #' @useDynLib antibodyKinetics
 calculate_x <- function(y, m){
@@ -15,9 +15,11 @@ calculate_x <- function(y, m){
 #'
 #' Calculates the ferret model trajectory for a single infection event.
 #' Uses an R implementation so easy to code and has named parameter vectors.
+#' An equivalent function using Rcpp is implemented at \code{\link{model_trajectory_cpp}}.
+#' Run \code{\link{parameter_descriptions}} for documentation of the model parameter vector
 #' @param pars the named vector of model parameters
 #' @param times the vector of time in days to solve over
-#' @param logSigma if TRUE, uses the exponential of pars["sigma"]
+#' @param logSigma if TRUE, uses the exponential of pars["sigma"] (useful if MCMC is exploring over log space). Default FALSE.
 #' @return a vector of antibody titres
 #' @export
 #' @family model functions
@@ -45,7 +47,8 @@ model_trajectory <- function(pars, times, logSigma=FALSE){
     primed <- pars["primed"]
     mod <- pars["mod"]
     lower_bound <- pars["lower_bound"]
-    
+
+    ## Convert to linear scale if passed on log scale.
     if(logSigma){
         sigma <- exp(pars["sigma"])
         beta <- exp(pars["beta"])
@@ -95,14 +98,16 @@ model_trajectory <- function(pars, times, logSigma=FALSE){
 #' Multiple group model trajectory
 #'
 #' Calculates model trajectories for multiple groups
-#' @param parTab the parameter table containing at least a values
-#' column and a names column which can be used to solve \code{\link{model_trajectory}}
+#' @param parTab the parameter table containing at least a column for values
+#' column and names which can be used to solve \code{\link{model_trajectory}}
 #' @param cr_table the cross reactivity part of the parameter table, with values and names for the exposure strain, the measured strain, and the antigenic distance (x)
 #' @param order_tab the table for parameters modifying boosting based on infection order (antigenic seniority)
 #' @param exposures the table for exposure types and times
 #' @param strains a vector with the names of all of the strains involved in the model
 #' @param times a vector of times to solve the model over
-#' @param MODEL_FUNC pointer to the R function that will be used to solve the model. 
+#' @param version 0 for isolated, 1 for competitive
+#' @param cross_reactivity if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains
+#' @param typing if TRUE, uses parameters corresponding to the exposure type rather than exposure index
 #' @return a table of antibody titres for the given times, with a column for times, group and colnames of the measured strain
 #' @export
 #' @useDynLib antibodyKinetics
@@ -197,7 +202,7 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
             ## Get the correct modifier for this exposure order
             mod <- order_tab[order_tab$order == order,"values"]
 
-            ## If competitive versoin of the model, need to store starting titre
+            ## If competitive version of the model, need to store starting titre
             ## from previous exposure
             if(version == 1){
                 ## Solve up to next exposure time. If at the last exposure, solve to the end
@@ -216,6 +221,7 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
               
             ## Solve model
             pars <- c("t_i"=t_i,pars,"mod"=mod,"x"=x,y0=y0,"primed"=isPrimed,"eff_y0"=eff_y0)
+
             y <- model_trajectory(pars, tmpTimes)
             trajectories[tmpTimesI,index] <-  trajectories[tmpTimesI,index] + y[1:(length(y)-1)]
         }

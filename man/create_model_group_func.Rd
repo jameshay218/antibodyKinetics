@@ -10,6 +10,8 @@ create_model_group_func(parTab, exposures, form = "isolated",
 \arguments{
 \item{parTab}{the full parameter table - see example csv file}
 
+\item{exposures}{the exposure table - see example csv file}
+
 \item{form}{a string to indicate the form of the model ("isolated" or "competitive")}
 
 \item{cross_reactivity}{if TRUE, then uses cross-reactive boosting rather than ID based boosting}
@@ -17,10 +19,10 @@ create_model_group_func(parTab, exposures, form = "isolated",
 \item{typing}{if TRUE, then uses the type specific parameters rather than universal parameters}
 }
 \value{
-a function pointer for \code{\link{model_func_isolated}} or \code{\link{model_func_competitive}}
+a function pointer for \code{\link{model_func_groups}}
 }
 \description{
-Creaters a function pointer for \code{\link{model_func_groups}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument.
+Creaters a function pointer for \code{\link{model_func_groups}} to save passing multiple vectors constantly. This function will return the same thing, but requires only a vector of (unnamed) parameters and a vector of times providing the parameter vector is the same order as in the given parTab argument. Users should use this function to create the interface function from a single parTab, rather than using \code{\link{model_func}} each time.
 }
 \seealso{
 \code{\link{create_model_func}}

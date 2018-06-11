@@ -12,10 +12,10 @@ calculate_x(y, m)
 \item{m}{the rate of the exponential function for cross reactivity}
 }
 \value{
-a single value, x#'
+a single value, x
 }
 \description{
 Calculates the necessary antigenic distance needed to give a given
-percentage cross reactivity with gradient m and percentage y
+percentage cross reactivity with gradient m and percentage y.
 }
 

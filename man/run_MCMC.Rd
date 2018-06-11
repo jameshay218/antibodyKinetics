@@ -13,7 +13,7 @@ run_MCMC(parTab, data = NULL, mcmcPars, filename,
 
 \item{data}{the data frame of data to be fitted}
 
-\item{mcmcPars}{named vector named vector with parameters for the MCMC procedure. Iterations, popt, opt_freq, thin, burnin, adaptive_period and save_block.}
+\item{mcmcPars}{named vector named vector with parameters for the MCMC procedure. iterations, popt, opt_freq, thin, burnin, adaptive_period and save_block.}
 
 \item{filename}{the full filepath at which the MCMC chain should be saved. "_chain.csv" will be appended to the end of this, so filename should have no file extensions}
 

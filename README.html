@@ -128,32 +128,164 @@ $(document).ready(function () {
 </blockquote>
 <div id="summary" class="section level2">
 <h2>Summary</h2>
-<p>This package includes all of the code, data and instructions required to reproduce the analysis in the “antibody kinetics model in ferrets” paper, which you have probably been linked from. The current draft of the paper can be found on <a href>biorxiv</a>, where the full model methodology and results can be found.</p>
+<p>This package includes all of the code, data and instructions required to reproduce the analysis in the “antibody kinetics model in ferrets” paper, which you have probably been linked from. The current draft of the paper can be found on <a href>biorxiv <em>link not yet uploaded</em></a>, where the full model methodology and results are described. The purpose of this project is to generate models of antibody kinetics that describe antibody kinetics following varied exposures; to fit these models to observed haemagglutination inhibition (HI) titre data; and to compare the ability of these models in fitting the observed data.</p>
+<p>This README covers the following topics, with links to more detailed vignettes where appropriate:</p>
+<ol style="list-style-type: decimal">
+<li>Installation and requirements, including a link to the shiny app vignette</li>
+<li>Running the basic model</li>
+<li>Work flow, including changing the model structure and generating input tables</li>
+<li>Link to model fitting vignette</li>
+<li>Links to scripts for reproducing analyses</li>
+</ol>
+<p><strong>NOTE:</strong> all of the code in this README can be found in a single R script in <code>scripts/readme_code.R</code>.</p>
 </div>
-<div id="installation" class="section level2">
-<h2>Installation</h2>
+<div id="installation-requirements" class="section level2">
+<h2>1. Installation &amp; requirements</h2>
 <p>Installation of the package itself is straightforward:</p>
-<pre class="r"><code>devtools::install_github(&quot;jameshay218/antibodyKinetics&quot;)</code></pre>
+<pre class="r"><code>devtools::install_github(&quot;jameshay218/antibodyKinetics&quot;)
+library(antibodyKinetics)</code></pre>
 <p>However, additional packages are required to use all of the features.</p>
-<div id="mcmc" class="section level3">
-<h3>MCMC</h3>
-<p>Whilst the base package comes with its own MCMC functionality, the model is well suited for use with the <a href="https://github.com/jameshay218/lazymcmc"><code>lazymcmc</code></a> package. In particular, the branch with parallel tempering <a href="https://github.com/jameshay218/lazymcmc/tree/parallel_tempering"><code>https://github.com/jameshay218/lazymcmc/tree/parallel_tempering</code></a> thanks to <a href="https://github.com/ada-w-yan">Ada Yan</a>. This is because, given the nature and amount of data used here, the posterior distribution is multi modal. Parallel tempering samples from such distributions more efficiently.</p>
-<p>Please visit this <a href="https://github.com/jameshay218/lazymcmc/tree/parallel_tempering">site</a> and clone or download the full package. Although the documentation on that site applies to MCMC code without parallel tempering, the interface for the user is the same.</p>
+<div id="mcmc-code" class="section level4">
+<h4>1.1 MCMC code</h4>
+<p>Whilst the base package comes with its own MCMC functionality, the model is well suited for use with the <a href="https://github.com/jameshay218/lazymcmc"><code>lazymcmc</code></a> package. In particular, the branch with parallel tempering <a href="https://github.com/jameshay218/lazymcmc/tree/parallel_tempering"><code>https://github.com/jameshay218/lazymcmc/tree/parallel_tempering</code></a> thanks to <a href="https://github.com/ada-w-yan">Ada Yan</a>. Given the nature and amount of data used here, the posterior distribution is multi-modal. Parallel tempering samples from such distributions more efficiently, and is therefore the recommended MCMC algorithm for this system.</p>
+<p>Please visit this <a href="https://github.com/jameshay218/lazymcmc/tree/parallel_tempering">site</a> and clone or download the full package. Although the documentation on that site applies to MCMC code without parallel tempering, the interface for the user is pretty much the same.</p>
 </div>
-<div id="shiny-app" class="section level3">
-<h3>Shiny app</h3>
-<p>There is a shiny app in this package which can be used to generate expected titre trajectories with user specified parameters and exposure schedules. This app can then be used to download .csv files with parameters and exposure timings to be fed directly into the model. It is unlikely that anyone will need to use this app, so no documentation is provided here.</p>
-<p>If you’d still like to run this app (eg. see what titre trajectories would be generated given your own model structure and exposure schedule), the <code>shiny</code>, <code>shinyBS</code> and <code>rhandsontable</code> packages are required. The app can then be run with:</p>
+<div id="shiny-app" class="section level4">
+<h4>1.2 Shiny app</h4>
+<p>There is a shiny app in this package which can be used to generate expected titre trajectories with user specified parameters and exposure schedules. This app can then be used to download .csv files with parameters and exposure timings to be fed directly into the model. It is unlikely that anyone will need to use this app, but a vignette explaining its use can be found here:</p>
+<p>(<a href="https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html" class="uri">https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html</a>)[<a href="https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html" class="uri">https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html</a>]</p>
+<p>If you’d like to run this app (eg. see what titre trajectories would be generated given your own model structure and exposure schedule), the <code>shiny</code>, <code>shinyBS</code> and <code>rhandsontable</code> packages are required. The app can then be run with:</p>
 <pre class="r"><code>paramViewer()</code></pre>
 </div>
 </div>
-<div id="usage" class="section level2">
-<h2>Usage</h2>
-<pre class="r"><code>library(antibodyKinetics)</code></pre>
+<div id="running-the-basic-model" class="section level2">
+<h2>2. Running the basic model</h2>
+<p>Below is a very basic example of generating a single antibody titre trajectory from a given parameter set. This particular trajectory has a single exposure 10 days after the start of the experiment.</p>
+<pre class="r"><code>## Load the package
+library(antibodyKinetics)
+
+## Vector of names input parameters to solve the model -
+## note that for the cpp implementation, the order of inputs matters
+## run `parameter_descriptions()` for further details
+parameter_descriptions()
+
+pars &lt;- c(&quot;lower_bound&quot;=0,&quot;S&quot;=1,&quot;EA&quot;=0,&quot;MAX_TITRE&quot;=13,
+          &quot;mu&quot;=4,&quot;tp&quot;=12,&quot;dp&quot;=0.5,&quot;ts&quot;=10,&quot;m&quot;=0.003,&quot;beta&quot;=0.02, &quot;c&quot;=4,
+          &quot;sigma&quot;=0.01,&quot;y0_mod&quot;=-10000,&quot;boost_limit&quot;=0,
+          &quot;primed&quot;=0,&quot;mod&quot;=1,
+          &quot;x&quot;=0,&quot;t_i&quot;=10,&quot;y0&quot;=0,&quot;eff_y0&quot;=0)
+          
+## Vector of times to solve the model over
+times &lt;- seq(0,100,by=1)
+
+## Solve the model using both the R and Cpp implementations 
+titre_trajectory_cpp &lt;- model_trajectory_cpp(pars,times)
+titre_trajectory_R &lt;- model_trajectory(pars, times)
+
+## Compare two the solvers, identical results
+plot(titre_trajectory_cpp, type='l', col=&quot;blue&quot;)
+lines(titre_trajectory_R,col=&quot;red&quot;)</code></pre>
+</div>
+<div id="work-flow" class="section level2">
+<h2>3. Work flow</h2>
+<p>The full work flow for the analysis is quite complex to replicate from scratch, but all of the inputs and scripts used are included. The examples below demonstrate how to run the entire model fitting process for a single model variant.</p>
+<p>A table describing the inputs and options used for each model variant can be found in <code>inputs/run_tracker.csv</code>. The examples below replicate the inputs for runID 62. <code>inputs/run_key.csv</code> describes which model mechanisms are included in which runs.</p>
+<p><strong>NOTE</strong> <code>stringsAsFactors</code> should be <code>FALSE</code> when reading in these parameter tables.</p>
+<pre class="r"><code>## Load package
+library(antibodyKinetics)</code></pre>
+<div id="generation-of-input-parameters-and-exposure-tables" class="section level4">
+<h4>3.1 Generation of input parameters and exposure tables</h4>
+<p>The purpose of this project is to explore different assumptions and immunological mechanisms in generating observed antibody titres. The format of input exposures and parameters therefore depends on the assumptions that the user wishes to make and the exposure schedule used. Making the correct input parameter and exposure tables is not completely trivial, and should be done using the <code>paramViewer()</code>, a vignette of which explaining its use can be found <a href="https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html">here</a>. However, example parameter tables and exposure tables can be found as attached R objects and in the <code>inputs</code> folder (including all those used in this analysis). Users should refer to <code>inputs/run_tracker.csv</code> for a description of which parameter and expsure tables in <code>inputs</code> correspond to which model.</p>
+<p>The <code>runName</code> identifier and corresponding options can be generated as follows:</p>
+<pre class="r"><code>runName &lt;- &quot;CYTY6BN&quot;
+options &lt;- convert_runName_to_options(runName)</code></pre>
+<div id="example-parameter-input-table" class="section level5">
+<h5>3.1.1 Example parameter input table</h5>
+<p>Refer to the documentation for this example table with <code>?exampleParTab</code>.</p>
+<pre class="r"><code>data(exampleParTab)</code></pre>
+<p>The parameter table can be split into 4 key “sections”:</p>
+<ul>
+<li>The top 4 parameters correspond to boundary conditions and observation error parameters, as described in <code>describe_parameters()</code></li>
+<li>The next <em>n</em> parameters correspond to antibody dynamics parameters specific to either each exposure type, each exposure ID (if not applying to “all”) or each exposure-strain specific set of interaction parameters</li>
+<li>After these type-specific parameters, entries correspond to additional boosting elicited by priming, parameters describing the cross reactivity and titre-dependent boosting parameters</li>
+<li>Parameters named “x” correspond to antigenic distances between each pair of strains in “exposure” and “strain”, assuming symmetric antigenic distance (A -&gt; B == B -&gt; A)</li>
+<li>The final set of entries, <code>mod</code> correspond to the <span class="math inline">\(\rho\)</span> parameters in the manuscript</li>
+</ul>
+<p>Some minor tweaks are needed to fix, remove or modify some parameters depending on the options used. The parameter table can be correctly formatted using the following function:</p>
+<pre class="r"><code>parTab &lt;- parTab_modification(exampleParTab,options)</code></pre>
+</div>
+<div id="example-exposure-input-table" class="section level5">
+<h5>3.1.2 Example exposure input table</h5>
+<p>Refer to the documentation for this example table with <code>?exampleExposureTab</code>. It is recommended that users use the shiny app to understand how this table is generated, if exposure schedules beyond those provided in the <code>inputs/exposureTabs</code> folder are needed.</p>
+<pre class="r"><code>data(exampleExposureTab)</code></pre>
+</div>
+</div>
+<div id="solving-the-model" class="section level4">
+<h4>3.2 Solving the model</h4>
+<pre class="r"><code>times &lt;- seq(0,100,by=1)
+
+## R implementation
+## Create a function pointer that only needs the unlabelled vector 
+## of model parameters and the observation time vector
+f1 &lt;- create_model_group_func(parTab,exposureTab,form=options$form,typing = typing,cross_reactivity = options$cr)
+y1 &lt;- f1(parTab$values, times)
+y1 &lt;- reshape2::melt(y1, id.vars=c(&quot;times&quot;,&quot;group&quot;))    
+p1 &lt;- ggplot(y1) + geom_line(aes(x=times,y=value,col=variable)) + facet_wrap(~group)+theme_bw()
+
+## Cpp implementation
+## Create a function pointer that only needs the unlabelled vector 
+## of model parameters and the observation time vector
+f2 &lt;- create_model_group_func_cpp(parTab,exposureTab,version=&quot;model&quot;,form=options$form,typing = typing,cross_reactivity = options$cr)
+y2 &lt;- f2(parTab$values, times)
+## Cpp implementation retains less labelling for speed, so 
+## corresponding groups/strains must be added back to the data frame
+cpp_labels &lt;- as.data.frame(expand.grid(&quot;strain&quot;=LETTERS[1:5],&quot;group&quot;=1:5))
+y2 &lt;- cbind(cpp_labels, as.data.frame(y2))
+y2 &lt;- reshape2::melt(y2, id.vars=c(&quot;strain&quot;,&quot;group&quot;))
+y2$variable &lt;- as.numeric(y$variable)
+p2 &lt;- ggplot(y2) + geom_line(aes(x=variable,y=value,col=strain)) + facet_wrap(~group) + theme_bw()</code></pre>
+</div>
+<div id="posterior-function" class="section level4">
+<h4>3.3 Posterior function</h4>
+<p>Solving the posterior probability for a set of model parameters given the ferret titre data is straightforward. The only difference relative to the model solving function is to pass the titre data as an argument to <code>create_model_group_func_cpp</code>, and to specify “posterior” in the <code>version</code> argument.</p>
+<pre class="r"><code>## Attach titre data
+data(ferret_titres)
+
+## Only use the columns containing titres
+dat &lt;- as.matrix(ferret_titres[,4:ncol(data)])
+
+## The first row of the data should give the sampling times
+dat &lt;- rbind(c(0,21,36,49,70),dat)
+rownames(dat) &lt;- NULL
+
+## Create a function pointer to solve the posterior probability
+posterior_func &lt;- create_model_group_func_cpp(parTab,exposureTab, dat=dat, version=&quot;posterior&quot;)
+posterior_func(parTab$values)</code></pre>
+</div>
+<div id="changing-the-model-structure-options" class="section level4">
+<h4>3.4 Changing the model structure options</h4>
+<p>Changing the model structure is not as simple as switching some input flags on or off, because the parameters used and interactions of these parameters changes depending on the assumed model. For ease of implementation, different input tables are used for different models, with input flags being used to inform the model code which parameters to expect.</p>
+<p>Users are referred to:</p>
+<ol style="list-style-type: decimal">
+<li><code>inputs/run_tracker.csv</code> to find which parameter and exposure tables are used for which model variants, indexed by <code>runName</code></li>
+<li><code>inputs/run_key.csv</code> for a key showing which mechanisms are included in each <code>runName</code></li>
+<li>The shiny app (above), which allows users to generate their own parameter and exposure tables for a given set of assumptions</li>
+</ol>
+<p>To test a particular model, use the appropriate <code>runName</code> in <code>inputs/run_key.csv</code> and use the parameter and exposure table files described in <code>run_tracker.csv</code> in place of <code>exampleParTab</code> and <code>exampleExposureTab</code> above.</p>
+</div>
+</div>
+<div id="links-to-further-vignettes" class="section level2">
+<h2>4. Links to further vignettes</h2>
+<p>The above examples should be sufficient to give a feel for what the package is doing and how it is doing it. The below vignettes give more detail regarding how to reproduce the analysis in the paper:</p>
+<ol style="list-style-type: decimal">
+<li><a href>Model fitting vignette</a></li>
+<li><a href>Model comparison script</a></li>
+<li><a href>Figure generation script</a></li>
+</ol>
 </div>
 <div id="license" class="section level2">
 <h2>License</h2>
-<p>GPL-3 ©</p>
+<p>GPL-3 © <a href="https://github.com/">James Hay &lt;james.hay13@imperial.ac.uk&gt;</a>.</p>
 </div>
 </div>
 

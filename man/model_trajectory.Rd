@@ -4,14 +4,14 @@
 \alias{model_trajectory}
 \title{Model trajectory calc}
 \usage{
-model_trajectory(pars, times, logSigma = TRUE)
+model_trajectory(pars, times, logSigma = FALSE)
 }
 \arguments{
 \item{pars}{the named vector of model parameters}
 
 \item{times}{the vector of time in days to solve over}
 
-\item{logSigma}{if TRUE, uses the exponential of pars["sigma"]}
+\item{logSigma}{if TRUE, uses the exponential of pars["sigma"] (useful if MCMC is exploring over log space). Default FALSE.}
 }
 \value{
 a vector of antibody titres
@@ -19,12 +19,17 @@ a vector of antibody titres
 \description{
 Calculates the ferret model trajectory for a single infection event.
 Uses an R implementation so easy to code and has named parameter vectors.
+An equivalent function using Rcpp is implemented at \code{\link{model_trajectory_cpp}}.
+Run \code{\link{parameter_descriptions}} for documentation of the model parameter vector
 }
 \examples{
-pars <- c("mu"=8,"dp"=0.5,"tp"=12,"ts"=10,"m"=0.003,"y0"=0,"t_i"=10,
-          "sigma"=0.01, "beta"=0.02,"c"=4,"x"=0,"primed"=0,"mod"=1)
+pars <- c("lower_bound"=-1000,"S"=1,"EA"=0,"MAX_TITRE"=13,
+          "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.02, "c"=4,
+          "sigma"=0.01,"y0_mod"=-10000,"boost_limit"=0,
+          "primed"=0,"mod"=1,
+          "x"=0,"t_i"=10,"y0"=0,"eff_y0"=0)
 times <- seq(0,100,by=10)
-y <- model_trajectory(pars,times,FALSE)
+y <- model_trajectory(pars,times)
 }
 \seealso{
 Other model.functions: \code{\link{model_func_groups}},
