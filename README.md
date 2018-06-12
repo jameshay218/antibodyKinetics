@@ -12,7 +12,7 @@ This README covers the following topics, with links to more detailed vignettes w
 4. Link to model fitting vignette
 5. Links to scripts for reproducing analyses
 
-**NOTE:** all of the code in this README can be found in a single R script in `scripts/readme_code.R`.
+**NOTE:** all of the code in this README can be found in a single R script in [`scripts/readme_code.R`](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/readme_code.R).
 
 ## 1. Installation & requirements
 Installation of the package itself is straightforward:
@@ -30,7 +30,7 @@ Please visit this [site](https://github.com/jameshay218/lazymcmc/tree/parallel_t
 #### 1.2 Shiny app
 There is a shiny app in this package which can be used to generate expected titre trajectories with user specified parameters and exposure schedules. This app can then be used to download .csv files with parameters and exposure timings to be fed directly into the model. It is unlikely that anyone will need to use this app, but a vignette explaining its use can be found here:
 
-(https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html)[https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html]
+[https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html](https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html)
 
 If you'd like to run this app (eg. see what titre trajectories would be generated given your own model structure and exposure schedule), the `shiny`, `shinyBS` and `rhandsontable` packages are required. The app can then be run with:
 
@@ -160,8 +160,8 @@ Changing the model structure is not as simple as switching some input flags on o
 
 Users are referred to:
 
-1. `inputs/run_tracker.csv` to find which parameter and exposure tables are used for which model variants, indexed by `runName`
-2. `inputs/run_key.csv` for a key showing which mechanisms are included in each `runName`
+1. [`inputs/run_tracker.csv`](https://github.com/jameshay218/antibodyKinetics/blob/master/inputs/run_tracker.csv) to find which parameter and exposure tables are used for which model variants, indexed by `runName`
+2. [`inputs/run_key.csv`](https://github.com/jameshay218/antibodyKinetics/blob/master/inputs/run_key.csv) for a key showing which mechanisms are included in each `runName`
 3. The shiny app (above), which allows users to generate their own parameter and exposure tables for a given set of assumptions
 
 To test a particular model, use the appropriate `runName` in `inputs/run_key.csv` and use the parameter and exposure table files described in `run_tracker.csv` in place of `exampleParTab` and `exampleExposureTab` above.
@@ -170,14 +170,16 @@ To test a particular model, use the appropriate `runName` in `inputs/run_key.csv
 The above examples should be sufficient to give a feel for what the package is doing and how it is doing it. The below vignettes give more detail regarding how to reproduce the analysis in the paper:
 
 1. [Model fitting vignette](https://jameshay218.github.io/antibodyKinetics/inst/doc/model_fitting.html)
-2. [Model comparison scripts](https://github.com/jameshay218/scripts/analyses/). A tidied .csv file of the outputs from these scripts can be found [here](https://github.com/jameshay218/scripts/analyses/waic_table.csv). Running the code in `all_analyses.R` or `all_analyses_PTchains.R`, depending on which MCMC sampler was used, will generate and save .csv files with:
+2. [Model comparison scripts](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses). A tidied .csv file of the outputs from these scripts can be found [here]((https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses/waic_table.csv). Running the code in `all_analyses.R` or `all_analyses_PTchains.R`, depending on which MCMC sampler was used, will generate and save .csv files with:
+     
       a) Effective sample sizes
       b) Convergence diagnostics
       c) Whether chains need to be visually inspected for convergence or rerun (eg. if bimodal posterior distributions detected)
       d) BIC and WAIC
       e) A table of posterior mean, median, mode and 95% credible intervals for each estimated parameter for each model (very large!)
       f) A table of residuals (model predicted values - observed values) for each model
-3. [Figure generation scripts](https://github.com/jameshay218/scripts/figures/): each script corresponds to a figure in the manuscript. However, running these relies on previously generating all of the MCMC chains as described above. Note that some minor additional formatting and labelling has been done to the figures in the manuscript. Note also that some figures (methods) were created using Inkscape, and therefore do not have accompanying scripts.
+3. [Figure generation scripts](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/figures): each script corresponds to a figure in the manuscript. However, running these relies on previously generating all of the MCMC chains as described above. Note that some minor additional formatting and labelling has been done to the figures in the manuscript. Note also that some figures (methods) were created using Inkscape, and therefore do not have accompanying scripts.
+4. [Parameter table formatting script](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses/par_table_formatting.R): this script was used to improve the formatting/symbols used in the output files from the model comparison scripts.
 
 
 ## License

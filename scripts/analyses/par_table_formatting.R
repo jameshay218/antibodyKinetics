@@ -1,6 +1,6 @@
 ## Modifies the all_estimates table to get nicer formatting
-runs <- read.csv("~/Documents/Ferret_Model/inputs/run_tracker_formatted.csv",stringsAsFactors=FALSE)
-par_estimates <- read.csv("~/Documents/new_mcmc1/par_estimates_combined.csv",stringsAsFactors=FALSE)
+runs <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inputs/run_tracker.csv",stringsAsFactors=FALSE) ## File location of run key table
+par_estimates <- read.csv("~/Documents/new_mcmc1/par_estimates_combined.csv",stringsAsFactors=FALSE) ## File location of parameter estimate results
 par_estimates <- par_estimates[,-2]
 runs[runs$form=="C","form"] <- "Competitive"
 runs[runs$form=="I","form"] <- "Isolated"
@@ -58,7 +58,7 @@ par_estimates$type <- type_names[par_estimates$type]
 colnames(par_estimates) <- c("runID","Parameter name","Exposure Type","Mean","Median","Mode","2.5% CI","97.5% CI")
 
 par_estimates <- merge(runs,par_estimates, by="runID")
-write.table(par_estimates,"~/Documents/new_mcmc1/parameter_estimates.csv",sep=",",row.names=FALSE)
+write.table(par_estimates,"~/Documents/parameter_estimates.csv",sep=",",row.names=FALSE)
 
 
 ########
@@ -117,4 +117,4 @@ convergence_table$δWAIC <- convergence_table$WAIC - min(convergence_table$WAIC)
 convergence_table$δBIC <- convergence_table$BIC - min(convergence_table$BIC)
 
 convergence_table <- merge(runs,convergence_table,by="runID")
-write.table(convergence_table,"~/Documents/new_mcmc1/waic_table.csv",sep=",",row.names=FALSE)
+write.table(convergence_table,"~/Documents/waic_table.csv",sep=",",row.names=FALSE)
