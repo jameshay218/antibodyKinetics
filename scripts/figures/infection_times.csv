@@ -1,0 +1,17 @@
+group,infection,time
+Group 5,i) H3N2 Infection,0
+Group 5,iv) H1N1 Infection,56
+Group 3,i) H3N2 Infection,0
+Group 3,ii) TIV 1,28
+Group 3,iii) TIV 2,42
+Group 3,iv) H1N1 Infection,56
+Group 1,ii) TIV 1,28
+Group 1,iii) TIV 2,42
+Group 1,iv) H1N1 Infection,56
+Group 4,i) H3N2 Infection,0
+Group 4,ii) TIV 1,28
+Group 4,iii) TIV 2,42
+Group 4,iv) H1N1 Infection,56
+Group 2,ii) TIV 1,28
+Group 2,iii) TIV 2,42
+Group 2,iv) H1N1 Infection,56
