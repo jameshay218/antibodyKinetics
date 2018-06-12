@@ -51,11 +51,9 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times){
 
   double cr = mu - sigma*x;
   double prime_cr = c - beta*x;
-  
   if(cr < 0) cr = 0;
   if(prime_cr < 0) prime_cr = 0;
   mu = mod*cr + prime_cr*primed;  
-
   if(y0_mod >= -999){
     if(y0 >= boost_limit){
       //mu = (-mu/(mu + y0_mod))*boost_limit + mu;
@@ -66,6 +64,7 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times){
     }
   }
   if(mu < 0) mu = 0;
+
   //mu += prime_cr*primed;
   NumericVector y(times.size());
   

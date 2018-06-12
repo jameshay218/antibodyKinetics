@@ -33,6 +33,7 @@ calculate_x <- function(y, m){
 #' times <- seq(0,100,by=10)
 #' y <- model_trajectory(pars,times)
 model_trajectory <- function(pars, times, logSigma=FALSE){
+    print(pars)
     ## Calculate modified mu from cross reactivity and modifiers
     mu <- pars["mu"]
     dp <- pars["dp"]

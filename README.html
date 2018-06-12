@@ -182,7 +182,7 @@ times &lt;- seq(0,100,by=1)
 titre_trajectory_cpp &lt;- model_trajectory_cpp(pars,times)
 titre_trajectory_R &lt;- model_trajectory(pars, times)
 
-## Compare two the solvers, identical results
+## Compare the 2 solvers with identical results
 plot(titre_trajectory_cpp, type='l', col=&quot;blue&quot;)
 lines(titre_trajectory_R,col=&quot;red&quot;)</code></pre>
 </div>
@@ -278,9 +278,17 @@ posterior_func(parTab$values)</code></pre>
 <h2>4. Links to further vignettes</h2>
 <p>The above examples should be sufficient to give a feel for what the package is doing and how it is doing it. The below vignettes give more detail regarding how to reproduce the analysis in the paper:</p>
 <ol style="list-style-type: decimal">
-<li><a href>Model fitting vignette</a></li>
-<li><a href>Model comparison script</a></li>
-<li><a href>Figure generation script</a></li>
+<li><a href="https://jameshay218.github.io/antibodyKinetics/inst/doc/model_fitting.html">Model fitting vignette</a></li>
+<li><a href="https://github.com/jameshay218/scripts/analyses/">Model comparison scripts</a>. Running the code in <code>all_analyses.R</code> or <code>all_analyses_PTchains.R</code>, depending on which MCMC sampler was used, will generate and save .csv files with:
+<ol style="list-style-type: lower-alpha">
+<li>Effective sample sizes</li>
+<li>Convergence diagnostics</li>
+<li>Whether chains need to be visually inspected for convergence or rerun (eg. if bimodal posterior distributions detected)</li>
+<li>BIC and WAIC</li>
+<li>A table of posterior mean, median, mode and 95% credible intervals for each estimated parameter for each model (very large!)</li>
+<li>A table of residuals (model predicted values - observed values) for each model</li>
+</ol></li>
+<li><a href="https://github.com/jameshay218/scripts/figures/">Figure generation scripts</a>: each script corresponds to the figure in the manuscript. However, running these relies on previously generating all of the MCMC chains as described above. Note that some minor additional formatting and labelling has been done to the figures in the manuscript.</li>
 </ol>
 </div>
 <div id="license" class="section level2">

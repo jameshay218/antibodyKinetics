@@ -1,0 +1,195 @@
+---
+title: "Model fitting"
+author: "James Hay"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+#library(antibodyKinetics)
+devtools::load_all()
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Summary
+This vignette provides step-by-step code to take you through the MCMC framework of the [`antibodyKinetics`](https://github.com/jameshay218/antibodyKinetics) package. Please read the README file on the package front page for context and links to further useful vignettes. This vignette assumes that the reader has stepped through the README code chunks that explain how the parameter and exposure table inputs are used. By the end, the user should be able to estimate posterior distributions for the model parameters given a set of ferret haemaglutination inhibition (HI) titre data.
+
+## Haemagglutination inhibition titre data
+The code below attaches the titre data used in this analysis and visualises the data by strain, sampling time and experimental group. Each row corresponds to observed HI titres against a single influenza strain from a single experimental group for a single individual. Each column gives observations made at a particular sampling time. The data is melted below using the `reshape2` package for plotting, but the unmelted data frame is used in model fitting.
+```{r, fig.width=7, fig.height=6}
+## Load the titre data and exposure times
+data(ferret_titres)
+data(exposure_times)
+
+## Melt titre data for plotting
+meltedDat <- reshape2::melt(ferret_titres, id.vars=c("group", "strain", "indiv"))
+
+## Convert factored times into sampling time in days
+times <- c("X0"=0,"X21"=21,"X36"=36,"X49"=49,"X70"=70)
+meltedDat$variable <- times[meltedDat$variable]
+
+## View titre data facetted by group and 
+## coloured by strain
+library(ggplot2)
+ggplot(meltedDat) + 
+  geom_jitter(aes(x=variable,y=value,col=strain), width=1,height=0) + 
+  geom_vline(data=exposure_times, aes(xintercept=time,linetype=exposure)) +
+  scale_y_continuous(limits=c(0,13),breaks=seq(0,13,by=2)) +
+  ylab("HI titre") +
+  facet_wrap(~group,ncol=1)+
+  theme_bw() + 
+  theme(text=element_text(size=8))
+```
+Y-axis shows log-titre; x-axis shows time of events in days (sampling times for data points, exposure events for vertical lines); each panel shows a different experimental group; vertical lines show which exposures are given to which experimental groups.
+
+## Running the MCMC code
+The code provided below forms the core of the scripts used to generate the accompanying analyses. Understanding this will allow a user to generate their own scripts for their own machine/cluster infrastructure.
+```{r, message=FALSE, results="hide"}
+## Specify the options for this run based on the run name string.
+## see inputs/run_key.csv for further details
+runName <- "CYTY6BN"
+
+## Generate a list of options from this run name
+options <- convert_runName_to_options(runName)
+
+## Attach example parameter and exposure tables
+## Only parameters with `fixed==0` will be varied 
+## in the MCMC framework - the rest will be left fixed
+data(exampleParTab)
+data(exampleExposureTab)
+exampleParTab <- parTab_modification(exampleParTab,options,fixed_S=FALSE)
+
+## Attach titre data and clean for submission to MCMC code
+data(ferret_titres)
+
+## Only use the columns containing titres
+## Note that the data matrix should be ordered by group
+## in the same order as the exposureTab
+dat <- as.matrix(ferret_titres[,4:ncol(ferret_titres)])
+
+## The first row of the data should give the sampling times
+## The posterior function will pull out the first row
+dat <- rbind(c(0,21,36,49,70),dat)
+rownames(dat) <- NULL
+
+## Create a function pointer to solve the posterior probability
+## Check that this solves correctly
+posterior_func <- create_model_group_func_cpp(exampleParTab,exampleExposureTab, dat=dat, version="posterior",
+                                              form=options$form,typing=TRUE,cross_reactivity = TRUE)
+posterior_func(exampleParTab$values)
+
+## Filename to save MCMC chain to 
+## file extensions will be appended automatically
+filename <- "test_chain"
+
+## Generate a table with random starting parameter values
+startTab <- exampleParTab
+for(i in which(startTab$fixed == 0)){
+    startTab[i,"values"] <- runif(1,startTab[i,"lower_bound"],startTab[i,"upper_bound"])
+}
+
+## Parameters controlling MCMC run time and adaptive period
+mcmcPars <- c("adaptive_period"=1000000,"iterations"=500000,"opt_freq"=2000,"thin"=100,"save_block"=10000,"popt"=0.44)
+
+## Need to tell the MCMC function how many individuals are in each group to index the data matrix
+individuals <- rep(3,5)
+
+## Run the MCMC code
+run_1 <- antibodyKinetics::run_MCMC(parTab=startTab, data=dat, mcmcPars=mcmcPars, 
+                                    filename=filename,CREATE_POSTERIOR_FUNC=create_model_group_func_cpp,
+                                    mvrPars=NULL,PRIOR_FUNC=NULL, 
+                                    version="posterior",form=options$form,
+                                    individuals=individuals,exposureTab=exampleExposureTab,
+                                    cross_reactivity=options$cr,typing=TRUE)
+```
+Once the MCMC chain has been run, calculate some diagnostics of convergence and effective sample size.
+
+```{r, fig.width=7, fig.height=6}
+## Save and view the MCMC chain
+chain <- read.csv(run_1$file)
+
+## Effective sample size of each free parameter
+print(coda::effectiveSize(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],startTab[startTab$fixed==0,"names"]])))
+
+## Look at some example traces
+plot(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],c("mu","sigma")]))
+```
+
+## Model fit
+Using the MCMC chain output, generate 95% prediction intervals and find the parameters corresponding to the highest posterior value from the chain. Plot these over the titre data to inspect model fit.
+```{r, fig.width=7, fig.height=6}
+nindiv <- 3
+nstrain <- 5
+ngroup <- 5
+
+## Create function to plot titre trajectories, same options as above
+f <- create_model_group_func_cpp(exampleParTab,exampleExposureTab,version="model",
+                                   form=options$form,typing = TRUE,cross_reactivity = options$cr)
+## Times to solve model over
+times1 <- seq(0,100,by=0.1)
+  
+## Get MLE parameters
+bestPars <- get_best_pars(chain)
+
+## Generate upper and lower prediction intervals using MCMC chain
+mod <- generate_prediction_intervals(chain, 200,seq(0,100,by=1),f,nstrains=5,ngroups=5)
+
+## Format data for plotting
+## Just adding labels and changing variable classes
+## for correct plotting
+meltedDat <- as.data.frame(dat[2:nrow(dat),])
+colnames(meltedDat) <- times
+meltedDat <- cbind(meltedDat,expand.grid("indiv"=1:nindiv,"strain"=1:nstrain,"group"=1:ngroup))
+meltedDat <- reshape2::melt(meltedDat,id.vars=c("indiv","strain","group"))
+meltedDat$variable <- as.numeric(as.character(meltedDat$variable))
+meltedDat$group <- as.factor(meltedDat$group)
+meltedDat$strain <- as.factor(meltedDat$strain)
+meltedDat$indiv <- as.factor(meltedDat$indiv)
+
+## Upper observable bound = 12
+mod[mod$upper > 12,"upper"] <- 12
+mod[mod$lower > 12,"lower"] <- 12
+
+## Plot trajectory using the MLE parameter set and format this for plotting
+bestTraj <- f(bestPars, seq(0,100,by=1))
+colnames(bestTraj) <- seq(0,100,by=1)
+bestTraj <- cbind(bestTraj,expand.grid("strain"=1:nstrain,"group"=1:ngroup))
+bestTraj <- reshape2::melt(bestTraj,id.vars=c("strain","group"))
+bestTraj$variable <- as.numeric(as.character(bestTraj$variable))
+bestTraj$group <- as.factor(bestTraj$group)
+bestTraj$strain <- as.factor(bestTraj$strain)
+bestTraj[bestTraj$value > 12,"value"] <- 12
+
+## Plot model fit over data
+p <- ggplot() + 
+    geom_ribbon(data = mod, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.4)+
+    geom_line(data=bestTraj,aes(x=variable,y=value,col=strain))+
+    geom_point(data = meltedDat,aes(x=variable,y=value,col=strain),
+               position=position_jitter(w=0.5,h=0.5)) +
+    facet_wrap(~group,ncol=1) +
+    theme_bw()
+plot(p)
+```
+
+## Scripts used in these analyses
+There are 128 different model options to be fitted (7 model mechanisms, each with two options - see [`https://github.com/jameshay218/antibodyKinetics/inputs/run_tracker.csv`](https://github.com/jameshay218/antibodyKinetics/inputs/run_tracker.csv) for a full list. Fitting multiple chains for all of these models to obtain a reasonable effective sample size is therefore infeasible without using a cluster or server infrastructure to submit batch jobs.
+
+The final MCMC chains used to generate the analyses in the accompanying paper were generated using a similar work flow to that described above, but with an MCMC sampler from an external package: [`lazymcmc`](https://github.com/jameshay218/lazymcmc/tree/parallel_tempering)
+
+These scripts use the [DIDE HPC](https://github.com/mrc-ide/didehpc) tool is only usable within the MRC Centre for Outbreak Analysis and Modelling, Imperial College London. However, the logic behind submitting batch jobs should be transferable.
+
+**NOTE:** although the scripts are provided here, they should be saved and run from the network drive, with all input files (eg. parameter tables) saved at locations on the network drive. For example, the top level directory I used was `~/net/home/ferret` with the scripts saved in `~/net/home/ferret/scripts`.
+
+1. Default MCMC routine scripts (for quick runs) ([https://github.com/jameshay218/antibodyKinetics/scripts/cluster/native_MCMC](https://github.com/jameshay218/antibodyKinetics/scripts/cluster/native_MCMC)):
+    a) [Cluster setup](https://github.com/jameshay218/antibodyKinetics/scripts/cluster/native_MCMC/cluster_setup.R): creates a connection to the DIDE cluster and installs the required packages from local source files
+    b) [MCMC fitting routine function](https://github.com/jameshay218/antibodyKinetics/scripts/cluster/native_MCMC/full_run.R): declares a function to submit a full MCMC job with specific inputs, ultimately saving 2 MCMC chains, a plot of the MCMC traces and a plot of model fits
+    c) [Job submission script](https://github.com/jameshay218/antibodyKinetics/scripts/cluster/native_MCMC/run_submission.R): takes the list of model runs and their corresponding parameter tables from `inputs/run_tracker.csv` and submits a batch of jobs to the DIDE cluster using the MCMC fitting routine function above
+  
+2. MCMC routine with parallel tempering (for better convergence) ([https://github.com/jameshay218/antibodyKinetics/scripts/cluster/parallel_tempering](https://github.com/jameshay218/antibodyKinetics/scripts/cluster/parallel_tempering))
+    a) [Cluster setup](https://github.com/jameshay218/antibodyKinetics/scripts/cluster/parallel_tempering/cluster_setup.R): creates a connection to the DIDE cluster and installs the required packages from local source files
+    b) [MCMC fitting routine function](https://github.com/jameshay218/antibodyKinetics/scripts/cluster/parallel_tempering/full_run.R): declares a function to submit a full MCMC job using parallel tempering with specific inputs, ultimately saving 2 MCMC chains, a plot of the MCMC traces and a plot of model fits
+    c) [Job submission script](https://github.com/jameshay218/antibodyKinetics/scripts/cluster/parallel_tempering/run_submission.R): takes the list of model runs and their corresponding parameter tables from `inputs/run_tracker.csv` and submits a batch of jobs to the DIDE cluster using the MCMC fitting routine function above
+  
