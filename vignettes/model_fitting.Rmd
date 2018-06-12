@@ -112,7 +112,7 @@ Once the MCMC chain has been run, calculate some diagnostics of convergence and 
 chain <- read.csv(run_1$file)
 
 ## Effective sample size of each free parameter
-print(coda::effectiveSize(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],startTab[startTab$fixed==0,"names"]])))
+print(coda::effectiveSize(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],c(startTab[startTab$fixed==0,"names"],"mod.1","mod.2","mod.3")])))
 
 ## Look at some example traces
 plot(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],c("mu","sigma")]))
@@ -183,13 +183,13 @@ These scripts use the [DIDE HPC](https://github.com/mrc-ide/didehpc) tool is onl
 
 **NOTE:** although the scripts are provided here, they should be saved and run from the network drive, with all input files (eg. parameter tables) saved at locations on the network drive. For example, the top level directory I used was `~/net/home/ferret` with the scripts saved in `~/net/home/ferret/scripts`.
 
-1. Default MCMC routine scripts (for quick runs) ([https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/cluster/native_MCMC](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/cluster/native_MCMC)):
-    a) [Cluster setup](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/cluster/native_MCMC/cluster_setup.R): creates a connection to the DIDE cluster and installs the required packages from local source files
-    b) [MCMC fitting routine function](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/cluster/native_MCMC/full_run.R): declares a function to submit a full MCMC job with specific inputs, ultimately saving 2 MCMC chains, a plot of the MCMC traces and a plot of model fits
-    c) [Job submission script](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/cluster/native_MCMC/run_submission.R): takes the list of model runs and their corresponding parameter tables from `inputs/run_tracker.csv` and submits a batch of jobs to the DIDE cluster using the MCMC fitting routine function above
+1. Default MCMC routine scripts (for quick runs) ([https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/cluster/native_MCMC/](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/cluster/native_MCMC/)):
+    a) [Cluster setup](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/cluster/native_MCMC/): creates a connection to the DIDE cluster and installs the required packages from local source files
+    b) [MCMC fitting routine function](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/cluster/native_MCMC/full_run.R): declares a function to submit a full MCMC job with specific inputs, ultimately saving 2 MCMC chains, a plot of the MCMC traces and a plot of model fits
+    c) [Job submission script](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/cluster/native_MCMC/run_submission.R): takes the list of model runs and their corresponding parameter tables from `inputs/run_tracker.csv` and submits a batch of jobs to the DIDE cluster using the MCMC fitting routine function above
   
-2. MCMC routine with parallel tempering (for better convergence) ([https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/cluster/parallel_tempering](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/cluster/parallel_tempering))
-    a) [Cluster setup](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/cluster/parallel_tempering/cluster_setup.R): creates a connection to the DIDE cluster and installs the required packages from local source files
-    b) [MCMC fitting routine function](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/cluster/parallel_tempering/full_run.R): declares a function to submit a full MCMC job using parallel tempering with specific inputs, ultimately saving 2 MCMC chains, a plot of the MCMC traces and a plot of model fits
-    c) [Job submission script](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/cluster/parallel_tempering/run_submission.R): takes the list of model runs and their corresponding parameter tables from `inputs/run_tracker.csv` and submits a batch of jobs to the DIDE cluster using the MCMC fitting routine function above
+2. MCMC routine with parallel tempering (for better convergence) ([https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/cluster/parallel_tempering](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/cluster/parallel_tempering))
+    a) [Cluster setup](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/cluster/parallel_tempering/cluster_setup_pt.R): creates a connection to the DIDE cluster and installs the required packages from local source files
+    b) [MCMC fitting routine function](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/cluster/parallel_tempering/full_run_paralleltemp.R): declares a function to submit a full MCMC job using parallel tempering with specific inputs, ultimately saving 2 MCMC chains, a plot of the MCMC traces and a plot of model fits
+    c) [Job submission script](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/cluster/parallel_tempering/run_submission_pt.R): takes the list of model runs and their corresponding parameter tables from `inputs/run_tracker.csv` and submits a batch of jobs to the DIDE cluster using the MCMC fitting routine function above
   

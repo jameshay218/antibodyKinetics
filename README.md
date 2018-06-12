@@ -170,7 +170,7 @@ To test a particular model, use the appropriate `runName` in `inputs/run_key.csv
 The above examples should be sufficient to give a feel for what the package is doing and how it is doing it. The below vignettes give more detail regarding how to reproduce the analysis in the paper:
 
 1. [Model fitting vignette](https://jameshay218.github.io/antibodyKinetics/inst/doc/model_fitting.html)
-2. [Model comparison scripts](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses). A tidied .csv file of the outputs from these scripts can be found [here]((https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses/waic_table.csv). Running the code in `all_analyses.R` or `all_analyses_PTchains.R`, depending on which MCMC sampler was used, will generate and save .csv files with:
+2. [Model comparison scripts](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses). A tidied .csv file of the outputs from these scripts can be found [here](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses/waic_table.csv). Running the code in `all_analyses.R` or `all_analyses_PTchains.R`, depending on which MCMC sampler was used, will generate and save .csv files with:
      
       a) Effective sample sizes
       b) Convergence diagnostics
@@ -178,8 +178,8 @@ The above examples should be sufficient to give a feel for what the package is d
       d) BIC and WAIC
       e) A table of posterior mean, median, mode and 95% credible intervals for each estimated parameter for each model (very large!)
       f) A table of residuals (model predicted values - observed values) for each model
-3. [Figure generation scripts](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/figures): each script corresponds to a figure in the manuscript. However, running these relies on previously generating all of the MCMC chains as described above. Note that some minor additional formatting and labelling has been done to the figures in the manuscript. Note also that some figures (methods) were created using Inkscape, and therefore do not have accompanying scripts.
-4. [Parameter table formatting script](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses/par_table_formatting.R): this script was used to improve the formatting/symbols used in the output files from the model comparison scripts.
+3. [Figure generation scripts](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/figures): each script corresponds to a figure in the manuscript. However, running these relies on previously generating all of the MCMC chains as described above. Note that some minor additional formatting and labelling has been done to the figures in the manuscript. Note also that some figures (methods) were created using Inkscape, and therefore do not have accompanying scripts.
+4. [Parameter table formatting script](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/analyses/par_table_formatting.R): this script was used to improve the formatting/symbols used in the output files from the model comparison scripts.
 
 
 ## License
