@@ -23,7 +23,7 @@ library(antibodyKinetics)
 However, additional packages are required to use all of the features.
 
 #### 1.1 MCMC code
-Whilst the base package comes with its own MCMC functionality, the model is well suited for use with the [`lazymcmc`](https://github.com/jameshay218/lazymcmc) package. In particular, the branch with parallel tempering [`https://github.com/jameshay218/lazymcmc/tree/parallel_tempering`](https://github.com/jameshay218/lazymcmc/tree/parallel_tempering) thanks to [Ada Yan](https://github.com/ada-w-yan). Given the nature and amount of data used here, the posterior distribution is multi-modal. Parallel tempering samples from such distributions more efficiently, and is therefore the recommended MCMC algorithm for this system. 
+Whilst the base package comes with its own MCMC functionality, the model is well suited for use with the [`lazymcmc`](https://github.com/jameshay218/lazymcmc) package. In particular, the branch with parallel tempering [`https://github.com/jameshay218/lazymcmc/tree/parallel_tempering`](https://github.com/jameshay218/lazymcmc/tree/parallel_tempering) thanks to [Ada Yan](https://github.com/ada-w-yan). Given the nature and amount of data used here, the posterior distributions are often multi-modal. Parallel tempering samples from such distributions more efficiently, and is therefore the recommended MCMC algorithm for this system. 
 
 Please visit this [site](https://github.com/jameshay218/lazymcmc/tree/parallel_tempering) and clone or download the full package. Although the documentation on that site applies to MCMC code without parallel tempering, the interface for the user is pretty much the same.
 
@@ -80,7 +80,7 @@ library(antibodyKinetics)
 ```
 
 #### 3.1 Generation of input parameters and exposure tables
-The purpose of this project is to explore different assumptions and immunological mechanisms in generating observed antibody titres. The format of input exposures and parameters therefore depends on the assumptions that the user wishes to make and the exposure schedule used. Making the correct input parameter and exposure tables is not completely trivial, and should be done using the `paramViewer()`, a vignette of which explaining its use can be found [here](https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html). However, example parameter tables and exposure tables can be found as attached R objects and in the `inputs` folder (including all those used in this analysis). Users should refer to `inputs/run_tracker.csv` for a description of which parameter and expsure tables in `inputs` correspond to which model.
+The purpose of this project is to explore different assumptions and immunological mechanisms in generating observed antibody titres. The format of input exposures and parameters therefore depends on the assumptions that the user wishes to make and the exposure schedule used. Making the correct input parameter and exposure tables is not completely trivial, and should be done using the `paramViewer()`, a vignette explaining its use can be found [here](https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html). However, example parameter tables and exposure tables can be found as attached R objects and in the `inputs` folder (including all those used in this analysis). Users should refer to `inputs/run_tracker.csv` for a description of which parameter and expsure tables in `inputs` correspond to which model.
 
 The `runName` identifier and corresponding options can be generated as follows:
 ```r
@@ -113,12 +113,13 @@ data(exampleExposureTab)
 ```
 #### 3.2 Solving the model
 ```r
+library(ggplot2)
 times <- seq(0,100,by=1)
 
 ## R implementation
 ## Create a function pointer that only needs the unlabelled vector 
 ## of model parameters and the observation time vector
-f1 <- create_model_group_func(parTab,exposureTab,form=options$form,typing = typing,cross_reactivity = options$cr)
+f1 <- create_model_group_func(parTab,exampleExposureTab,form=options$form,typing = TRUE,cross_reactivity = options$cr)
 y1 <- f1(parTab$values, times)
 y1 <- reshape2::melt(y1, id.vars=c("times","group"))    
 p1 <- ggplot(y1) + geom_line(aes(x=times,y=value,col=variable)) + facet_wrap(~group)+theme_bw()
@@ -126,7 +127,7 @@ p1 <- ggplot(y1) + geom_line(aes(x=times,y=value,col=variable)) + facet_wrap(~gr
 ## Cpp implementation
 ## Create a function pointer that only needs the unlabelled vector 
 ## of model parameters and the observation time vector
-f2 <- create_model_group_func_cpp(parTab,exposureTab,version="model",form=options$form,typing = typing,cross_reactivity = options$cr)
+f2 <- create_model_group_func_cpp(parTab,exampleExposureTab,version="model",form=options$form,typing = TRUE,cross_reactivity = options$cr)
 y2 <- f2(parTab$values, times)
 ## Cpp implementation retains less labelling for speed, so 
 ## corresponding groups/strains must be added back to the data frame
@@ -144,15 +145,16 @@ Solving the posterior probability for a set of model parameters given the ferret
 data(ferret_titres)
 
 ## Only use the columns containing titres
-dat <- as.matrix(ferret_titres[,4:ncol(data)])
+dat <- as.matrix(ferret_titres[,4:ncol(ferret_titres)])
 
 ## The first row of the data should give the sampling times
 dat <- rbind(c(0,21,36,49,70),dat)
 rownames(dat) <- NULL
 
 ## Create a function pointer to solve the posterior probability
-posterior_func <- create_model_group_func_cpp(parTab,exposureTab, dat=dat, version="posterior")
-posterior_func(parTab$values)
+posterior_func <- create_model_group_func_cpp(exampleParTab,exampleExposureTab, dat=dat, version="posterior",
+                                              form=options$form,typing=TRUE,cross_reactivity = TRUE)
+posterior_func(exampleParTab$values)
 ```
 
 #### 3.4 Changing the model structure options

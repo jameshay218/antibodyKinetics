@@ -1,5 +1,6 @@
 ## Load the package
 library(antibodyKinetics)
+library(ggplot2)
 
 ## Vector of names input parameters to solve the model -
 ## note that for the cpp implementation, the order of inputs matters
@@ -36,7 +37,7 @@ times <- seq(0,100,by=1)
 ## R implementation
 ## Create a function pointer that only needs the unlabelled vector 
 ## of model parameters and the observation time vector
-f1 <- create_model_group_func(parTab,exposureTab,form=options$form,typing = typing,cross_reactivity = options$cr)
+f1 <- create_model_group_func(parTab,exampleExposureTab,form=options$form,typing = TRUE,cross_reactivity = options$cr)
 y1 <- f1(parTab$values, times)
 y1 <- reshape2::melt(y1, id.vars=c("times","group"))    
 p1 <- ggplot(y1) + geom_line(aes(x=times,y=value,col=variable)) + facet_wrap(~group)+theme_bw()
@@ -44,14 +45,14 @@ p1 <- ggplot(y1) + geom_line(aes(x=times,y=value,col=variable)) + facet_wrap(~gr
 ## Cpp implementation
 ## Create a function pointer that only needs the unlabelled vector 
 ## of model parameters and the observation time vector
-f2 <- create_model_group_func_cpp(parTab,exposureTab,version="model",form=options$form,typing = typing,cross_reactivity = options$cr)
+f2 <- create_model_group_func_cpp(parTab,exampleExposureTab,version="model",form=options$form,typing = TRUE,cross_reactivity = options$cr)
 y2 <- f2(parTab$values, times)
 ## Cpp implementation retains less labelling for speed, so 
 ## corresponding groups/strains must be added back to the data frame
 cpp_labels <- as.data.frame(expand.grid("strain"=LETTERS[1:5],"group"=1:5))
 y2 <- cbind(cpp_labels, as.data.frame(y2))
 y2 <- reshape2::melt(y2, id.vars=c("strain","group"))
-y2$variable <- as.numeric(y$variable)
+y2$variable <- as.numeric(y2$variable)
 p2 <- ggplot(y2) + geom_line(aes(x=variable,y=value,col=strain)) + facet_wrap(~group) + theme_bw()
 
 
@@ -59,12 +60,13 @@ p2 <- ggplot(y2) + geom_line(aes(x=variable,y=value,col=strain)) + facet_wrap(~g
 data(ferret_titres)
 
 ## Only use the columns containing titres
-dat <- as.matrix(ferret_titres[,4:ncol(data)])
+dat <- as.matrix(ferret_titres[,4:ncol(ferret_titres)])
 
 ## The first row of the data should give the sampling times
 dat <- rbind(c(0,21,36,49,70),dat)
 rownames(dat) <- NULL
 
 ## Create a function pointer to solve the posterior probability
-posterior_func <- create_model_group_func_cpp(parTab,exposureTab, dat=dat, version="posterior")
-posterior_func(parTab$values)
+posterior_func <- create_model_group_func_cpp(exampleParTab,exampleExposureTab, dat=dat, version="posterior",
+                                              form=options$form,typing=TRUE,cross_reactivity = TRUE)
+posterior_func(exampleParTab$values)
