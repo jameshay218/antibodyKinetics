@@ -1,12 +1,10 @@
 ## Load required packages and auxiliary functions
 library(coda)
 library(antibodyKinetics)
-source("~/Documents/Ferret_Model/antibodyKinetics/scripts/analysis/convergence_check_funcs.R")
-source("~/Documents/Ferret_Model/antibodyKinetics/scripts/analysis/model_comparison_functions.R")
+source("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/convergence_check_funcs.R")
+source("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/model_comparison_functions.R")
 
 top_wd <- getwd()
-
-
 
 #############################
 ## Run model comparison?
@@ -19,9 +17,10 @@ do_parameter_estimates <- TRUE
 
 ## Input area
 ## Full file path to giving location to save all results
-res_wd <- "~/Documents/Ferret_Model/adam_error_012018"
+res_wd <- "~/Documents/Ferret_Model/results"
 ## Full file path to folder containing the MCMC chains
-chain_wd_base <- "~/Documents/Ferret_Model/adam_error_012018/outputs"
+chain_wd_base <- "~/net/home/ferret/outputs/"
+#chain_wd_base <- "/media/james/Storage 2/ferrets_17Aug2018"
 
 ## Location of the data file used
 dat_file <- "~/net/home/ferret/inputs/real_data_simple.csv"
@@ -37,12 +36,14 @@ exposureTab_loc <- "~/net/home/ferret/inputs/exposureTabs/"
 
 ## Table describing which files and options are used for which runs
 runs <- read.csv("~/net/home/ferret/inputs/run_tracker.csv",stringsAsFactors=FALSE)
-#runs <- runs[runs$antigenic_seniority == "Y",]
 ###
+
 ## IF SKIPPING
 ###
+#ids <- c(7,8)
 #runs <- runs[runs$runID %in% ids,]
-times <- c(0,21,36,49,70)
+
+times <- c(0,21,37,49,70)
 n <- 1000
 
 #############################

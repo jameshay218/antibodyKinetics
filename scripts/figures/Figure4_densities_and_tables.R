@@ -26,7 +26,7 @@ source("~/Documents/Ferret_Model/antibodyKinetics/scripts/figures/plotting_help.
 ##############################################################
 ## USER INPUT AREA
 ##############################################################
-i <- 63
+i <- 62
 
 ## Input area
 res_wd <- "~/Documents/Ferret_Model/"
@@ -35,9 +35,9 @@ if(!dir.exists(paste0(res_wd,"plots/",i))) dir.create(paste0(res_wd,"plots/",i))
 setwd(paste0(res_wd,"plots/",i))
 
 ## Where are the MCMC chains saved?
-chain_wd_base <- "~/Documents/Ferret_Model/results_112017/outputs"
+chain_wd_base <- "~/Documents/Ferret_Model/rerun_correct_times_28082018/outputs"
 
-at_file <- "~/Documents/Ferret_Model/antibodyKinetics/inputs/real_data_simple.csv"
+dat_file <- "~/Documents/Ferret_Model/antibodyKinetics/inputs/real_data_simple.csv"
 
 ## Number of iterations to disgard
 adaptive <- 1000000
@@ -52,7 +52,7 @@ runs <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inputs/run_tracker.c
 #runs <- read.csv("~/net/home/ferret/inputs/run_tracker.csv",stringsAsFactors=FALSE)
 
 ## Times to solve model over
-times <- c(0,21,36,49,70)
+times <- c(0,21,37,49,70)
 n <- 1000 ## Samples to take from chain
 
 ##############################################################
@@ -79,14 +79,15 @@ chain <- as.data.frame(load_mcmc_chains(chain_wd, parTab, FALSE, 1, adaptive, FA
 ## USER NOTE - may need to change the "skipped" parameters. Change to NULL
 ## if you want to include all parameters
 extraTheme <- theme(text=element_text(family="Arial"),axis.text.x=element_text(size=8,angle=45,hjust=1),
-                    axis.text.y=element_text(size=8),axis.title.y=element_text(size=10))
-densities_mu <- den_plot(chain, "mu", parTab, options, "Maximum homologous\n boost, μ", 15)
+                    axis.text.y=element_text(size=8),axis.title.y=element_text(size=10),plot.margin=unit(c(0.5,0,0,0),"cm"))
+densities_mu <- den_plot(chain, "mu", parTab, options, "Maximum homologous\n boost, μ", 15,add_priming_blank=FALSE)
 densities_adjmu <- den_plot(chain, "adjmu", parTab, options, "Homologous boost after\ninitial waning, μ(1-dp)", 15)
 densities_ts <- den_plot(chain, "ts", parTab, options, "Duration of initial\n waning phase, ts", 20)
 densities_dp <- den_plot(chain, "dp", parTab, options, "Initial proportion of\n boost lost, dp", 1)
 densities_m <- den_plot(chain, "m", parTab,options, "Long term waning\n rate, m", 0.3,FALSE,skip_pars=c("m","m.2","m.3"),yupper=12)
 densities_m[[2]]
-densities_sigma <- den_plot(chain, "sigma", parTab, options, "Cross reactivity\ngradient,σ", 10, skip_pars=c("sigma.1","sigma.2"),yupper=100)
+densities_sigma <- den_plot(chain, "sigma", parTab, options, "Cross reactivity\ngradient,σ", 10, skip_pars=c("sigma.1","sigma.2"),
+                            yupper=100,add_priming_blank = FALSE)
 densities_mod <- den_plot(chain, "mod", parTab, options, "Antigenic seniority \nmodifiers, ρ", 1)
 densities_y0mod <- den_plot(chain, "y0_mod", parTab, options, "Titre dependence gradient, γ", ymax=1,ymin=-1)
 densities_boostlim <- den_plot(chain, "boost_limit", parTab, options, "Maximum titre dependence,\ny_switch", ymax=12)
@@ -99,7 +100,7 @@ all_dens <- plot_grid(densities_mu[[2]] + extraTheme,
                       densities_sigma[[2]] + extraTheme,
                       ncol=2)
 
-svg(paste0(runName,"_all_densities.svg"),width=7.5,height=7.5,family="Arial")
+svg(paste0(runName,"_all_densities.svg"),width=5.2,height=6.5,family="Arial")
 print(all_dens)
 dev.off()
 
@@ -204,11 +205,13 @@ print(do.call("plot_grid",c(pair_plots,ncol=5)))
 dev.off()
 
 ## Save posterior densities for all inferred parameters
-write.table(densities_mu[[1]],"mu_densities.csv",sep=",",row.names=FALSE)
-write.table(densities_adjmu[[1]],"adjmu_densities.csv",sep=",",row.names=FALSE)
-write.table(densities_m[[1]],"m_densities.csv",sep=",",row.names=FALSE)
-write.table(densities_sigma[[1]],"sigma_densities.csv",sep=",",row.names=FALSE)
-write.table(densities_ts[[1]],"ts_densities.csv",sep=",",row.names=FALSE)
-write.table(densities_dp[[1]],"dp_densities.csv",sep=",",row.names=FALSE)
-write.table(densities_mod[[1]],"mod_densities.csv",sep=",",row.names=FALSE)
+
+
+write.table(densities_mu[[1]][,c("type","mean","median","lower","upper")],"mu_densities.csv",sep=",",row.names=FALSE)
+write.table(densities_adjmu[[1]][,c("type","mean","median","lower","upper")],"adjmu_densities.csv",sep=",",row.names=FALSE)
+write.table(densities_m[[1]][,c("type","mean","median","lower","upper")],"m_densities.csv",sep=",",row.names=FALSE)
+write.table(densities_sigma[[1]][,c("type","mean","median","lower","upper")],"sigma_densities.csv",sep=",",row.names=FALSE)
+write.table(densities_ts[[1]][,c("type","mean","median","lower","upper")],"ts_densities.csv",sep=",",row.names=FALSE)
+write.table(densities_dp[[1]][,c("type","mean","median","lower","upper")],"dp_densities.csv",sep=",",row.names=FALSE)
+write.table(densities_mod[[1]][,c("type","mean","median","lower","upper")],"mod_densities.csv",sep=",",row.names=FALSE)
 

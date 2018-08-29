@@ -7,7 +7,7 @@ ordered_names <- c("All","TIV","TIV + adjuvant","Infection",
 ordered_names2 <- c("All","TIV","TIV + adjuvant","Infection",
                    "TIV 1","TIV 2","TIV 1 + adjuvant","TIV 2 + adjuvant",
                    "Infection 1","Infection 2","Priming")
-den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals=TRUE, skip_pars=NULL,yupper=NULL,ymin=0){
+den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals=TRUE, skip_pars=NULL,yupper=NULL,ymin=0, add_priming_blank=TRUE){
     print(parName)
     if(is.null(yupper)) yupper <- ymax
     print(yupper)
@@ -32,12 +32,15 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
     melted_chain$parName <- as.character(melted_chain$parName)
     
     types_table <- unique(parTab[parTab$names %in% parName,c("names","type")])
+
     if(parName == "mod"){
         types_table <- rep(types_table, 4)
         types_table$names <- c("mod","mod.1","mod.2","mod.3")
     }
-    
+
+   
     types_table$names <- colnames(tmp_chain)
+
     
     if(options$priming) types_table[types_table$names %in% c("beta","c"),"type"] <- "Priming"
     
@@ -57,21 +60,23 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
     
     ## Code to reorder the exposure type factor levels
     present_names <- ordered_names[ordered_names %in% as.character(unique(melted_chain$type))]
-    melted_chain$type = factor(melted_chain$type,ordered_names)
+    if(add_priming_blank) present_names <- c(present_names,"Priming")
+    melted_chain$type = factor(melted_chain$type,present_names)
     melted_chain[melted_chain$parName %in% skip_pars,"value"] <- NA
 
+    
     use_var <- "type"
     if(parName == "mod"){
       use_var <- "parName"
       convert <- c("mod"="ρ1","mod.1"="ρ2","mod.2"="ρ3","mod.3"="ρ4")
       melted_chain$parName <- convert[melted_chain$parName]
-
     }
     if(plot_intervals){
         p <- ggplot(melted_chain) + 
             geom_violin(aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.025,0.5,0.975),trim=TRUE,scale="width") + 
             coord_cartesian(ylim=c(ymin,ymax)) + xlab("") + ylab(ylab) +
             geom_hline(yintercept = c(ymin,yupper),linetype="dashed", alpha=0.3) +
+             scale_x_discrete(drop=FALSE) +
             theme(axis.text.x = element_text(size=8,family="Arial",colour="black"),
                   axis.text.y = element_text(size=8,family="Arial",colour="black"),
                   axis.title.y=element_text(size=10,family="Arial",colour="black"))  + theme_classic()
@@ -80,6 +85,7 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
             geom_violin(aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.5),trim=TRUE,scale="width") + 
             coord_cartesian(ylim=c(ymin,ymax)) + xlab("") + ylab(ylab) +
             geom_hline(yintercept = c(ymin,yupper),linetype="dashed", alpha=0.3) +
+            scale_x_discrete(drop=FALSE) +
             theme(axis.text.x = element_text(size=8,family="Arial",colour="black"),
                   axis.text.y = element_text(size=8,family="Arial",colour="black"),
                   axis.title.y=element_text(size=10,family="Arial",colour="black"))  + theme_classic()

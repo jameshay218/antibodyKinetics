@@ -6,7 +6,7 @@ source("~/Documents/Ferret_Model/analysis/model_comparison_functions.R")
 
 models <- read.csv("~/Dropbox/Wellcome Trust/ferret_model/results/model_comparisons_predictive_models.csv",stringsAsFactors=FALSE)
 
-times <- c(0,21,36,49,70)
+times <- c(0,21,37,49,70)
 runs <- read.csv("~/net/home/ferret/inputs/run_tracker.csv",stringsAsFactors=FALSE)
 runs$typing <- as.logical(runs$typing)
 runs$cr <- as.logical(runs$cr)

@@ -1,129 +1,67 @@
-"runID","Model Form","Antigenic Seniority","Cross Reactivity","Priming","Typed exposures","Waning","Titre dependent boosting"
-1,"Competitive","Absent","Universal","Absent","6 types","Monophasic","Present"
-2,"Competitive","Absent","Type specific","Absent","6 types","Monophasic","Present"
-3,"Competitive","Absent","Universal","Absent","3 types","Monophasic","Present"
-4,"Competitive","Absent","Type specific","Absent","3 types","Monophasic","Present"
-5,"Competitive","Absent","Universal","Absent","6 types","Biphasic","Present"
-6,"Competitive","Absent","Type specific","Absent","6 types","Biphasic","Present"
-7,"Competitive","Absent","Universal","Absent","3 types","Biphasic","Present"
-8,"Competitive","Absent","Type specific","Absent","3 types","Biphasic","Present"
-9,"Competitive","Absent","Universal","Absent","6 types","Monophasic","Absent"
-10,"Competitive","Absent","Type specific","Absent","6 types","Monophasic","Absent"
-11,"Competitive","Absent","Universal","Absent","3 types","Monophasic","Absent"
-12,"Competitive","Absent","Type specific","Absent","3 types","Monophasic","Absent"
-13,"Competitive","Absent","Universal","Absent","6 types","Biphasic","Absent"
-14,"Competitive","Absent","Type specific","Absent","6 types","Biphasic","Absent"
-15,"Competitive","Absent","Universal","Absent","3 types","Biphasic","Absent"
-16,"Competitive","Absent","Type specific","Absent","3 types","Biphasic","Absent"
-17,"Competitive","Absent","Universal","Present","6 types","Monophasic","Present"
-18,"Competitive","Absent","Type specific","Present","6 types","Monophasic","Present"
-19,"Competitive","Absent","Universal","Present","3 types","Monophasic","Present"
-20,"Competitive","Absent","Type specific","Present","3 types","Monophasic","Present"
-21,"Competitive","Absent","Universal","Present","6 types","Biphasic","Present"
-22,"Competitive","Absent","Type specific","Present","6 types","Biphasic","Present"
-23,"Competitive","Absent","Universal","Present","3 types","Biphasic","Present"
-24,"Competitive","Absent","Type specific","Present","3 types","Biphasic","Present"
-25,"Competitive","Absent","Universal","Present","6 types","Monophasic","Absent"
-26,"Competitive","Absent","Type specific","Present","6 types","Monophasic","Absent"
-27,"Competitive","Absent","Universal","Present","3 types","Monophasic","Absent"
-28,"Competitive","Absent","Type specific","Present","3 types","Monophasic","Absent"
-29,"Competitive","Absent","Universal","Present","6 types","Biphasic","Absent"
-30,"Competitive","Absent","Type specific","Present","6 types","Biphasic","Absent"
-31,"Competitive","Absent","Universal","Present","3 types","Biphasic","Absent"
-32,"Competitive","Absent","Type specific","Present","3 types","Biphasic","Absent"
-33,"Competitive","Present","Universal","Absent","6 types","Monophasic","Present"
-34,"Competitive","Present","Type specific","Absent","6 types","Monophasic","Present"
-35,"Competitive","Present","Universal","Absent","3 types","Monophasic","Present"
-36,"Competitive","Present","Type specific","Absent","3 types","Monophasic","Present"
-37,"Competitive","Present","Universal","Absent","6 types","Biphasic","Present"
-38,"Competitive","Present","Type specific","Absent","6 types","Biphasic","Present"
-39,"Competitive","Present","Universal","Absent","3 types","Biphasic","Present"
-40,"Competitive","Present","Type specific","Absent","3 types","Biphasic","Present"
-41,"Competitive","Present","Universal","Absent","6 types","Monophasic","Absent"
-42,"Competitive","Present","Type specific","Absent","6 types","Monophasic","Absent"
-43,"Competitive","Present","Universal","Absent","3 types","Monophasic","Absent"
-44,"Competitive","Present","Type specific","Absent","3 types","Monophasic","Absent"
-45,"Competitive","Present","Universal","Absent","6 types","Biphasic","Absent"
-46,"Competitive","Present","Type specific","Absent","6 types","Biphasic","Absent"
-47,"Competitive","Present","Universal","Absent","3 types","Biphasic","Absent"
-48,"Competitive","Present","Type specific","Absent","3 types","Biphasic","Absent"
-49,"Competitive","Present","Universal","Present","6 types","Monophasic","Present"
-50,"Competitive","Present","Type specific","Present","6 types","Monophasic","Present"
-51,"Competitive","Present","Universal","Present","3 types","Monophasic","Present"
-52,"Competitive","Present","Type specific","Present","3 types","Monophasic","Present"
-53,"Competitive","Present","Universal","Present","6 types","Biphasic","Present"
-54,"Competitive","Present","Type specific","Present","6 types","Biphasic","Present"
-55,"Competitive","Present","Universal","Present","3 types","Biphasic","Present"
-56,"Competitive","Present","Type specific","Present","3 types","Biphasic","Present"
-57,"Competitive","Present","Universal","Present","6 types","Monophasic","Absent"
-58,"Competitive","Present","Type specific","Present","6 types","Monophasic","Absent"
-59,"Competitive","Present","Universal","Present","3 types","Monophasic","Absent"
-60,"Competitive","Present","Type specific","Present","3 types","Monophasic","Absent"
-61,"Competitive","Present","Universal","Present","6 types","Biphasic","Absent"
-62,"Competitive","Present","Type specific","Present","6 types","Biphasic","Absent"
-63,"Competitive","Present","Universal","Present","3 types","Biphasic","Absent"
-64,"Competitive","Present","Type specific","Present","3 types","Biphasic","Absent"
-65,"Isolated","Absent","Universal","Absent","6 types","Monophasic","Present"
-66,"Isolated","Absent","Type specific","Absent","6 types","Monophasic","Present"
-67,"Isolated","Absent","Universal","Absent","3 types","Monophasic","Present"
-68,"Isolated","Absent","Type specific","Absent","3 types","Monophasic","Present"
-69,"Isolated","Absent","Universal","Absent","6 types","Biphasic","Present"
-70,"Isolated","Absent","Type specific","Absent","6 types","Biphasic","Present"
-71,"Isolated","Absent","Universal","Absent","3 types","Biphasic","Present"
-72,"Isolated","Absent","Type specific","Absent","3 types","Biphasic","Present"
-73,"Isolated","Absent","Universal","Absent","6 types","Monophasic","Absent"
-74,"Isolated","Absent","Type specific","Absent","6 types","Monophasic","Absent"
-75,"Isolated","Absent","Universal","Absent","3 types","Monophasic","Absent"
-76,"Isolated","Absent","Type specific","Absent","3 types","Monophasic","Absent"
-77,"Isolated","Absent","Universal","Absent","6 types","Biphasic","Absent"
-78,"Isolated","Absent","Type specific","Absent","6 types","Biphasic","Absent"
-79,"Isolated","Absent","Universal","Absent","3 types","Biphasic","Absent"
-80,"Isolated","Absent","Type specific","Absent","3 types","Biphasic","Absent"
-81,"Isolated","Absent","Universal","Present","6 types","Monophasic","Present"
-82,"Isolated","Absent","Type specific","Present","6 types","Monophasic","Present"
-83,"Isolated","Absent","Universal","Present","3 types","Monophasic","Present"
-84,"Isolated","Absent","Type specific","Present","3 types","Monophasic","Present"
-85,"Isolated","Absent","Universal","Present","6 types","Biphasic","Present"
-86,"Isolated","Absent","Type specific","Present","6 types","Biphasic","Present"
-87,"Isolated","Absent","Universal","Present","3 types","Biphasic","Present"
-88,"Isolated","Absent","Type specific","Present","3 types","Biphasic","Present"
-89,"Isolated","Absent","Universal","Present","6 types","Monophasic","Absent"
-90,"Isolated","Absent","Type specific","Present","6 types","Monophasic","Absent"
-91,"Isolated","Absent","Universal","Present","3 types","Monophasic","Absent"
-92,"Isolated","Absent","Type specific","Present","3 types","Monophasic","Absent"
-93,"Isolated","Absent","Universal","Present","6 types","Biphasic","Absent"
-94,"Isolated","Absent","Type specific","Present","6 types","Biphasic","Absent"
-95,"Isolated","Absent","Universal","Present","3 types","Biphasic","Absent"
-96,"Isolated","Absent","Type specific","Present","3 types","Biphasic","Absent"
-97,"Isolated","Present","Universal","Absent","6 types","Monophasic","Present"
-98,"Isolated","Present","Type specific","Absent","6 types","Monophasic","Present"
-99,"Isolated","Present","Universal","Absent","3 types","Monophasic","Present"
-100,"Isolated","Present","Type specific","Absent","3 types","Monophasic","Present"
-101,"Isolated","Present","Universal","Absent","6 types","Biphasic","Present"
-102,"Isolated","Present","Type specific","Absent","6 types","Biphasic","Present"
-103,"Isolated","Present","Universal","Absent","3 types","Biphasic","Present"
-104,"Isolated","Present","Type specific","Absent","3 types","Biphasic","Present"
-105,"Isolated","Present","Universal","Absent","6 types","Monophasic","Absent"
-106,"Isolated","Present","Type specific","Absent","6 types","Monophasic","Absent"
-107,"Isolated","Present","Universal","Absent","3 types","Monophasic","Absent"
-108,"Isolated","Present","Type specific","Absent","3 types","Monophasic","Absent"
-109,"Isolated","Present","Universal","Absent","6 types","Biphasic","Absent"
-110,"Isolated","Present","Type specific","Absent","6 types","Biphasic","Absent"
-111,"Isolated","Present","Universal","Absent","3 types","Biphasic","Absent"
-112,"Isolated","Present","Type specific","Absent","3 types","Biphasic","Absent"
-113,"Isolated","Present","Universal","Present","6 types","Monophasic","Present"
-114,"Isolated","Present","Type specific","Present","6 types","Monophasic","Present"
-115,"Isolated","Present","Universal","Present","3 types","Monophasic","Present"
-116,"Isolated","Present","Type specific","Present","3 types","Monophasic","Present"
-117,"Isolated","Present","Universal","Present","6 types","Biphasic","Present"
-118,"Isolated","Present","Type specific","Present","6 types","Biphasic","Present"
-119,"Isolated","Present","Universal","Present","3 types","Biphasic","Present"
-120,"Isolated","Present","Type specific","Present","3 types","Biphasic","Present"
-121,"Isolated","Present","Universal","Present","6 types","Monophasic","Absent"
-122,"Isolated","Present","Type specific","Present","6 types","Monophasic","Absent"
-123,"Isolated","Present","Universal","Present","3 types","Monophasic","Absent"
-124,"Isolated","Present","Type specific","Present","3 types","Monophasic","Absent"
-125,"Isolated","Present","Universal","Present","6 types","Biphasic","Absent"
-126,"Isolated","Present","Type specific","Present","6 types","Biphasic","Absent"
-127,"Isolated","Present","Universal","Present","3 types","Biphasic","Absent"
-128,"Isolated","Present","Type specific","Present","3 types","Biphasic","Absent"
+runID,Model Form,Antigenic Seniority,Cross Reactivity,Priming,Typed exposures,Waning,Titre dependent boosting
+1,Competitive,Absent,Universal,Absent,6 types,Monophasic,Present
+2,Competitive,Absent,Type specific,Absent,6 types,Monophasic,Present
+3,Competitive,Absent,Universal,Absent,3 types,Monophasic,Present
+4,Competitive,Absent,Type specific,Absent,3 types,Monophasic,Present
+5,Competitive,Absent,Universal,Absent,6 types,Biphasic,Present
+6,Competitive,Absent,Type specific,Absent,6 types,Biphasic,Present
+7,Competitive,Absent,Universal,Absent,3 types,Biphasic,Present (suppression)
+8,Competitive,Absent,Type specific,Absent,3 types,Biphasic,Present (suppression)
+9,Competitive,Absent,Universal,Absent,6 types,Monophasic,Absent
+10,Competitive,Absent,Type specific,Absent,6 types,Monophasic,Absent
+11,Competitive,Absent,Universal,Absent,3 types,Monophasic,Absent
+12,Competitive,Absent,Type specific,Absent,3 types,Monophasic,Absent
+13,Competitive,Absent,Universal,Absent,6 types,Biphasic,Absent
+14,Competitive,Absent,Type specific,Absent,6 types,Biphasic,Absent
+15,Competitive,Absent,Universal,Absent,3 types,Biphasic,Absent
+16,Competitive,Absent,Type specific,Absent,3 types,Biphasic,Absent
+17,Competitive,Absent,Universal,Present,6 types,Monophasic,Present
+18,Competitive,Absent,Type specific,Present,6 types,Monophasic,Present
+19,Competitive,Absent,Universal,Present,3 types,Monophasic,Present
+20,Competitive,Absent,Type specific,Present,3 types,Monophasic,Present
+21,Competitive,Absent,Universal,Present,6 types,Biphasic,Present
+22,Competitive,Absent,Type specific,Present,6 types,Biphasic,Present
+23,Competitive,Absent,Universal,Present,3 types,Biphasic,Present
+24,Competitive,Absent,Type specific,Present,3 types,Biphasic,Present
+25,Competitive,Absent,Universal,Present,6 types,Monophasic,Absent
+26,Competitive,Absent,Type specific,Present,6 types,Monophasic,Absent
+27,Competitive,Absent,Universal,Present,3 types,Monophasic,Absent
+28,Competitive,Absent,Type specific,Present,3 types,Monophasic,Absent
+29,Competitive,Absent,Universal,Present,6 types,Biphasic,Absent
+30,Competitive,Absent,Type specific,Present,6 types,Biphasic,Absent
+31,Competitive,Absent,Universal,Present,3 types,Biphasic,Absent
+32,Competitive,Absent,Type specific,Present,3 types,Biphasic,Absent
+33,Competitive,Present,Universal,Absent,6 types,Monophasic,Present
+34,Competitive,Present,Type specific,Absent,6 types,Monophasic,Present
+35,Competitive,Present,Universal,Absent,3 types,Monophasic,Present
+36,Competitive,Present,Type specific,Absent,3 types,Monophasic,Present
+37,Competitive,Present,Universal,Absent,6 types,Biphasic,Present
+38,Competitive,Present,Type specific,Absent,6 types,Biphasic,Present
+39,Competitive,Present,Universal,Absent,3 types,Biphasic,Present
+40,Competitive,Present,Type specific,Absent,3 types,Biphasic,Present
+41,Competitive,Present,Universal,Absent,6 types,Monophasic,Absent
+42,Competitive,Present,Type specific,Absent,6 types,Monophasic,Absent
+43,Competitive,Present,Universal,Absent,3 types,Monophasic,Absent
+44,Competitive,Present,Type specific,Absent,3 types,Monophasic,Absent
+45,Competitive,Present,Universal,Absent,6 types,Biphasic,Absent
+46,Competitive,Present,Type specific,Absent,6 types,Biphasic,Absent
+47,Competitive,Present,Universal,Absent,3 types,Biphasic,Absent
+48,Competitive,Present,Type specific,Absent,3 types,Biphasic,Absent
+49,Competitive,Present,Universal,Present,6 types,Monophasic,Present
+50,Competitive,Present,Type specific,Present,6 types,Monophasic,Present
+51,Competitive,Present,Universal,Present,3 types,Monophasic,Present
+52,Competitive,Present,Type specific,Present,3 types,Monophasic,Present
+53,Competitive,Present,Universal,Present,6 types,Biphasic,Present
+54,Competitive,Present,Type specific,Present,6 types,Biphasic,Present
+55,Competitive,Present,Universal,Present,3 types,Biphasic,Present
+56,Competitive,Present,Type specific,Present,3 types,Biphasic,Present
+57,Competitive,Present,Universal,Present,6 types,Monophasic,Absent
+58,Competitive,Present,Type specific,Present,6 types,Monophasic,Absent
+59,Competitive,Present,Universal,Present,3 types,Monophasic,Absent
+60,Competitive,Present,Type specific,Present,3 types,Monophasic,Absent
+61,Competitive,Present,Universal,Present,6 types,Biphasic,Absent
+62,Competitive,Present,Type specific,Present,6 types,Biphasic,Absent
+63,Competitive,Present,Universal,Present,3 types,Biphasic,Absent
+64,Competitive,Present,Type specific,Present,3 types,Biphasic,Absent
+65,Competitive,Absent,Universal,Absent,3 types,Biphasic,Present (enhancement)
+66,Competitive,Absent,Type specific,Absent,3 types,Biphasic,Present (enhancement)

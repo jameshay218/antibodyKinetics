@@ -50,7 +50,7 @@ runs <- read.csv("~/net/home/ferret/inputs/run_tracker.csv",stringsAsFactors=FAL
 ## IF SKIPPING
 ###
 #runs <- runs[runs$runID %in% ids,] ## Only analyse runs in the ids vector, if using a subset
-times <- c(0,21,36,49,70) ## Times to solve model over
+times <- c(0,21,37,49,70) ## Times to solve model over
 n <- 1000 ## How many draws from each chain to take when performing analyses
 
 #############################

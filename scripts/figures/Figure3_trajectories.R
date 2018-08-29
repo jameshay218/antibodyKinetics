@@ -32,7 +32,8 @@ if(!dir.exists(paste0(res_wd,"plots/",i))) dir.create(paste0(res_wd,"plots/",i))
 setwd(paste0(res_wd,"plots/",i))
 #chain_wd_base <- "~/Documents/Ferret_Model/raw_results_test/outputs_real/"
 ## Where are the MCMC chains saved?
-chain_wd_base <- "~/Documents/Ferret_Model/results_112017/outputs"
+#chain_wd_base <- "~/Documents/Ferret_Model/results_112017/outputs"
+chain_wd_base <- "/media/james/Storage 2/ferrets_17Aug2018"
 
 ## Data and exposure table for plot
 infection_times <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/scripts/figures/infection_times.csv",stringsAsFactors=FALSE)
@@ -53,7 +54,7 @@ runs <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inputs/run_tracker.c
 convergence <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/waic_table.csv",stringsAsFactors=FALSE)
 
 ## Times to solve model over
-times <- c(0,21,36,49,70)
+times <- c(0,21,37,49,70)
 n <- 1000 ## Samples to take from chain
 ##############################################################
 
@@ -109,9 +110,9 @@ bestTraj$variable <- as.numeric(as.character(bestTraj$variable))
 bestTraj$group <- as.factor(bestTraj$group)
 bestTraj$strain <- as.factor(bestTraj$strain)
 
-mod[mod$upper > 12,"upper"] <- 12
-mod[mod$lower > 12,"lower"] <- 12
-bestTraj[bestTraj$value > 12,"value"] <- 12
+mod[mod$upper > 14,"upper"] <- 14
+mod[mod$lower > 14,"lower"] <- 14
+bestTraj[bestTraj$value > 14,"value"] <- 14
 
 convert_group <- c("Group 1","Group 2", "Group 3","Group 4", "Group 5")
 convert_strains <- c("A/Panama/2007/1999 (H3N2)","A/Brisbane/10/2007 (H3N2)","A/Wisconsin/67/2005 (H3N2)",
@@ -139,18 +140,21 @@ xlabel_colours <- c(rep("gray20",5),rep("red",nrow(infection_times)))
 xlabel_sizes <- c(rep(14,5),rep(10,4))
 
 p1 <- ggplot() + 
-  geom_ribbon(data = mod_A, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.5)+
+  geom_hline(yintercept=0,linetype="dashed",col="gray") +    
+  geom_hline(yintercept=12,linetype="dashed",col="gray") +
+   geom_ribbon(data = mod_A, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.4)+
+
   geom_line(data=bestTraj_A,aes(x=variable,y=value,col=strain))+
-  geom_point(data = meltedDat_A,aes(x=variable,y=value,col=strain),position=position_jitter(w=0.5,h=0.5)) +
-  geom_vline(data=infection_times,aes(xintercept=time),col="red",linetype="longdash") +
+  geom_point(data = meltedDat_A,aes(x=variable,y=value,fill=strain),size=1,shape=21,stroke=0.4,
+             col="gray20",position=position_jitter(w=0.25,h=0.25)) +
+    geom_vline(data=infection_times,aes(xintercept=time),col="red",linetype="dashed") +
   facet_wrap(~group,ncol=1) +
-  scale_y_continuous(limits=c(-1,12),expand=c(0,0),breaks=seq(0,12,by=2)) +
+  scale_y_continuous(limits=c(-1,14),expand=c(0,0),breaks=seq(0,14,by=2)) +
   scale_x_continuous(limits=c(0,80)) +
-  geom_hline(yintercept=0,linetype="dashed",col="gray") +
   #geom_hline(yintercept=13,linetype="dashed",col="gray") +
-  ylab("log titer") +
+  ylab("log titre") +
   xlab("Time (days)") +
-  guides(colour=guide_legend(nrow=3))+
+  guides(colour=guide_legend(nrow=1,byrow=TRUE))+
   scale_fill_brewer(palette="Set1") +
   scale_colour_brewer(palette="Set1") + 
   scale_colour_manual(values=brewer.pal(8,"Set1")[1:3])+
@@ -161,32 +165,36 @@ p1 <- ggplot() +
         legend.title=element_blank(),
         legend.direction = "vertical",
         axis.text=element_text(family="Arial"),
-        axis.text.x=element_text(size=10),
-        axis.text.y=element_text(size=10),
-        axis.title.x=element_text(size=12),
-        axis.title.y=element_text(size=12),
+        axis.text.x=element_text(size=8),
+        axis.text.y=element_text(size=8),
+        axis.title.x=element_text(size=10),
+        axis.title.y=element_text(size=10),
         legend.text=element_text(size=8),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         axis.line=element_line(colour="gray20"),
         axis.line.x = element_line(colour = "gray20"),
         axis.line.y=element_line(colour="gray20"),
-        panel.spacing=unit(2,"lines"),
+        plot.margin = unit(c(1, 0, 0, 0), "cm"),
+        panel.spacing=unit(1,"lines"),
         panel.background=element_blank())
 
 p2 <- ggplot() + 
-  geom_ribbon(data = mod_B, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.5)+
-  geom_line(data=bestTraj_B,aes(x=variable,y=value,col=strain))+
-  geom_point(data = meltedDat_B,aes(x=variable,y=value,col=strain),position=position_jitter(w=0.5,h=0.5)) +
-  geom_vline(data=infection_times,aes(xintercept=time),col="red",linetype="longdash") +
-  facet_wrap(~group,ncol=1) +
-  scale_y_continuous(limits=c(-1,12),expand=c(0,0),breaks=seq(0,12,by=2)) +
-  scale_x_continuous(limits=c(0,80)) +
   geom_hline(yintercept=0,linetype="dashed",col="gray") +
+  geom_hline(yintercept=12,linetype="dashed",col="gray") +
+  geom_ribbon(data = mod_B, aes(x=time,ymax=upper,ymin=lower,fill=strain),alpha=0.4)+
+  
+  geom_line(data=bestTraj_B,aes(x=variable,y=value,col=strain))+
+  geom_point(data = meltedDat_B,aes(x=variable,y=value,fill=strain),size=1,shape=21,stroke=0.4,
+             col="gray20",position=position_jitter(w=0.25,h=0.25)) +
+   geom_vline(data=infection_times,aes(xintercept=time),col="red",linetype="dashed") +
+  facet_wrap(~group,ncol=1) +
+  scale_y_continuous(limits=c(-1,14),expand=c(0,0),breaks=seq(0,14,by=2)) +
+  scale_x_continuous(limits=c(0,80)) +
   #geom_hline(yintercept=13,linetype="dashed",col="gray") +
-  ylab("log titer") +
-  xlab("Time (days)") +
-  guides(colour=guide_legend(nrow=2))+
+  ylab("log titre") +
+  xlab("Time (days)") +  
+  guides(colour=guide_legend(nrow=1,byrow=TRUE))+
   scale_fill_brewer(palette="Set1") +
   scale_colour_brewer(palette="Set1") + 
   scale_colour_manual(values=brewer.pal(8,"Set1")[4:5])+
@@ -197,10 +205,10 @@ p2 <- ggplot() +
         legend.direction = "vertical",
         legend.title=element_blank(),
         axis.text=element_text(family="Arial"),
-        axis.text.x=element_text(size=10),
-        axis.text.y=element_text(size=10),
-        axis.title.x=element_text(size=12),
-        axis.title.y=element_text(size=12),
+        axis.text.x=element_text(size=8),
+        axis.text.y=element_text(size=8),
+        axis.title.x=element_text(size=10),
+        axis.title.y=element_text(size=10),
         legend.text=element_text(size=8),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -208,13 +216,15 @@ p2 <- ggplot() +
         axis.line.x = element_line(colour = "gray20"),
         axis.line.y=element_line(colour="gray20"),
         #axis.text.x=element_text(colour=xlabel_colours,size=xlabel_sizes),
-        panel.spacing=unit(2,"lines"),
+        panel.spacing=unit(1,"lines"),
+        plot.margin = unit(c(1, 0, 0, 0), "cm"),
         panel.background=element_blank())
 trajP <- plot_grid(p1,p2,ncol=2,align="hv")
+trajP
+svg(paste0(runName,"_model_traj.svg"),width=5.2,height=6,family="Arial")
+print(trajP)
+dev.off()
+#tiff(paste0(runName,"_model_traj.tiff"),width=7,height=7,units="in",res=300)
+#print(trajP)
+#dev.off()
 
-svg(paste0(runName,"_model_traj.svg"),width=7,height=7,family="Arial")
-print(trajP)
-dev.off()
-tiff(paste0(runName,"_model_traj.tiff"),width=7,height=7,units="in",res=300)
-print(trajP)
-dev.off()

@@ -148,7 +148,7 @@ data(ferret_titres)
 dat <- as.matrix(ferret_titres[,4:ncol(ferret_titres)])
 
 ## The first row of the data should give the sampling times
-dat <- rbind(c(0,21,36,49,70),dat)
+dat <- rbind(c(0,21,37,49,70),dat)
 rownames(dat) <- NULL
 
 ## Create a function pointer to solve the posterior probability

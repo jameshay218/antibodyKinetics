@@ -10,7 +10,7 @@ sim <- FALSE
 fixed_S <- FALSE
 typing <- TRUE
 
-times <- c(0,21,36,49,70)   
+times <- c(0,21,37,49,70)   
 
 
 ## Read in the run tracker table

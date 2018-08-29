@@ -1,6 +1,6 @@
 ## Modifies the all_estimates table to get nicer formatting
 runs <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inputs/run_tracker.csv",stringsAsFactors=FALSE) ## File location of run key table
-par_estimates <- read.csv("~/Documents/new_mcmc1/par_estimates_combined.csv",stringsAsFactors=FALSE) ## File location of parameter estimate results
+par_estimates <- read.csv("~/Documents/Ferret_Model/rerun_correct_times_28082018/parameter_estimates_complete.csv",stringsAsFactors=FALSE) ## File location of parameter estimate results
 par_estimates <- par_estimates[,-2]
 runs[runs$form=="C","form"] <- "Competitive"
 runs[runs$form=="I","form"] <- "Isolated"
@@ -58,14 +58,13 @@ par_estimates$type <- type_names[par_estimates$type]
 colnames(par_estimates) <- c("runID","Parameter name","Exposure Type","Mean","Median","Mode","2.5% CI","97.5% CI")
 
 par_estimates <- merge(runs,par_estimates, by="runID")
-write.table(par_estimates,"~/Documents/parameter_estimates.csv",sep=",",row.names=FALSE)
-
+#write.table(par_estimates,"~/Documents/Ferret_Model/rerun_correct_times_28082018/parameter_estimates.csv",sep=",",row.names=FALSE)
 
 ########
 ## Format convergence/WAIC table
 ########
 
-convergence_table <- read.csv("~/Documents/new_mcmc1/convergence_check.csv",stringsAsFactors=FALSE)
+convergence_table <- read.csv("~/Documents/Ferret_Model/rerun_correct_times_28082018/waic_table.csv",stringsAsFactors=FALSE)
 convergence_table$ess_names <- par_names_2[convergence_table$ess_names]
 convergence_table$psrf_names <- par_names_2[convergence_table$psrf_names]
 #convergence_table$ess_names_univ <- par_names_2[convergence_table$ess_names_univ]
@@ -77,39 +76,39 @@ max_gelman_par <- NULL
 max_gelman <- NULL
 gelman_mpsrf <- NULL
 
-for(i in 1:nrow(convergence_table)){
-  if((convergence_table[i,"multi_chain_fine"] & convergence_table[i,"manual"] != "univ") |
-     convergence_table[i,"manual"] == "multi"){
-      min_ess[i] <- convergence_table[i,"ess_vector_multi"]
-      min_ess_par[i] <- convergence_table[i,"ess_names_multi"]
-      max_gelman_par[i] <- convergence_table[i,"psrf_names_multi"]
-      max_gelman[i] <- convergence_table[i,"gelman.psrf_multi"]
-      gelman_mpsrf[i] <- convergence_table[i,"gelman.mpsrf_multi"]
-    
-  }
-  else if(convergence_table[i,"manual"] == "univ" | 
-          (convergence_table[i,"multi_chain_fine"] != TRUE & convergence_table[i,"univ_chain_fine"] == TRUE)){
-    min_ess[i] <- convergence_table[i,"ess_vector_univ"]
-    min_ess_par[i] <- convergence_table[i,"ess_names_univ"]
-    max_gelman_par[i] <- convergence_table[i,"psrf_names_univ"]
-    max_gelman[i] <- convergence_table[i,"gelman.psrf_univ"]
-    gelman_mpsrf[i] <- convergence_table[i,"gelman.mpsrf_univ"]
-  }
-  else{
-    min_ess[i] <- convergence_table[i,"ess_vector_multi"]
-    min_ess_par[i] <- convergence_table[i,"ess_names_multi"]
-    max_gelman_par[i] <- convergence_table[i,"psrf_names_multi"]
-    max_gelman[i] <- convergence_table[i,"gelman.psrf_multi"]
-    gelman_mpsrf[i] <- convergence_table[i,"gelman.mpsrf_multi"]
-  }
-}
-
-convergence_table <- convergence_table[,c(1,20,21)]
-convergence_table <- cbind(convergence_table,min_ess_par,min_ess,max_gelman_par,max_gelman,gelman_mpsrf)
-
-convergence_table <- convergence_table[,c(1,11,12,3:7)]
-
-
+# Commented out code applied to chains run before parallel tempering version
+# for(i in 1:nrow(convergence_table)){
+#   if((convergence_table[i,"multi_chain_fine"] & convergence_table[i,"manual"] != "univ") |
+#      convergence_table[i,"manual"] == "multi"){
+#       min_ess[i] <- convergence_table[i,"ess_vector_multi"]
+#       min_ess_par[i] <- convergence_table[i,"ess_names_multi"]
+#       max_gelman_par[i] <- convergence_table[i,"psrf_names_multi"]
+#       max_gelman[i] <- convergence_table[i,"gelman.psrf_multi"]
+#       gelman_mpsrf[i] <- convergence_table[i,"gelman.mpsrf_multi"]
+#     
+#   }
+#   else if(convergence_table[i,"manual"] == "univ" | 
+#           (convergence_table[i,"multi_chain_fine"] != TRUE & convergence_table[i,"univ_chain_fine"] == TRUE)){
+#     min_ess[i] <- convergence_table[i,"ess_vector_univ"]
+#     min_ess_par[i] <- convergence_table[i,"ess_names_univ"]
+#     max_gelman_par[i] <- convergence_table[i,"psrf_names_univ"]
+#     max_gelman[i] <- convergence_table[i,"gelman.psrf_univ"]
+#     gelman_mpsrf[i] <- convergence_table[i,"gelman.mpsrf_univ"]
+#   }
+#   else{
+#     min_ess[i] <- convergence_table[i,"ess_vector_multi"]
+#     min_ess_par[i] <- convergence_table[i,"ess_names_multi"]
+#     max_gelman_par[i] <- convergence_table[i,"psrf_names_multi"]
+#     max_gelman[i] <- convergence_table[i,"gelman.psrf_multi"]
+#     gelman_mpsrf[i] <- convergence_table[i,"gelman.mpsrf_multi"]
+#   }
+# }
+#
+#convergence_table <- convergence_table[,c(1,20,21)]
+#convergence_table <- cbind(convergence_table,min_ess_par,min_ess,max_gelman_par,max_gelman,gelman_mpsrf)
+#
+#convergence_table <- convergence_table[,c(1,12,13,3:7)]
+convergence_table <- convergence_table[,c(1,12,13,3,4,5,6,7)]
 colnames(convergence_table) <- c("runID","BIC","WAIC",
                                   "Minimum ESS Parameter","Minimum ESS Value",
                                  "Max Gelman PSRF Parameter","Max Gelman PSRF","Gelman MPSRF")
@@ -117,4 +116,4 @@ convergence_table$δWAIC <- convergence_table$WAIC - min(convergence_table$WAIC)
 convergence_table$δBIC <- convergence_table$BIC - min(convergence_table$BIC)
 
 convergence_table <- merge(runs,convergence_table,by="runID")
-write.table(convergence_table,"~/Documents/waic_table.csv",sep=",",row.names=FALSE)
+write.table(convergence_table,"~/Documents/Ferret_Model/rerun_correct_times_28082018/waic_table_complete.csv",sep=",",row.names=FALSE)
