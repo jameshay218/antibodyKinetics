@@ -80,29 +80,35 @@ chain <- as.data.frame(load_mcmc_chains(chain_wd, parTab, FALSE, 1, adaptive, FA
 ## if you want to include all parameters
 extraTheme <- theme(text=element_text(family="Arial"),axis.text.x=element_text(size=8,angle=45,hjust=1),
                     axis.text.y=element_text(size=8),axis.title.y=element_text(size=10),plot.margin=unit(c(0.5,0,0,0),"cm"))
-densities_mu <- den_plot(chain, "mu", parTab, options, "Maximum homologous\n boost, μ", 15,add_priming_blank=FALSE)
-densities_adjmu <- den_plot(chain, "adjmu", parTab, options, "Homologous boost after\ninitial waning, μ(1-dp)", 15)
-densities_ts <- den_plot(chain, "ts", parTab, options, "Duration of initial\n waning phase, ts", 20)
-densities_dp <- den_plot(chain, "dp", parTab, options, "Initial proportion of\n boost lost, dp", 1)
-densities_m <- den_plot(chain, "m", parTab,options, "Long term waning\n rate, m", 0.3,FALSE,skip_pars=c("m","m.2","m.3"),yupper=12)
+densities_mu <- den_plot(chain, "mu", parTab, options, "Maximum homologous\n boost, μ", 15,add_priming_blank=FALSE,use_pointrange=TRUE)
+densities_adjmu <- den_plot(chain, "adjmu", parTab, options, "Homologous boost after\ninitial waning, μ(1-d)", 15,use_pointrange=TRUE)
+densities_ts <- den_plot(chain, "ts", parTab, options, "Duration of initial\n waning phase, ts", 20,use_pointrange=TRUE)
+densities_dp <- den_plot(chain, "dp", parTab, options, "Initial proportion of\n boost lost, d", 1,use_pointrange=TRUE)
+densities_m <- den_plot(chain, "m", parTab,options, "Long term waning\n rate, m", 0.3,FALSE,skip_pars=c("m","m.2","m.3"),yupper=12,use_pointrange=TRUE)
 densities_m[[2]]
 densities_sigma <- den_plot(chain, "sigma", parTab, options, "Cross reactivity\ngradient,σ", 10, skip_pars=c("sigma.1","sigma.2"),
-                            yupper=100,add_priming_blank = FALSE)
-densities_mod <- den_plot(chain, "mod", parTab, options, "Antigenic seniority \nmodifiers, ρ", 1)
-densities_y0mod <- den_plot(chain, "y0_mod", parTab, options, "Titre dependence gradient, γ", ymax=1,ymin=-1)
-densities_boostlim <- den_plot(chain, "boost_limit", parTab, options, "Maximum titre dependence,\ny_switch", ymax=12)
+                            yupper=100,add_priming_blank = FALSE,use_pointrange=TRUE)
+densities_mod <- den_plot(chain, "mod", parTab, options, "Antigenic seniority \nmodifiers, ρ", 1,use_pointrange=TRUE)
+densities_y0mod <- den_plot(chain, "y0_mod", parTab, options, "Titre dependence gradient, γ", ymax=1,ymin=-1,use_pointrange=TRUE)
+densities_boostlim <- den_plot(chain, "boost_limit", parTab, options, "Maximum titre dependence,\ny_switch", ymax=12,use_pointrange=TRUE)
 
 all_dens <- plot_grid(densities_mu[[2]] + extraTheme,
                       densities_adjmu[[2]] + extraTheme,
                       densities_ts[[2]] + extraTheme, 
                       densities_dp[[2]] + extraTheme,
                       densities_m[[2]] + extraTheme, 
-                      densities_sigma[[2]] + extraTheme,
+                      densities_sigma[[2]] +
+                        geom_hline(yintercept=1,col="gray30",linetype="dotted",size=0.5) +extraTheme,
                       ncol=2)
 
 svg(paste0(runName,"_all_densities.svg"),width=5.2,height=6.5,family="Arial")
 print(all_dens)
 dev.off()
+
+png(paste0(runName,"_all_densities.png"),width=5.2,height=6.5,family="Arial",units="in",res=300)
+print(all_dens)
+dev.off()
+
 
 svg(paste0(runName,"_mod_density.svg"),width=4,height=3,family="Arial")
 print(densities_mod[[2]])

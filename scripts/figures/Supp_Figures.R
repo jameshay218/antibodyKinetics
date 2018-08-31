@@ -129,12 +129,12 @@ beta_p <- ggplot(tmp3) +
 
 all_estimates[all_estimates$Parameter.name == "y_switch","Parameter.name"] <- "y_limit"
 mu_p <- combined_density_plot(all_estimates, "μ","μ",0,15,0,15,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, fillBy="Cross.Reactivity")
-adjmu_p <- combined_density_plot(all_estimates, "μ(1-dp)","μ(1-dp)",0,15,0,15,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, fillBy="Cross.Reactivity")
+adjmu_p <- combined_density_plot(all_estimates, "μ(1-dp)","μ(1-d)",0,15,0,15,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, fillBy="Cross.Reactivity")
 sd_p <- combined_density_plot(all_estimates, "sd","sd",0,2,0,10,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, fillBy=NULL)
 m_p <- combined_density_plot(all_estimates, "m","m",0,0.25,0,12,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, fillBy="Cross.Reactivity")
 sigma_p <- combined_density_plot(all_estimates, "σ","σ",0,10,0,100,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, blueLine=5,redLine=1, fillBy="Cross.Reactivity") +
   theme(axis.text.x=element_text(angle=90,hjust=1))
-dp_p <- combined_density_plot(all_estimates, "dp","dp",0,1,0,1,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, fillBy="Cross.Reactivity")
+dp_p <- combined_density_plot(all_estimates, "dp","d",0,1,0,1,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, fillBy="Cross.Reactivity")
 ts_p <- combined_density_plot(all_estimates, "ts","ts",0,20,0,20,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, fillBy="Cross.Reactivity")
 ymax_p <- combined_density_plot(all_estimates, "γ","γ",-1,1,-1,1,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, fillBy="Cross.Reactivity")
 c_p <- combined_density_plot(all_estimates, "c","c",0,15,0,15,saveDir=res_wd,savePNG=FALSE,saveEPS=FALSE, fillBy=NULL)

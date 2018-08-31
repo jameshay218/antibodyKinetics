@@ -7,7 +7,7 @@ ordered_names <- c("All","TIV","TIV + adjuvant","Infection",
 ordered_names2 <- c("All","TIV","TIV + adjuvant","Infection",
                    "TIV 1","TIV 2","TIV 1 + adjuvant","TIV 2 + adjuvant",
                    "Infection 1","Infection 2","Priming")
-den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals=TRUE, skip_pars=NULL,yupper=NULL,ymin=0, add_priming_blank=TRUE){
+den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals=TRUE, skip_pars=NULL,yupper=NULL,ymin=0, add_priming_blank=TRUE,use_pointrange=FALSE){
     print(parName)
     if(is.null(yupper)) yupper <- ymax
     print(yupper)
@@ -71,18 +71,40 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
       convert <- c("mod"="ρ1","mod.1"="ρ2","mod.2"="ρ3","mod.3"="ρ4")
       melted_chain$parName <- convert[melted_chain$parName]
     }
+    lower_quant <- function(x) quantile(x, 0.025)
+    upper_quant <- function(x) quantile(x,0.975)
     if(plot_intervals){
-        p <- ggplot(melted_chain) + 
-            geom_violin(aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.025,0.5,0.975),trim=TRUE,scale="width") + 
-            coord_cartesian(ylim=c(ymin,ymax)) + xlab("") + ylab(ylab) +
-            geom_hline(yintercept = c(ymin,yupper),linetype="dashed", alpha=0.3) +
-             scale_x_discrete(drop=FALSE) +
-            theme(axis.text.x = element_text(size=8,family="Arial",colour="black"),
+        p <- ggplot(melted_chain)
+        if(use_pointrange){
+          #p <- p + geom_boxplot(aes_string(x=use_var,y="value"),fill="grey",outlier.alpha=0.05,outlier.size=0.1)
+          p <- p +   geom_point(aes_string(x=use_var,y="value"),stat="summary",fun.y=median,size=1,col="grey30") +
+            geom_errorbar(aes_string(x=use_var,y="value"),col="grey30",stat="summary",
+                          fun.ymin=lower_quant,fun.ymax=upper_quant,fun.y=median,
+                          width=0.2)
+        } else {
+          p <- p +  
+            geom_violin(aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.025,0.5,0.975),trim=TRUE,scale="width")
+          }
+        p <- p + 
+              coord_cartesian(ylim=c(ymin,ymax)) + xlab("") + ylab(ylab) +
+              geom_hline(yintercept = c(ymin,yupper),linetype="dashed", alpha=0.3) +
+               scale_x_discrete(drop=FALSE) +
+              theme(axis.text.x = element_text(size=8,family="Arial",colour="black"),
                   axis.text.y = element_text(size=8,family="Arial",colour="black"),
                   axis.title.y=element_text(size=10,family="Arial",colour="black"))  + theme_classic()
     } else {
-        p <- ggplot(melted_chain) + 
-            geom_violin(aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.5),trim=TRUE,scale="width") + 
+        p <- ggplot(melted_chain) 
+        if(use_pointrange){
+          #p <- p + geom_boxplot(aes_string(x=use_var,y="value"),fill="grey",outlier.alpha=0.05,outlier.size=0.1)
+          p <- p +   geom_point(aes_string(x=use_var,y="value"),stat="summary",fun.y=median,size=1,col="grey30") +
+            geom_errorbar(aes_string(x=use_var,y="value"),col="grey30",stat="summary",
+                          fun.ymin=lower_quant,fun.ymax=upper_quant,fun.y=median,
+                          width=0.2)
+        } else {
+          p <- p + 
+            geom_violin(aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.5),trim=TRUE,scale="width")
+          } 
+        p <- p + 
             coord_cartesian(ylim=c(ymin,ymax)) + xlab("") + ylab(ylab) +
             geom_hline(yintercept = c(ymin,yupper),linetype="dashed", alpha=0.3) +
             scale_x_discrete(drop=FALSE) +
