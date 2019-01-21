@@ -34,8 +34,8 @@ a table of antibody titres for the given times, with a column for times and coln
 Solves the antibody kinetics model for a single group, which may have multiple measured and exposure strains.
 }
 \seealso{
-Other model.functions: \code{\link{model_func_groups}},
+Other model functions: \code{\link{model_func_groups}},
   \code{\link{model_trajectory_cpp}},
   \code{\link{model_trajectory}}
 }
-
+\concept{model functions}

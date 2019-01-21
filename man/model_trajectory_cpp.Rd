@@ -29,7 +29,7 @@ times <- seq(0,100,by=1)
 y <- model_trajectory_cpp(pars,times)
 }
 \seealso{
-Other model.functions: \code{\link{model_func_groups}},
+Other model functions: \code{\link{model_func_groups}},
   \code{\link{model_func}}, \code{\link{model_trajectory}}
 }
-
+\concept{model functions}

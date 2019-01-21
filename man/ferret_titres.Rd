@@ -32,4 +32,3 @@ Ferret titre data
 }
 }
 \keyword{datasets}
-

@@ -16,4 +16,3 @@ a named vector of parameters
 Given an MCMC chain, finds the row with the highest log likelihood. There must be a column named "lnlike"
 which is the log likelihood. Will return the vector of all parameters other than "sampno","lnlike" and "strain"
 }
-

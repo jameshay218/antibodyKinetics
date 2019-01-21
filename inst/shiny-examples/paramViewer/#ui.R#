@@ -8,44 +8,6 @@ tmax=100
 
 shinyUI(    
     navbarPage("Antibody Kinetics Model",
-               #' Parameter exploration panel
-               tabPanel("Exposures",
-                        ## ISOLATE EXPOSURE PARAMETERS
-                        sidebarPanel(
-                            
-                            
-                            h4(strong("Exposures")),
-                            fluidRow(uiOutput("choose_exposure_id")),
-                            fluidRow(uiOutput("choose_exposure_type")),
-                            fluidRow(uiOutput("choose_exposure_ti")),
-                            fluidRow(uiOutput("choose_exposure_group")),
-                            fluidRow(uiOutput("choose_exposure_strain")),
-                            fluidRow(uiOutput("choose_exposure_affects")),
-                            fluidRow(uiOutput("choose_is_primed")),
-                            hr(),
-                            fluidRow(actionButton("add_exposure",strong("Add")),
-                                     actionButton("remove_exposure",strong("Remove")),
-                                     actionButton("clear_exposures",strong("Clear")),
-                                     downloadButton("export_exposures",strong("Download"))
-                                     ),
-                            br(),
-                            fluidRow(
-                                fileInput("exposure_tab_input",strong("Exposure table input")),
-                                actionButton("upload_exposures","Upload")
-                            )
-                        ),
-                        mainPanel(
-                            h4(strong("Protocol")),
-                            fluidRow(
-                                plotOutput("protocol_plot")
-                            ),
-                            hr(),
-                            h4(strong("Exposure table")),
-                            fluidRow(
-                                rHandsontableOutput("exposure_table")
-                            )
-                        )
-                        ),
                tabPanel("Model settings",
                         sidebarPanel(
                             fluidRow(
@@ -100,7 +62,44 @@ shinyUI(
                         )
                         ),
                
-               
+               #' Parameter exploration panel
+               tabPanel("Exposures",
+                        ## ISOLATE EXPOSURE PARAMETERS
+                        sidebarPanel(
+                            
+                            
+                            h4(strong("Exposures")),
+                            fluidRow(uiOutput("choose_exposure_id")),
+                            fluidRow(uiOutput("choose_exposure_type")),
+                            fluidRow(uiOutput("choose_exposure_ti")),
+                            fluidRow(uiOutput("choose_exposure_group")),
+                            fluidRow(uiOutput("choose_exposure_strain")),
+                            fluidRow(uiOutput("choose_exposure_affects")),
+                            fluidRow(uiOutput("choose_is_primed")),
+                            hr(),
+                            fluidRow(actionButton("add_exposure",strong("Add")),
+                                     actionButton("remove_exposure",strong("Remove")),
+                                     actionButton("clear_exposures",strong("Clear")),
+                                     downloadButton("export_exposures",strong("Download"))
+                                     ),
+                            br(),
+                            fluidRow(
+                                fileInput("exposure_tab_input",strong("Exposure table input")),
+                                actionButton("upload_exposures","Upload")
+                            )
+                        ),
+                        mainPanel(
+                            h4(strong("Protocol")),
+                            fluidRow(
+                                plotOutput("protocol_plot")
+                            ),
+                            hr(),
+                            h4(strong("Exposure table")),
+                            fluidRow(
+                                rHandsontableOutput("exposure_table")
+                            )
+                        )
+                        ),
                tabPanel("Trajectories",
                         sidebarPanel(
                             h4(strong("Main parameters")),

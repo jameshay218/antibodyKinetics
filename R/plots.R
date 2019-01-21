@@ -4,13 +4,15 @@
 #' @param chain the MCMC chain to sample from
 #' @param samp_no the number of random samples to take from the MCMC chain
 #' @param ts the times over which to solve the model
+#' @param ts_obs times at which observations were made
 #' @param MODEL_FUNCTION pointer to the model solving function that takes two arguments: pars and ts. This should return a matrix of trajectories with times across columns
 #' @param nstrains the number of strains for which measurements are available
 #' @param ngroups the number of exposure groups
 #' @export
-generate_prediction_intervals <- function(chain, samp_no=1000,ts, MODEL_FUNCTION,nstrains=3,ngroups=5){
-    ## Take random samples from the MCMC chain 
-    samps <- sample(nrow(chain),samp_no)
+generate_prediction_intervals <- function(chain, samp_no=1000,ts=seq(0,70,by=1), ts_obs=ts, MODEL_FUNCTION,nstrains=3,ngroups=5){
+    ## Take random samples from the MCMC chain
+    samp_max <- max(nrow(chain), samp_no)
+    samps <- sample(nrow(chain),samp_max, replace=FALSE)
 
     ## The result of the model solving procedure will be a matrix of titres, with columns as time
     ## and rows as groups/strains. As such, we need a way to store samp_no*(ngroups*nstrains) trajectories
@@ -22,46 +24,75 @@ generate_prediction_intervals <- function(chain, samp_no=1000,ts, MODEL_FUNCTION
                           simplify=FALSE),
                       simplify=FALSE)
     
+    observations <- replicate(ngroups,
+                      replicate(
+                          nstrains,matrix(nrow=samp_no,ncol=length(ts_obs)),
+                          simplify=FALSE),
+                      simplify=FALSE)
     
     ## For each sample
     for(i in 1:samp_no){
+        
         samp <- samps[i]
-
         ## Get parameters
         pars <- as.numeric(chain[samp,!(colnames(chain) %in% c("sampno","lnlike"))])
         names(pars) <- colnames(chain[,!(colnames(chain) %in% c("sampno","lnlike"))])
 
         ## Solve model
         y <- MODEL_FUNCTION(pars, ts)
-
+        y_obs <- MODEL_FUNCTION(pars, ts_obs)
         ## Save this trajectory
         index <- 1
         for(x in 1:ngroups){
             for(j in 1:nstrains){
                 dats[[x]][[j]][i,] <- y[index,]
+                obs <- floor(y_obs[index,])
+                #print(obs)
+                obs <- sapply(obs, add_noise, pars=pars, normal=TRUE)
+                #print(obs)
+                observations[[x]][[j]][i,] <- obs
                 index <- index + 1
             }
         }
     }
-    
     allQuantiles <- NULL
+    allQuantiles_observations <- NULL
     for(x in 1:ngroups){
         tmpQuantiles <- NULL
+        tmpQuantiles_observations <- NULL
         for(j in 1:nstrains){
             quantiles <- t(apply(dats[[x]][[j]], 2, function(x) quantile(x,c(0.025,0.5,0.975))))
             quantiles <- data.frame(time=ts,quantiles)
             colnames(quantiles) <- c("time","lower","median","upper")
             quantiles$strain <- j
             tmpQuantiles[[j]] <- quantiles
+
+            quantiles_obs <- t(apply(observations[[x]][[j]], 2, function(x) quantile(x,c(0.025,0.5,0.975))))
+            quantiles_obs <- data.frame(time=ts_obs,quantiles_obs)
+            colnames(quantiles_obs) <- c("time","lower","median","upper")
+            quantiles_obs$strain <- j
+            tmpQuantiles_observations[[j]] <- quantiles_obs
+
+            
         }
         tmpQuantiles <- do.call("rbind",tmpQuantiles)
         tmpQuantiles$group <- x
         allQuantiles[[x]] <- tmpQuantiles
+        
+        tmpQuantiles_observations<- do.call("rbind",tmpQuantiles_observations)
+        tmpQuantiles_observations$group <- x
+        allQuantiles_observations[[x]] <- tmpQuantiles_observations
     }
     allQuantiles <- do.call("rbind",allQuantiles)
     allQuantiles$group <- as.factor(allQuantiles$group)
     allQuantiles$strain <- as.factor(allQuantiles$strain)
-    return(allQuantiles)
+
+
+    allQuantiles_observations <- do.call("rbind",allQuantiles_observations)
+    allQuantiles_observations$group <- as.factor(allQuantiles_observations$group)
+    allQuantiles_observations$strain <- as.factor(allQuantiles_observations$strain)
+    
+    return(list(allQuantiles, allQuantiles_observations))
 }
 
 
@@ -154,6 +185,100 @@ base_plot <- function(chains, data, samps=1000,infection_times=NULL){
             p <- p + geom_vline(xintercept=infection_times[i,"time"],colour="red",linetype="longdash")
         }
     }
-    return(p)
+    return(p)    
+}
+
+#' Plot single trajectory model fit
+#'
+#' 
+#' @export
+plot_single_fit <- function(parTab, exposureTab,
+                            ferret_titres, times,
+                            chain, options,
+                            add_sim_obs=FALSE,
+                            n=1000,
+                            nindiv=3,
+                            nstrain=1,
+                            ngroup=1){
+    ## Create function to plot titre trajectories, same options as above
+    f <- create_model_group_func_cpp(parTab,exposureTab,version="model",
+                                     form=options$form,typing = TRUE,cross_reactivity = TRUE)
+    ## Times to solve model over
+    times1 <- seq(0,max(ferret_titres[1,]),by=0.1)
     
+    ## Get MLE parameters
+    bestPars <- get_best_pars(chain)  
+    pred_intervals <- generate_prediction_intervals(chain, n,times1,times,f,nstrains=1,ngroups=1)
+    mod <- pred_intervals[[1]]
+    sim_obs <- pred_intervals[[2]]
+    
+    ## Format data for plotting
+    ## Just adding labels and changing variable classes
+    ## for correct plotting
+    meltedDat <- as.data.frame(ferret_titres[2:nrow(ferret_titres),])
+    colnames(meltedDat) <- times
+    meltedDat <- cbind(meltedDat,expand.grid("indiv"=1:nindiv,"strain"=1:nstrain,"group"=1:ngroup))
+    meltedDat <- reshape2::melt(meltedDat,id.vars=c("indiv","strain","group"))
+    meltedDat$variable <- as.numeric(as.character(meltedDat$variable))
+    meltedDat$group <- as.factor(meltedDat$group)
+    meltedDat$strain <- as.factor(meltedDat$strain)
+    meltedDat$indiv <- as.factor(meltedDat$indiv)
+    
+    ## Upper observable bound = 14
+    mod[mod$upper > 14,"upper"] <- 14
+    mod[mod$lower > 14,"lower"] <- 14
+    
+    ## Plot trajectory using the MLE parameter set and format this for plotting
+    bestTraj <- f(bestPars, times1)
+    colnames(bestTraj) <- times1
+    bestTraj <- cbind(bestTraj,expand.grid("strain"=1:nstrain,"group"=1:ngroup))
+    bestTraj <- reshape2::melt(bestTraj,id.vars=c("strain","group"))
+    bestTraj$variable <- as.numeric(as.character(bestTraj$variable))
+    bestTraj$group <- as.factor(bestTraj$group)
+    bestTraj$strain <- as.factor(bestTraj$strain)
+    bestTraj[bestTraj$value > 14,"value"] <- 14
+    
+    ## Plot model fit over data
+    p <- ggplot() + 
+        geom_ribbon(data = mod, aes(x=time,ymax=upper,ymin=lower),fill="grey60",col="grey60")+
+        geom_line(data=bestTraj,aes(x=variable,y=value))+
+        geom_line(data=meltedDat,aes(x=variable,y=value,group=indiv,linetype=indiv),col="royalblue2")#
+    if(nindiv <= 3){
+        p <- p + scale_linetype_manual(values=c("twodash","dotted","dashed"))
+    }
+  
+    p <- p +
+        geom_point(data = meltedDat,aes(x=variable,y=value), size=2, shape=4, col="blue")
+    if(add_sim_obs){
+        p <- p + geom_point(data=sim_obs, aes(x=time,y=median),stat="identity",
+                            size=2,col="black",shape=18) +
+            geom_errorbar(data=sim_obs,aes(x=time,ymin=lower,ymax=upper),
+                          col="black",stat="identity",
+                          width=1.5)
+    }
+    p <- p + scale_y_continuous(limits=c(0,14),breaks=seq(0,14,by=2),expand=c(0,0))+
+        scale_x_continuous(expand=c(0.02,0.02),limits=c(-2,72),breaks=seq(0,70,by=10))+
+        ylab("log titre") +
+        xlab("Time post infection (days)") +
+        theme_bw() +
+        theme(legend.position = "none",
+              strip.background = element_blank(),
+              strip.text=element_blank(),
+              legend.title=element_blank(),
+              legend.direction = "vertical",
+              axis.text=element_text(family="Arial",colour="gray20"),
+              axis.text.x=element_text(size=8),
+              axis.text.y=element_text(size=8),
+              axis.title.x=element_text(size=10),
+              axis.title.y=element_text(size=10),
+              legend.text=element_text(size=8),
+              #panel.grid.major = element_blank(),
+              #panel.grid.minor = element_blank(),
+              axis.line=element_line(colour="gray20"),
+              axis.line.x = element_line(colour = "gray20"),
+              axis.line.y=element_line(colour="gray20"),
+              plot.margin = unit(c(1, 0, 0, 0), "cm"),
+              panel.spacing=unit(1,"lines"),
+              panel.background=element_blank())
+    return(p)
 }

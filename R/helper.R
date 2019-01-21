@@ -30,18 +30,18 @@ add_noise <- function(pars, y, normal=FALSE){
     S <- pars["S"]
     EA <- pars["EA"]
 
-    if(y < 0) y <- 0
-    if(y > MAX_TITRE) y <- MAX_TITRE
+    #if(y < 0) y <- 0
+    #if(y > MAX_TITRE) y <- MAX_TITRE
 
     if(!normal){
         probs <- numeric(MAX_TITRE+1)
         
         probs[] <- (1.0/(MAX_TITRE-2.0))*(1.0-S-EA)
         
-        if(y == MAX_TITRE){
+        if(y >= MAX_TITRE){
             probs[y+1] <- S + EA/2.0 - (1.0/(MAX_TITRE-2.0))*(1.0-S-EA)
             probs[y] <- EA/2.0
-        } else if (y == 0){
+        } else if (y < 1.0){
             probs[y+1] <- S + EA/2.0 - (1.0/(MAX_TITRE-2.0))*(1.0-S-EA)
             probs[y+2] <- EA/2.0        
         } else {
@@ -50,20 +50,22 @@ add_noise <- function(pars, y, normal=FALSE){
             probs[y+2] <- EA/2.0
         }
     } else {
-        probs <- numeric(MAX_TITRE + 1)
+        probs <- numeric(MAX_TITRE + 25)
         for(i in 1:length(probs)){
             probs[i] <- norm_error(y, i-1, S, MAX_TITRE)
         }
     }
     probs <- cumsum(probs)
-
     tmp <- runif(1,0,1)
 
     i <- 1
     while(probs[i] < tmp){
         i <- i + 1
     }
-    return(i-1)
+    titre <- i-1
+    if(titre < 0) titre <- 0
+    if(titre > MAX_TITRE) titre <- MAX_TITRE
+    return(titre)
 }
 
 
@@ -106,10 +108,12 @@ parTab_modification <- function(parTab, options,fixed_S=FALSE){
     ## Modify if titre dependent boosting
     if(y0_mod){
         parTab[parTab$names =="y0_mod","fixed"] <- 0
+        parTab[parTab$names =="y0_mod","values"] <- -0.5
         parTab[parTab$names == "y0_mod","upper_bound"] <- 1
         parTab[parTab$names == "y0_mod","lower_bound"] <- -1
         
         parTab[parTab$names =="boost_limit","fixed"] <- 0
+        parTab[parTab$names =="boost_limit","values"] <- 4
         parTab[parTab$names =="boost_limit","upper_bound"] <- 12
         parTab[parTab$names =="boost_limit","lower_bound"] <- 0
     } else {
@@ -146,7 +150,8 @@ parTab_modification <- function(parTab, options,fixed_S=FALSE){
     } else {
         parTab[parTab$names %in% c("beta","c"),"fixed"] <- 1
     }
-    parTab[parTab$names == "m","upper_bound"] <- 12
+    parTab[parTab$names == "m","upper_bound"] <- 1
+    parTab[parTab$names == "ts","upper_bound"] <- 30
     return(parTab)
 }
 
@@ -268,4 +273,117 @@ parameter_descriptions <- function(){
     message(cat("y0", "initial titre at time of exposure.", sep="\t"))
     message(cat("eff_y0", "initial titre for the purpose of calculating titre dependent boosting. If competitive version, this is the actual titre at the time of exposure. If isolated, this should be 0", sep="\t"))
     NULL
+}
+
+#' Create simulated titre data
+#'
+#' Generates simulated observed antibody titre data from the given parameter and exposure table files, along with selected kinetics options.
+#'
+#' @param runName the simulation name to save data under
+#' @param runID run ID to append to the front of the filename
+#' @param parTab_file file location of the parameter table to simulate from
+#' @param exposureTab_file file location of the exposure table to simulate from
+#' @param ngroup how many groups to simulate? Make sure that this matches the dimensions of exposureTab_file
+#' @param nstrain how many strains to simulate?
+#' @param nindiv how many individuals to simulate data for for each group/strain combination
+#' @param times vector of times in days at which titres should be measured
+#' @param wd working directory to save simulated data to
+#' @param group if only one group to be simulated, subset exposureTab for this group
+#' @param strain if only one strain to be simulated, subset exposureTab for this strain
+#' @param normal if TRUE, adds normally distributed measurement error
+#' @return a list with the simulated data, the residuals between true simulated data and observed simulated data, the file location of saved simulated data
+#' @export
+create_data <- function(runName,
+                        runID, parTab_file,
+                        exposureTab_file, 
+                        ngroup=5,nstrain=5,nindiv=3,
+                        times,
+                        wd="~/net/home/ferret/inputs/data_normal",
+                        group=NA,strain=NA,
+                        normal=TRUE){
+    options <- convert_runName_to_options(runName)
+    parTab <- read.csv(parTab_file,stringsAsFactors=FALSE)
+    parTab <- parTab_modification(parTab, options, FALSE)
+    #parTab[parTab$names == "mod","values"] <- c(1,0.9,0.8,0.7)
+    exposureTab <- read.csv(exposureTab_file,stringsAsFactors=FALSE)
+    if(!is.na(group)){
+        exposureTab <- exposureTab[exposureTab$group == group,]
+        if(!is.na(strain)){
+            exposureTab <- exposureTab[exposureTab$strain == strain,]
+        }
+        
+        parTab <- parTab[parTab$id %in% c(NA,"all",unique(exposureTab$id)) | parTab$names == "x",]
+    }
+    ## Simulate data and save
+    individuals <- rep(nindiv,ngroup)
+    pars <- parTab[parTab$names %in% c("S","EA","MAX_TITRE"),"values"]
+    names(pars) <- c("S","EA","MAX_TITRE")
+    f <- create_model_group_func_cpp(parTab,exposureTab,version="model",
+                                     form=options$form,typing = TRUE,cross_reactivity = options$cr)
+    dat <- f(parTab$values, times)
+    dat <- floor(dat)
+    dat <- apply(dat,2,function(x) rep(x, each=nindiv))
+    index <- 1
+    difs <- NULL
+    for(i in 1:nrow(dat)){
+        for(j in 1:ncol(dat)){
+            tmp <- dat[i,j]
+            dat[i,j] <- add_noise(pars,dat[i,j],normal)
+            tmp <- tmp - dat[i,j]
+            difs[index] <- tmp
+            index <- index + 1
+        }
+    }
+    rownames(dat) <- NULL
+    colnames(dat) <- times
+    labels <- expand.grid(indiv=1:3,strain=LETTERS[1:5],group=1:5)
+    dat_unlabelled <- dat
+    dat <- cbind(labels, dat)
+    meltedDat <- reshape2::melt(dat, id.vars=c("indiv","strain","group"))
+    meltedDat$variable <- times[meltedDat$variable]
+    meltedDat[meltedDat$indiv == 1,"variable"] <- meltedDat[meltedDat$indiv == 1,"variable"] - 1
+    meltedDat[meltedDat$indiv == 2,"variable"] <- meltedDat[meltedDat$indiv == 2,"variable"] + 1
+    meltedDat$indiv <- as.factor(meltedDat$indiv)
+    rectangle1 <- data.frame(xmin=-2,xmax=70,ymin=pars["MAX_TITRE"],ymax=pars["MAX_TITRE"]+2)
+    rectangle2 <- data.frame(xmin=-2, xmax=70,ymin=-1,ymax=0)
+
+    p1 <- ggplot(meltedDat) +
+        geom_vline(data=exposureTab, aes(xintercept=values),col="red",linetype="dashed",size=0.5)+
+        geom_rect(data=rectangle1, aes(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax),fill="gray") +
+        geom_rect(data=rectangle2, aes(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax),fill="gray") +
+        geom_point(aes(x=variable,y=value,col=strain,shape=indiv)) +
+        geom_line(aes(x=variable,y=value,col=strain,group=interaction(indiv,strain)),
+                  alpha=0.5,size=0.5,linetype="dashed")+
+        xlab("Time (days)") +
+        ylab("log HI titre") +
+        scale_y_continuous(limits=c(-1,pars["MAX_TITRE"]+2),breaks=seq(0,pars["MAX_TITRE"],by=2), expand=c(0,0))+
+        scale_x_continuous(limits=c(-2,71),expand=c(0,0),breaks=seq(0,70,by=10)) +
+        facet_grid(group~strain) +
+        #theme_bw() +
+        theme(legend.position = "bottom",
+              strip.background = element_blank(),
+              axis.text=element_text(family="Arial",colour="gray20"),
+              axis.text.x=element_text(size=8),
+              axis.text.y=element_text(size=8),
+              axis.title.x=element_text(size=10),
+              axis.title.y=element_text(size=10),
+              legend.text=element_text(size=8),
+              axis.line=element_line(colour="gray20"),
+              axis.line.x = element_line(colour = "gray20"),
+              axis.line.y=element_line(colour="gray20"),
+              plot.margin = unit(c(1, 0, 0, 0), "cm"),
+              panel.spacing=unit(1,"lines"),
+              panel.background=element_blank())
+
+    ## Filenames
+    filename <- paste0(wd,"/",runID,"_",runName,"_data.csv")
+    plot_filename <- paste0(wd,"/",runID,"_",runName,"_plot.png")
+    if(!is.na(group)){
+        filename <- paste0(wd,"/",runID,"_",runName,"_",group,"_data.csv")
+    }
+    write.csv(dat_unlabelled, filename,row.names=FALSE)
+    png(plot_filename,width=8,height=6,units="in",res=300)
+    print(p1)
+    dev.off()             
+    return(list("data"=dat,"residuals"=difs,"filename"=filename))
 }

@@ -5,7 +5,7 @@
 #' @param exposures the exposure table - see example csv file
 #' @param form string to indicate if this uses the "isolated" or "competitive" version of the model
 #' @param cross_reactivity if TRUE, uses cross reactivity parameters to infer expected titres against heterologous strains
-#' @param trying if TRUE, uses parameters corresponding to the exposure type rather than exposure index
+#' @param typing if TRUE, uses parameters corresponding to the exposure type rather than exposure index
 #' @return a function pointer for \code{\link{model_func}}
 #' @export
 #' @useDynLib antibodyKinetics
@@ -282,6 +282,21 @@ create_model_group_func_cpp <- function(parTab, exposureTab,
             if(!is.null(PRIOR_FUNC)) ln <- ln + PRIOR_FUNC(pars)
             ln
         }
+    } else if(version == "loo"){
+        times <- dat[1,]
+        dat <- dat[2:nrow(dat),]
+        f <- function(pars){
+            if(is.null(nrow(dat))){
+                dat <- matrix(dat,nrow=1)
+            }
+            ln <- posterior_func_group_cpp_matrix(pars, times, groups, strains,
+                                                  exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths,
+                                                  exposure_times, exposure_strains, exposure_next, exposure_measured,
+                                                  exposure_orders, exposure_primes, cr_inds, par_inds,
+                                                  order_inds, par_lengths, cr_lengths, ver, individuals, dat)
+            ln
+        }
+        
     } else {
         f <- function(pars, times){
             model_func_group_cpp(pars, times, groups, strains,

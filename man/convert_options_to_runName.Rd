@@ -23,4 +23,3 @@ a 7 character long string corresponding to a run name identifier
 \description{
 The inverse function of \code{\link{convert_runName_to_options}}
 }
-

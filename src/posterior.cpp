@@ -1,4 +1,3 @@
-#include <Rcpp.h>
 #include "model.h"
 using namespace Rcpp;
 
@@ -34,26 +33,26 @@ double obs_error(int actual, int obs, double S, double EA, int MAX_TITRE){
 //' @export
 //[[Rcpp::export]]
 double norm_error(double actual, int obs, double sd, int MAX_TITRE){
-   double lik = 0;
-  
-     if(obs >= MAX_TITRE){
-     lik = R::pnorm(MAX_TITRE, actual, sd, 0, 0);
-     } 
-     if(obs <= 0){
-     lik = R::pnorm(1, actual, sd, 1, 0);    
-     }
-     else {
-     lik = R::pnorm(obs+1, actual, sd, 1, 0) - R::pnorm(obs, actual, sd, 1, 0);
-     }
-     /*
   double lik = 0;
   
-  if(obs > MAX_TITRE || obs < 0){
-    return 0;
+  if(obs >= MAX_TITRE){
+    lik = R::pnorm(MAX_TITRE, actual, sd, 0, 0);
+  } 
+  if(obs < 1.0){
+    lik = R::pnorm(1, actual, sd, 1, 0);    
   }
+  else {
+    lik = R::pnorm(obs+1, actual, sd, 1, 0) - R::pnorm(obs, actual, sd, 1, 0);
+  }
+  /*
+    double lik = 0;
   
-  lik = R::pnorm(obs+1, actual, sd, 1, 0) - R::pnorm(obs, actual, sd, 1, 0);
-     */
+    if(obs > MAX_TITRE || obs < 0){
+    return 0;
+    }
+  
+    lik = R::pnorm(obs+1, actual, sd, 1, 0) - R::pnorm(obs, actual, sd, 1, 0);
+  */
   
   //lik = lik/(R::pnorm(MAX_TITRE,actual,sd,1,0) - R::pnorm(0, actual, sd, 1, 0));
   return lik;  
@@ -82,7 +81,7 @@ double norm_error_adam(double actual, int obs, double sd, int MAX_TITRE){
   if(obs >= MAX_TITRE){
     lik = R::pnorm(MAX_TITRE, actual, sd, 0, 0);
   } 
-  if(obs <= 0){
+  if(obs < 1.0){
     lik = R::pnorm(1, actual, sd, 1, 0);    
   }
   else {
@@ -101,7 +100,6 @@ double norm_error_adam(double actual, int obs, double sd, int MAX_TITRE){
 //' @param data NumericVector of observed data, matching y
 //' @param params observation error matrix paramters in order S, EA, MAX_TITRE
 //' @export
-//' @useDynLib antibodyKinetics
 //[[Rcpp::export]]
 double obs_likelihood(NumericVector y, NumericVector data, NumericVector params){
   double ln = 0;
@@ -111,7 +109,9 @@ double obs_likelihood(NumericVector y, NumericVector data, NumericVector params)
     //if(y(i) < 0) y(i) = 0;
     //if(y(i) >= MAX_TITRE) y(i) = MAX_TITRE;
     //ln += R::dnorm(data(i),y(i),params(1),1);
-    tmp = norm_error(y(i),data(i),params(1),MAX_TITRE);
+    if(!NumericVector::is_na(data(i))){
+      tmp = norm_error(y(i),data(i),params(1),MAX_TITRE);
+    }
     if(tmp == 0){
       ln += -10000;
     } else {
@@ -158,7 +158,6 @@ double obs_likelihood(NumericVector y, NumericVector data, NumericVector params)
 //' @param data NumericMatrix of antibody titre data. Each row should be complete observations of titres against a given strain for a given group. If we have 5 strains measured and 5 groups, rows 1:5 should be titres in group 1, rows 6:10 titres in group 3 etc. If more than 1 individual in each group, multiply these criteria by number of inidividuals in that group (ie., rows 1:15 for group 1)
 //' @return a single likelihood of observing the data given the model parameters
 //' @export
-//' @useDynLib antibodyKinetics
 //[[Rcpp::export]]
 double posterior_func_group_cpp(
 				NumericVector pars, NumericVector times, 
@@ -193,4 +192,50 @@ double posterior_func_group_cpp(
     }
   }
   return ln;
+}
+
+
+
+
+
+
+//[[Rcpp::export]]
+NumericMatrix posterior_func_group_cpp_matrix(
+					      NumericVector pars, NumericVector times, 
+					      IntegerVector groups, IntegerVector strains,
+					      IntegerVector exposure_indices, IntegerVector exposure_i_lengths,
+					      IntegerVector strain_indices, IntegerVector strain_i_lengths,
+					      NumericVector exposure_times, IntegerVector exposure_strains,
+					      NumericVector exposure_next, IntegerVector exposure_measured,
+					      IntegerVector exposure_orders, IntegerVector exposure_primes, 
+					      IntegerVector cr_inds, IntegerVector par_inds, 
+					      IntegerVector order_inds, IntegerVector par_lengths,
+					      IntegerVector cr_lengths, int version, IntegerVector individuals,
+					      NumericMatrix data){
+  
+  NumericMatrix result = model_func_group_cpp(pars, times, groups, strains, exposure_indices,
+                                              exposure_i_lengths,strain_indices, strain_i_lengths,
+                                              exposure_times, exposure_strains, exposure_next,
+                                              exposure_measured, exposure_orders, exposure_primes,
+                                              cr_inds, par_inds, order_inds, par_lengths,
+                                              cr_lengths, version);
+  int n_col = data.ncol();
+  int n_row = data.nrow();
+  NumericMatrix likelihoods(n_row,n_col);
+  int index_data = 0;
+  int index_model = 0;
+  int MAX_TITRE = pars(3);
+  double sd = pars(1);
+  for(int i = 0; i < groups.size(); ++i){
+    for(int j = 0; j < strains.size(); ++j){
+      for(int k = 0; k < individuals[i]; ++k){
+        for(int x = 0; x < times.size(); ++x){
+          likelihoods(index_data,x) = log(norm_error(result(index_model,x), data(index_data,x), sd,MAX_TITRE));
+        }
+        index_data++;
+      }
+      index_model++;
+    }
+  }
+  return likelihoods;
 }

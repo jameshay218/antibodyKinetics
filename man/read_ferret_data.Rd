@@ -15,4 +15,3 @@ the melted antibody titre data to be used in the model fitting
 \description{
 Reads in the csv of ferret antibody titre data from a specified file
 }
-

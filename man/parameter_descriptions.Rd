@@ -12,4 +12,3 @@ nothing
 \description{
 Prints out descriptions of the model parameters corresponding to \code{\link{model_trajectory}} and \code{\link{model_trajectory_cpp}}
 }
-

@@ -29,4 +29,3 @@ the correct parTab data frame for the given model structure
 \description{
 Modifies the parTab data frame depending on the model settings
 }
-

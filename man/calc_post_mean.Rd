@@ -15,4 +15,3 @@ the posterior mean
 \description{
 Calculates posterior mean of a given MCMC chain
 }
-

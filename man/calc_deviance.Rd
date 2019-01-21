@@ -17,4 +17,3 @@ a single deviance value
 \description{
 Calculates deviance of a vector with a given likelihood function
 }
-

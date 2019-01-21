@@ -1,6 +1,8 @@
 ## Load required packages and auxiliary functions
 library(coda)
-library(antibodyKinetics)
+library(loo)
+#library(antibodyKinetics)
+devtools::load_all("~/Documents/Ferret_Model/antibodyKinetics")
 source("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/convergence_check_funcs.R")
 source("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/model_comparison_functions.R")
 
@@ -19,7 +21,8 @@ do_parameter_estimates <- TRUE
 ## Full file path to giving location to save all results
 res_wd <- "~/Documents/Ferret_Model/results"
 ## Full file path to folder containing the MCMC chains
-chain_wd_base <- "~/net/home/ferret/outputs/"
+#chain_wd_base <- "~/net/home/ferret/outputs/"
+chain_wd_base <- "/media/james/Storage 2/ferret_results/rerun_correct_times_28082018/outputs/"
 #chain_wd_base <- "/media/james/Storage 2/ferrets_17Aug2018"
 
 ## Location of the data file used
@@ -40,7 +43,7 @@ runs <- read.csv("~/net/home/ferret/inputs/run_tracker.csv",stringsAsFactors=FAL
 
 ## IF SKIPPING
 ###
-#ids <- c(7,8)
+#ids <- c(62,54)
 #runs <- runs[runs$runID %in% ids,]
 
 times <- c(0,21,37,49,70)
@@ -61,11 +64,21 @@ rerun <- NULL
 bics <- rep(NA, nrow(runs))
 names <- NULL
 waics <- rep(NA, nrow(runs))
+elpd_loos <- rep(NA, nrow(runs))
+elpd_loos_se<- rep(NA, nrow(runs))
+p_loos <- rep(NA, nrow(runs))
+p_loos_se <- rep(NA, nrow(runs))
+looics <- rep(NA, nrow(runs))
+looics_se <- rep(NA, nrow(runs))
+
 pwaics <- rep(NA, nrow(runs))
 residuals <- NULL
 waic_names <- NULL
 
 all_estimates <- NULL
+all_loo_estimates <- NULL
+all_loo_labels <- NULL
+all_k_percentages <- NULL
 
 ## For each run/model
 for(i in 1:nrow(runs)){
@@ -175,6 +188,19 @@ for(i in 1:nrow(runs)){
         bics[i] <- model_comparison_res[["BIC"]]
         waics[i] <- model_comparison_res[["WAIC"]]
         pwaics[i] <- model_comparison_res[["pwaic"]]
+
+        elpd_loos[i] <- model_comparison_res[["elpd_loo"]]
+        elpd_loos_se[i] <- model_comparison_res[["elpd_loo_se"]]
+        p_loos[i] <- model_comparison_res[["p_loo"]]
+        p_loos_se[i] <- model_comparison_res[["p_loo_se"]]
+        looics[i] <- model_comparison_res[["looic"]]
+        looics_se[i] <- model_comparison_res[["looic_se"]]
+
+        all_loo_estimates[[i]] <- model_comparison_res[["loo_estimate"]]
+        x <- model_comparison_res[["loo_estimate"]]$diagnostics$pareto_k
+        all_k_percentages[i] <- length(x[x > 0.7])/length(x) * 100
+        all_loo_labels[[i]] <- model_comparison_res[["pareto_k"]]
+        
         print(waics[i])
         waic_names[i] <- paste0(runID,"_",runName)
         tmp_residuals <- as.data.frame(model_comparison_res[["mle_res"]])
@@ -184,19 +210,30 @@ for(i in 1:nrow(runs)){
     }
 }
 
-
+runs <- runs[runs$form == "C",]
 results <- data.frame(runID=runs$runID, runName=runs$runName,
                       ess_names,ess_vector,psrf_names,gelman.psrf,gelman.mpsrf,
                       ess_check,gelman_check,
                       chain_fine, rerun
                       )
 beepr::beep(4)
-model_comparison <- data.frame(bics, waics)
+model_comparison <- data.frame(bics, waics, elpd_loos, elpd_loos_se, p_loos, p_loos_se, looics, looics_se,all_k_percentages)
 if(do_model_comparison) results <- cbind(results, model_comparison)
 
+loo_comparison <- as.data.frame(loo::compare(x=all_loo_estimates))
+loo_comparison$model <- row.names(loo_comparison)
+model_names <- paste0("model",1:length(all_loo_estimates))
+model_names <- data.frame("model"=model_names,runName=runs$runName)
+loo_comparison <- merge(loo_comparison, model_names)
+loo_comparison <- loo_comparison[order(loo_comparison$elpd_diff),]
+
 setwd(res_wd)
+save(all_loo_estimates,file="all_loo_estimates.RData")
+save(all_loo_labels, file="all_loo_ks.RData")
+
 write.table(residuals,"mle_residuals2.csv",row.names=FALSE,sep=",")
 write.table(results,"convergence_check2.csv",sep=",",row.names=FALSE)
+write.table(loo_comparison,"loo_comparison.csv",sep=",",row.names=FALSE)
 
 if(do_parameter_estimates) write.table(all_estimates,"parameter_estimates2.csv",row.names=FALSE,sep=",")
 

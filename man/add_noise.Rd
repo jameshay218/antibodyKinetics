@@ -19,4 +19,3 @@ a single, modified titre value
 \description{
 Adds observation noise to the provided vector of titres
 }
-

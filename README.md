@@ -2,7 +2,7 @@
 > Fitting antibody dynamics models to HI titre data
 
 ## Summary
-This package includes all of the code, data and instructions required to reproduce the analysis in the "antibody kinetics model in ferrets" paper, which you have probably been linked from. The current draft of the paper can be found on [biorxiv *link not yet uploaded*](), where the full model methodology and results are described. The purpose of this project is to generate models of antibody kinetics that describe antibody kinetics following varied exposures; to fit these models to observed haemagglutination inhibition (HI) titre data; and to compare the ability of these models in fitting the observed data.
+This package includes all of the code, data and instructions required to reproduce the analysis in the "antibody kinetics model in ferrets" paper, which you have probably been linked from. The current draft of the paper can be found on [biorxiv](https://www.biorxiv.org/content/early/2018/09/07/411751), where the full model methodology and results are described. The purpose of this project is to generate models of antibody kinetics that describe antibody kinetics following varied exposures; to fit these models to observed haemagglutination inhibition (HI) titre data; and to compare the ability of these models in fitting the observed data.
 
 This README covers the following topics, with links to more detailed vignettes where appropriate:
 

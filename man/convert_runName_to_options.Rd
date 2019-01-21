@@ -15,4 +15,3 @@ a list to be fed into the options argument of \code{\link{parTab_modification}}
 \description{
 Given a string describing the run name (eg. "CYAY3BN"), generates a list of model options to be fed into \code{\link{parTab_modification}}
 }
-

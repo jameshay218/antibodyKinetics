@@ -66,7 +66,7 @@ shinyServer(
             return(types)
         })
         
-                                        # Related to the above, display the output select input based on
+        ## Related to the above, display the output select input based on
         ## availability
         output$choose_exposure_type_cr<- renderUI({
             selectInput("type_cr","CR Type:",

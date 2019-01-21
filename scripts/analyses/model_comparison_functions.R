@@ -2,7 +2,9 @@ model_comparison_analyses <- function(wd, multi_chain=TRUE,
                                       adaptive_period,
                                       parTab, exposureTab,
                                       dat_file, options, typing=TRUE,
-                                      times, n=1000, PTchain=FALSE){
+                                      times, n=1000, PTchain=FALSE,
+                                      individuals=c(3,3,3,3,3),
+                                      n1=10000){
     chain <- as.data.frame(load_mcmc_chains(wd,parTab,FALSE,
                                             1,adaptive_period,multi_chain,FALSE,PTchain)[["chain"]])
     cr <- options$cr
@@ -15,12 +17,11 @@ model_comparison_analyses <- function(wd, multi_chain=TRUE,
     ## Create model solving functions
     f <- create_model_group_func_cpp(parTab,exposureTab,version="model",
                                      form=form,typing = typing,cross_reactivity = cr)
-    lik <- create_model_group_func_cpp(parTab,exposureTab,dat=dat,version="posterior",
+    lik <- create_model_group_func_cpp(parTab,exposureTab,dat=dat,PRIOR_FUNC=NULL,version="posterior",
                                        form=form,typing = typing,cross_reactivity = cr,
-                                       individuals=c(3,3,3,3,3))
+                                       individuals=individuals)
     
     ## Generate residuals
-                                        #res <- generate_residuals(f, chain, times, n, 3)
     res <- NULL
     mle_res <- generate_mle_residuals(f,chain,times,dat, 3)
     
@@ -33,10 +34,27 @@ model_comparison_analyses <- function(wd, multi_chain=TRUE,
     BIC <- calculate_BIC(chain,parTab,dat[2:nrow(dat),])
     AIC <- calculate_AIC(chain,parTab)
     WAIC <- calculate_WAIC(chain, parTab, dat, f, n)
+    loo_estimates <- calculate_loo(chain, parTab, dat, f, n1)
+    loo_pareto_k <- loo_estimates[[2]]
+    loo_estimates <- loo_estimates[[1]]
     n_pars <- nrow(parTab[parTab$fixed == 0,])
+
+    elpd_loo <- loo_estimates$estimates[1,1]
+    elpd_loo_se <- loo_estimates$estimates[1,2]
+    p_loo <- loo_estimates$estimates[2,1]
+    p_loo_se <- loo_estimates$estimates[2,2]
+    looic <- loo_estimates$estimates[3,1]
+    looic_se <- loo_estimates$estimates[3,2]
+    
     
     return(list(DIC=DIC,BIC=BIC,res=res,calcs=all_calcs,AIC=AIC,n_pars,
-                WAIC=WAIC[[1]],pwaic=WAIC[[2]],mle_res=mle_res))
+                WAIC=WAIC[[1]],pwaic=WAIC[[2]],mle_res=mle_res,
+                elpd_loo = elpd_loo, elpd_loo_se = elpd_loo_se,
+                p_loo = p_loo, p_loo_se = p_loo_se,
+                looic = looic, looic_se = looic_se,
+                loo_estimate=loo_estimates,
+                pareto_k=loo_pareto_k
+                ))
 }
 
 

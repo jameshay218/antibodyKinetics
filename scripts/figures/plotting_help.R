@@ -31,7 +31,7 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
     colnames(melted_chain) <- c("parName","value")
     melted_chain$parName <- as.character(melted_chain$parName)
     
-    types_table <- unique(parTab[parTab$names %in% parName,c("names","type")])
+    types_table <- unique(parTab[parTab$names %in% parName,c("values","names","type")])
 
     if(parName == "mod"){
         types_table <- rep(types_table, 4)
@@ -44,19 +44,19 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
     
     if(options$priming) types_table[types_table$names %in% c("beta","c"),"type"] <- "Priming"
     
-    colnames(types_table) <- c("parName","type")
+    colnames(types_table) <- c("true_value","parName","type")
     types_table$type <- type_names[types_table$type]
     
     melted_chain <- merge(melted_chain,types_table,by="parName")
     
-    quantiles <- plyr::ddply(melted_chain, c("parName","type"), function(x) signif(quantile(x$value,c(0.025,0.5,0.975)),3))
-    means <- plyr::ddply(melted_chain, c("parName","type"), function(x) signif(mean(x$value),3))
-    modes <- plyr::ddply(melted_chain, c("parName","type"), function(x) signif(estimate_mode(x$value),3))
+    quantiles <- plyr::ddply(melted_chain, c("parName","type","true_value"), function(x) signif(quantile(x$value,c(0.025,0.5,0.975)),3))
+    means <- plyr::ddply(melted_chain, c("parName","type","true_value"), function(x) signif(mean(x$value),3))
+    modes <- plyr::ddply(melted_chain, c("parName","type","true_value"), function(x) signif(estimate_mode(x$value),3))
     
-    res <- merge(quantiles, means, id.vars=c("parName","type"))
-    res <- merge(res, modes, by=c("parName","type")) 
+    res <- merge(quantiles, means, id.vars=c("parName","type","true_value"))
+    res <- merge(res, modes, by=c("parName","type","true_value")) 
     
-    colnames(res) <- c("parName","type","lower","median","upper","mean","mode")
+    colnames(res) <- c("parName","type","true_value","lower","median","upper","mean","mode")
     
     ## Code to reorder the exposure type factor levels
     present_names <- ordered_names[ordered_names %in% as.character(unique(melted_chain$type))]
@@ -86,6 +86,7 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
             geom_violin(aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.025,0.5,0.975),trim=TRUE,scale="width")
           }
         p <- p + 
+          geom_point(data=melted_chain, aes_string(x=use_var, y="true_value")) +
               coord_cartesian(ylim=c(ymin,ymax)) + xlab("") + ylab(ylab) +
               geom_hline(yintercept = c(ymin,yupper),linetype="dashed", alpha=0.3) +
                scale_x_discrete(drop=FALSE) +
@@ -104,7 +105,8 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
           p <- p + 
             geom_violin(aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.5),trim=TRUE,scale="width")
           } 
-        p <- p + 
+        p <- p +
+          geom_point(data=melted_chain, aes_string(x=use_var, y="true_value")) +
             coord_cartesian(ylim=c(ymin,ymax)) + xlab("") + ylab(ylab) +
             geom_hline(yintercept = c(ymin,yupper),linetype="dashed", alpha=0.3) +
             scale_x_discrete(drop=FALSE) +

@@ -1,15 +1,18 @@
+
 #' Antigenic distance calc
 #'
 #' Calculates the necessary antigenic distance needed to give a given
 #' percentage cross reactivity with gradient m and percentage y.
 #' @param y the desired proportion cross reactivity
-#' @param m the rate of the exponential function for cross reactivity
+#' @param m the gradient for cross reactivity
 #' @return a single value, x
 #' @export
 #' @useDynLib antibodyKinetics
 calculate_x <- function(y, m){
-  return(-log(y)/m)
+  return(y/m)
 }
+
+#' Model 
 
 #' Model trajectory calc
 #'
@@ -45,6 +48,8 @@ model_trajectory <- function(pars, times, logSigma=FALSE){
     t_i <- pars["t_i"]
     x <- pars["x"]
     c <- pars["c"]
+    tau <- pars["tau"]
+    order <- pars["order"]
     primed <- pars["primed"]
     mod <- pars["mod"]
     lower_bound <- pars["lower_bound"]
@@ -63,20 +68,30 @@ model_trajectory <- function(pars, times, logSigma=FALSE){
     
     ## mu = f(y0)
     #mu <- mu*exp(-max(y0,0)*y0_mod)
-    #cr <- exp(-sigma*pars["x"])
-    cr <- mu - sigma*x
-    prime_cr <- c - beta*x
+                                        #cr <- exp(-sigma*pars["x"])
+    cr  <- (1 - sigma*x)
+    #cr <- mu - sigma*x
+    prime_cr <- (1-beta*x)
     if(cr < 0) cr <- 0;
     if(prime_cr < 0) prime_cr <- 0;
-    mu <- mod*cr + prime_cr*primed;  
+    #mu <- mod*cr + prime_cr*primed;  
 
+    titre_dependent <- 1
     if(y0_mod >= -999){
         if(y0 >= boost_limit){
-            mu = y0_mod*boost_limit + mu;
-        } else { 
-            mu = y0_mod*y0 + mu;
+            titre_dependent <- (1.0 - y0_mod*boost_limit)
+            #mu = y0_mod*boost_limit + mu;
+        } else {
+            titre_dependent <- (1.0 - y0_mod*y0)
+            #mu = y0_mod*y0 + mu;
         }
     }
+    if(titre_dependent < 0) titre_dependent <- 0
+
+    seniority <- 1.0 - tau*(order - 1)
+    if(seniority < 0) seniority <- 0
+    mu <- seniority*titre_dependent*mod*(mu*cr + c*prime_cr*primed)
+
     if(mu < 0) mu = 0;
     
     #print(paste0("CR: ",cr))
@@ -221,7 +236,7 @@ model_func <- function(parTab, cr_table, order_tab, all_exposures, strains, time
             tmpTimes <- c(tmpTimes, next_t)
               
             ## Solve model
-            pars <- c("t_i"=t_i,pars,"mod"=mod,"x"=x,y0=y0,"primed"=isPrimed,"eff_y0"=eff_y0)
+            pars <- c("t_i"=t_i,pars,"mod"=mod,"x"=x,y0=y0,"primed"=isPrimed,"eff_y0"=eff_y0, "order"=order)
 
             y <- model_trajectory(pars, tmpTimes)
             trajectories[tmpTimesI,index] <-  trajectories[tmpTimesI,index] + y[1:(length(y)-1)]

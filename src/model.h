@@ -1,7 +1,13 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+#ifndef MODEL_TRAJECTORY_CPP
+#define MODEL_TRAJECTORY_CPP
 NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times);
+#endif
+
+#ifndef MODEL_FUNC_GROUP_CPP
+#define MODEL_FUNC_GROUP_CPP
 NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times, 
 				   IntegerVector groups, IntegerVector strains,
 				   IntegerVector exposure_indices, IntegerVector exposure_i_lengths,
@@ -12,3 +18,4 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 				   IntegerVector cr_inds, IntegerVector par_inds, 
 				   IntegerVector order_inds, IntegerVector par_lengths,
 				   IntegerVector cr_lengths, int version);
+#endif

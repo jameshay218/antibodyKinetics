@@ -15,4 +15,3 @@ a single DIC value
 \description{
 Calculates DIC from a given MCMC chain
 }
-

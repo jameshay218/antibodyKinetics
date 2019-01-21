@@ -117,7 +117,6 @@ norm_error <- function(actual, obs, sd, MAX_TITRE) {
 #' @param data NumericVector of observed data, matching y
 #' @param params observation error matrix paramters in order S, EA, MAX_TITRE
 #' @export
-#' @useDynLib antibodyKinetics
 obs_likelihood <- function(y, data, params) {
     .Call('_antibodyKinetics_obs_likelihood', PACKAGE = 'antibodyKinetics', y, data, params)
 }
@@ -154,8 +153,11 @@ obs_likelihood <- function(y, data, params) {
 #' @param data NumericMatrix of antibody titre data. Each row should be complete observations of titres against a given strain for a given group. If we have 5 strains measured and 5 groups, rows 1:5 should be titres in group 1, rows 6:10 titres in group 3 etc. If more than 1 individual in each group, multiply these criteria by number of inidividuals in that group (ie., rows 1:15 for group 1)
 #' @return a single likelihood of observing the data given the model parameters
 #' @export
-#' @useDynLib antibodyKinetics
 posterior_func_group_cpp <- function(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version, individuals, data) {
     .Call('_antibodyKinetics_posterior_func_group_cpp', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version, individuals, data)
+}
+
+posterior_func_group_cpp_matrix <- function(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version, individuals, data) {
+    .Call('_antibodyKinetics_posterior_func_group_cpp_matrix', PACKAGE = 'antibodyKinetics', pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version, individuals, data)
 }
 

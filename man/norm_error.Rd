@@ -18,4 +18,3 @@ norm_error(actual, obs, sd, MAX_TITRE)
 \description{
 Gives the probability of a titre observation given a true titre.
 }
-

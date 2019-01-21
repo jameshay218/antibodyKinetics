@@ -121,31 +121,31 @@ observeEvent(inputs$tp,{
 ## Management of parameter table when sliders change for "dp"
 observeEvent(inputs$dp,{
     if(!is.null(parameters$parTab)){
-    if(inputs$cr_flags == 0){
-        if(inputs$typing_flags == 0){
-            isolate(parameters$parTab[parameters$parTab$id == inputs$exposure_select &
-                                      parameters$parTab$strain == inputs$exposure_strain_select &
-                                      parameters$parTab$exposure == inputs$exposure_exposure_select &
-                                      parameters$parTab$names == "dp","values"] <- inputs$dp)
+        if(inputs$cr_flags == 0){
+            if(inputs$typing_flags == 0){
+                isolate(parameters$parTab[parameters$parTab$id == inputs$exposure_select &
+                                          parameters$parTab$strain == inputs$exposure_strain_select &
+                                          parameters$parTab$exposure == inputs$exposure_exposure_select &
+                                          parameters$parTab$names == "dp","values"] <- inputs$dp)
+            } else {
+                isolate(parameters$parTab[parameters$parTab$type == inputs$exposure_select &
+                                          parameters$parTab$strain == inputs$exposure_strain_select &
+                                          parameters$parTab$exposure == inputs$exposure_exposure_select &
+                                          parameters$parTab$names == "dp","values"] <- inputs$dp)
+            }
         } else {
-            isolate(parameters$parTab[parameters$parTab$type == inputs$exposure_select &
-                                      parameters$parTab$strain == inputs$exposure_strain_select &
-                                      parameters$parTab$exposure == inputs$exposure_exposure_select &
-                                      parameters$parTab$names == "dp","values"] <- inputs$dp)
+            if(inputs$typing_flags == 0){
+                isolate(parameters$parTab[parameters$parTab$id == inputs$exposure_select &
+                                          parameters$parTab$strain == inputs$exposure_strain_select &
+                                          parameters$parTab$exposure == inputs$exposure_exposure_select &
+                                          parameters$parTab$names == "dp","values"] <- inputs$dp)
+            } else {
+                isolate(parameters$parTab[parameters$parTab$type == inputs$exposure_select &
+                                          parameters$parTab$exposure == inputs$exposure_exposure_select &
+                                          parameters$parTab$strain == inputs$exposure_strain_select &
+                                          parameters$parTab$names == "dp","values"] <- inputs$dp)
+            }
         }
-    } else {
-        if(inputs$typing_flags == 0){
-            isolate(parameters$parTab[parameters$parTab$id == inputs$exposure_select &
-                                      parameters$parTab$strain == inputs$exposure_strain_select &
-                                      parameters$parTab$exposure == inputs$exposure_exposure_select &
-                                      parameters$parTab$names == "dp","values"] <- inputs$dp)
-        } else {
-            isolate(parameters$parTab[parameters$parTab$type == inputs$exposure_select &
-                                      parameters$parTab$exposure == inputs$exposure_exposure_select &
-                                      parameters$parTab$strain == inputs$exposure_strain_select &
-                                      parameters$parTab$names == "dp","values"] <- inputs$dp)
-        }
-    }
     }
 })
 
@@ -258,43 +258,48 @@ observeEvent(inputs$exposure_select,{
 })
 
 observeEvent(inputs$exposure_strain_select,{
-    tmpTab <- parameters$parTab
-    if(inputs$typing_flags == 0){
-        tmpTab <- tmpTab[tmpTab$id == inputs$exposure_select & tmpTab$exposure == inputs$exposure_exposure_select,]
-    } else {
-        tmpTab <- tmpTab[tmpTab$type == inputs$exposure_select & tmpTab$exposure == inputs$exposure_exposure_select,]
+    if(!is.null(parameters$parTab)){
+        tmpTab <- parameters$parTab
+        if(inputs$typing_flags == 0){
+            tmpTab <- tmpTab[tmpTab$id == inputs$exposure_select & tmpTab$exposure == inputs$exposure_exposure_select,]
+        } else {
+            tmpTab <- tmpTab[tmpTab$type == inputs$exposure_select & tmpTab$exposure == inputs$exposure_exposure_select,]
+        }
+        tmpTab <- tmpTab[tmpTab$strain == inputs$exposure_strain_select,]
+        mu <- tmpTab[tmpTab$names == "mu","values"]
+        tp <- tmpTab[tmpTab$names == "tp","values"]
+        dp <- tmpTab[tmpTab$names == "dp","values"]
+        ts <- tmpTab[tmpTab$names == "ts","values"]
+        m <- tmpTab[tmpTab$names == "m","values"]
+
+        isolate(updateSliderInput(session,inputId="mu",value=mu))
+        isolate(updateSliderInput(session,inputId="tp",value=tp))
+        isolate(updateSliderInput(session,inputId="dp",value=dp))
+        isolate(updateSliderInput(session,inputId="ts",value=ts))
+        isolate(updateSliderInput(session,inputId="m",value=m))
     }
-    tmpTab <- tmpTab[tmpTab$strain == inputs$exposure_strain_select,]
-    mu <- tmpTab[tmpTab$names == "mu","values"]
-    tp <- tmpTab[tmpTab$names == "tp","values"]
-    dp <- tmpTab[tmpTab$names == "dp","values"]
-    ts <- tmpTab[tmpTab$names == "ts","values"]
-    m <- tmpTab[tmpTab$names == "m","values"]
-    isolate(updateSliderInput(session,inputId="mu",value=mu))
-    isolate(updateSliderInput(session,inputId="tp",value=tp))
-    isolate(updateSliderInput(session,inputId="dp",value=dp))
-    isolate(updateSliderInput(session,inputId="ts",value=ts))
-    isolate(updateSliderInput(session,inputId="m",value=m))
 })
 
 observeEvent(inputs$exposure_exposure_select,{
-    tmpTab <- parameters$parTab
-    if(inputs$typing_flags == 0){
-        tmpTab <- tmpTab[tmpTab$id == inputs$exposure_select & tmpTab$exposure == inputs$exposure_exposure_select,]
-    } else {
-        tmpTab <- tmpTab[tmpTab$type == inputs$exposure_select & tmpTab$exposure == inputs$exposure_exposure_select,]
+    if(!is.null(parameters$parTab)){
+        tmpTab <- parameters$parTab
+        if(inputs$typing_flags == 0){
+            tmpTab <- tmpTab[tmpTab$id == inputs$exposure_select & tmpTab$exposure == inputs$exposure_exposure_select,]
+        } else {
+            tmpTab <- tmpTab[tmpTab$type == inputs$exposure_select & tmpTab$exposure == inputs$exposure_exposure_select,]
+        }
+        tmpTab <- tmpTab[tmpTab$strain == inputs$exposure_strain_select,]
+        mu <- tmpTab[tmpTab$names == "mu","values"]
+        tp <- tmpTab[tmpTab$names == "tp","values"]
+        dp <- tmpTab[tmpTab$names == "dp","values"]
+        ts <- tmpTab[tmpTab$names == "ts","values"]
+        m <- tmpTab[tmpTab$names == "m","values"]
+        isolate(updateSliderInput(session,inputId="mu",value=mu))
+        isolate(updateSliderInput(session,inputId="tp",value=tp))
+        isolate(updateSliderInput(session,inputId="dp",value=dp))
+        isolate(updateSliderInput(session,inputId="ts",value=ts))
+        isolate(updateSliderInput(session,inputId="m",value=m))
     }
-    tmpTab <- tmpTab[tmpTab$strain == inputs$exposure_strain_select,]
-    mu <- tmpTab[tmpTab$names == "mu","values"]
-    tp <- tmpTab[tmpTab$names == "tp","values"]
-    dp <- tmpTab[tmpTab$names == "dp","values"]
-    ts <- tmpTab[tmpTab$names == "ts","values"]
-    m <- tmpTab[tmpTab$names == "m","values"]
-    isolate(updateSliderInput(session,inputId="mu",value=mu))
-    isolate(updateSliderInput(session,inputId="tp",value=tp))
-    isolate(updateSliderInput(session,inputId="dp",value=dp))
-    isolate(updateSliderInput(session,inputId="ts",value=ts))
-    isolate(updateSliderInput(session,inputId="m",value=m))
 })
     
 

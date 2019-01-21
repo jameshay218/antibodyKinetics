@@ -15,4 +15,3 @@ the posterior variance
 \description{
 Calculates posterior variance from a given MCMC chain
 }
-

@@ -38,4 +38,3 @@ Each row corresponds to an observable antibody titre trajectory in the model. Co
 }
 }
 \keyword{datasets}
-

@@ -22,4 +22,3 @@ Exposure times
 }
 }
 \keyword{datasets}
-

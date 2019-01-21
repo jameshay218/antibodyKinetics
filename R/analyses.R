@@ -102,14 +102,16 @@ calculate_WAIC <- function(chain, parTab, dat, f, N){
     expectation_likelihood <- 0
     tmp <- matrix(nrow=nrow(chain),ncol=nrow(dat)*ncol(dat))
 
-    ## For each sample
+    data("ferret_titres")
+    
+   ## For each sample
     for(i in 1:nrow(chain)){
-        pars <- zikaProj::get_index_pars(chain,i)
+        pars <- zikaInfer::get_index_pars(chain,i)
 
         ## Get parameters
         y <- f(pars,times)
         index <- 1
-
+        
         ## For each strain/group pairing
         for(j in 1:nrow(y)){
             ## For each time point
@@ -129,7 +131,6 @@ calculate_WAIC <- function(chain, parTab, dat, f, N){
             }
         }
     }
-
     ## Get mean of log likelihoods
     expectation_likelihood <- expectation_likelihood/nrow(chain)
 
@@ -152,3 +153,118 @@ calculate_WAIC <- function(chain, parTab, dat, f, N){
     
     return(list(WAIC=-2*(lppd-pwaic),pwaic=pwaic))
 }
+
+#' Calculate per data point likelihood matrix
+#'
+#' From the output of an MCMC chain, calculates the likelihood of observing each data point. This can then be used in loo::loo
+#' @inheritParams calculate_WAIC
+#' @param nindiv the number of individuals in each group/strain combination
+#' @return a matrix of same dimensions as dat
+#' @export
+calculate_lik_matrix <- function(chain, parTab, dat, f, N, nindiv=3){
+    ## Do this for a subsample of the MCMC chain to save time
+    samps <- sample(1:nrow(chain),size = N,replace=FALSE)
+    chain <- chain[samps,]
+
+    ## Separate out data - times and measurements
+    times <- dat[1,]
+    dat <- dat[2:nrow(dat),]
+    
+    tmp <- matrix(nrow=nrow(chain),ncol=nrow(dat)*ncol(dat))
+    data(ferret_titres)
+
+    groups <- strains <- character(nrow(dat)*ncol(dat))
+    all_times <- numeric(nrow(dat)*ncol(dat))
+    indiv <- character(nrow(dat)*ncol(dat))
+    times <- c(0,21,37,49,70)
+    data_points <- numeric(nrow(dat)*ncol(dat))
+ 
+    index <- 1
+    ## For each strain/group pairing
+    i <- 1
+    pars <- zikaInfer::get_index_pars(chain,i)
+
+    ## Get parameters
+    y <- f(pars,times)
+    
+    for(j in 1:nrow(y)){
+        ## For each time point
+        for(x in 1:ncol(y)){
+            ## We have 3 of each individual
+            for(q in 1:nindiv){
+                groups[index] <- as.character(ferret_titres[(3*(j-1)+1)+(q-1),"group"])
+                strains[index] <- as.character(ferret_titres[(3*(j-1)+1)+(q-1),"strain"])
+                indiv[index] <- as.character(ferret_titres[(3*(j-1)+1)+(q-1),"indiv"])
+                all_times[index] <- times[x]
+                data_points[index] <- dat[(3*(j-1)+1)+(q-1),x]
+                index <- index + 1
+            }
+        }
+    }
+    ## For each sample
+    for(i in 1:nrow(chain)){
+        pars <- zikaInfer::get_index_pars(chain,i)
+
+        ## Get parameters
+        y <- f(pars,times)
+        index <- 1
+
+        ## For each strain/group pairing
+        for(j in 1:nrow(y)){
+            ## For each time point
+            for(x in 1:ncol(y)){
+                ## We have 3 of each individual
+                for(q in 1:nindiv){                   
+                    ## Get likelihood for this point
+                    wow <- norm_error(y[j,x],dat[(3*(j-1)+1)+(q-1),x],pars["S"],pars["MAX_TITRE"])
+                    ## Store this likelihood
+                    tmp[i, index] <- wow
+                    index <- index + 1                
+                }
+            }
+        }
+    }
+    all_labels <- data.frame(groups,strains,indiv,all_times, data_points)
+    return(list(tmp, all_labels))
+}
+
+
+
+#' Calculate LOOIC using loo package
+#'
+#' Calculates PSIS-LOO CV as in Vehtari et al. 2017a/b, using the loo package.
+#' @inheritParams calculate_lik_matrix
+#' @export
+calculate_loo <- function(chain, parTab, dat, f, N=1000, nindiv=3){
+  samps <- sample(1:nrow(chain),size = N,replace=FALSE)
+  chain <- chain[samps,]
+  tmp <- calculate_lik_matrix(chain, parTab, dat, f, N,nindiv=nindiv)
+  all_liks <- log(tmp[[1]])
+  labels <- tmp[[2]]
+  rel_n_eff <- loo::relative_eff(exp(all_liks),chain_id=rep(1,each=N))
+  loo1 <- loo::loo(all_liks,r_eff=rel_n_eff,cores=1)
+  pareto_k <- data.frame(labels, pareto_k=loo1$diagnostics$pareto_k)
+  return(list(loo1,pareto_k))
+}
+
+#' Get titre data labels
+#'
+#' @export
+get_titre_labels <- function(nindiv=3){
+    data("ferret_titres")
+    groups <- NULL
+    strains <- NULL
+    all_times <- NULL
+    times <- c(0,21,37,49,70)
+    index <- 1
+    for(j in 1:nrow(ferret_titres)){
+        for(x in 1:length(times)){
+            groups <- c(groups, as.character(ferret_titres[index,"group"]))
+            strains <- c(strains, as.character(ferret_titres[index,"strain"]))
+            all_times<- c(all_times, times[x])
+        }
+    }
+    all_labels <- data.frame(groups,strains,all_times)
+    return(all_labels)
+}
+

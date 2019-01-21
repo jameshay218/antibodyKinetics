@@ -1,6 +1,12 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+
+#ifndef MAX
+#define MAX(a,b) ((a) < (b) ? (b) : (a)) // define MAX function for use later
+#endif
+
+
 //' Model trajectory calc cpp
 //'
 //' Calculates the ferret model trajectory for a single infection event.
@@ -23,7 +29,7 @@ using namespace Rcpp;
 //' @export
 //[[Rcpp::export]]
 NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times){
-  double sigma, beta, y0_mod, boost_limit;
+  double sigma, beta, y0_mod, boost_limit, seniority, titre_dependent;
   double lower_bound = pars[0];
   double mu = pars[4];
   double tp = pars[5];
@@ -35,34 +41,43 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times){
   sigma = pars[11];
   y0_mod = pars[12];
   boost_limit = pars[13];
-  double primed = pars[14];
-  double mod = pars[15];
-  double x = pars[16];
-  double t_i = pars[17];
+  double tau = pars[14];
+  double order = pars[15];
+  double primed = pars[16];
+  double mod = pars[17];
+  double x = pars[18];
+  double t_i = pars[19];
 
   // We have y0 twice. In the non-additive version (one antibody producing process),
   // eff_y0 is zero. Otherwise, it's the titre at the time of exposure.
-  double y0 = pars[18];
+  double y0 = pars[20];
   if(y0 < 0) y0 = 0;
-  double eff_y0 = pars[19];
+  double eff_y0 = pars[21];
 
   double t = 0;
   double tmp = 0;
 
-  double cr = mu - sigma*x;
-  double prime_cr = c - beta*x;
-  if(cr < 0) cr = 0;
-  if(prime_cr < 0) prime_cr = 0;
-  mu = mod*cr + prime_cr*primed;  
+  double cr = MAX(0, (1.0 - sigma*x));
+  double prime_cr = MAX(0,(1.0 - beta*x));
+  
+  //mu = mod*cr + prime_cr*primed;  
   if(y0_mod >= -999){
     if(y0 >= boost_limit){
       //mu = (-mu/(mu + y0_mod))*boost_limit + mu;
-      mu = y0_mod*boost_limit + mu;
+      //mu = y0_mod*boost_limit + mu;
+      mu = MAX(0, (1.0 - y0_mod*boost_limit));
     } else { 
       //mu = (-mu/(mu+y0_mod))*y0 + mu;
-      mu = y0_mod*y0 + mu;
+      mu = MAX(0, (1.0 - y0_mod*y0));
+      
+      //mu = y0_mod*y0 + mu;
     }
   }
+  
+  // Seniority
+  seniority = MAX(0, 1.0 - tau*(order-1.0));
+  
+  mu = seniority*titre_dependent*mod*(mu*cr + c*prime_cr*primed);
   if(mu < 0) mu = 0;
 
   //mu += prime_cr*primed;
@@ -194,6 +209,7 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	isPrimed = exposure_primes[index];
 	cr = pars[cr_inds[cr_lengths[measured_strain] + exposure_strain]];
 
+	fullPars.push_back(order);
 	fullPars.push_back(isPrimed);
 	fullPars.push_back(mod);
 	fullPars.push_back(cr);

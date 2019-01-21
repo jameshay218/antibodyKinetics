@@ -27,4 +27,3 @@ Creaters a function pointer for \code{\link{model_func_groups}} to save passing 
 \seealso{
 \code{\link{create_model_func}}
 }
-

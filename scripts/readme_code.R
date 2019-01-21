@@ -8,7 +8,7 @@ library(ggplot2)
 parameter_descriptions()
 
 pars <- c("lower_bound"=0,"S"=1,"EA"=0,"MAX_TITRE"=13,
-          "mu"=4,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.02, "c"=4,
+          "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.02, "c"=4,
           "sigma"=0.01,"y0_mod"=-10000,"boost_limit"=0,
           "primed"=0,"mod"=1,
           "x"=0,"t_i"=10,"y0"=0,"eff_y0"=0)
@@ -25,7 +25,7 @@ plot(titre_trajectory_cpp, type='l', col="blue")
 lines(titre_trajectory_R,col="red")
 
 
-runName <- "CYTY6BN"
+runName <- "CNAN3BN"
 options <- convert_runName_to_options(runName)
 
 data(exampleParTab)
@@ -63,7 +63,7 @@ data(ferret_titres)
 dat <- as.matrix(ferret_titres[,4:ncol(ferret_titres)])
 
 ## The first row of the data should give the sampling times
-dat <- rbind(c(0,21,36,49,70),dat)
+dat <- rbind(c(0,21,37,49,70),dat)
 rownames(dat) <- NULL
 
 ## Create a function pointer to solve the posterior probability
