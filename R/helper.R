@@ -16,6 +16,22 @@ read_ferret_data <- function(data_file){
 
 }
 
+#' Add noise
+#'
+#' Adds truncated noise to titre data
+#' @param y the titre
+#' @param theta a vector with MAX_TITRE and error parameters
+#' @return a noisy titre
+#' @export
+add_noise_serosolver<- function(y, theta) { 
+    noise_y <- floor(rnorm(length(y), mean = y, sd = theta["S"]))
+    ## If outside of bounds, truncate
+    noise_y[noise_y < 0] <- 0
+    noise_y[noise_y > theta["MAX_TITRE"]] <- theta["MAX_TITRE"]
+    return(noise_y)
+}
+
+
 #' Add noise to a titre observation
 #'
 #' Adds observation noise to the provided vector of titres
@@ -108,9 +124,9 @@ parTab_modification <- function(parTab, options,fixed_S=FALSE){
     ## Modify if titre dependent boosting
     if(y0_mod){
         parTab[parTab$names =="y0_mod","fixed"] <- 0
-        parTab[parTab$names =="y0_mod","values"] <- -0.5
+        parTab[parTab$names =="y0_mod","values"] <- 0.1
         parTab[parTab$names == "y0_mod","upper_bound"] <- 1
-        parTab[parTab$names == "y0_mod","lower_bound"] <- -1
+        parTab[parTab$names == "y0_mod","lower_bound"] <- 0
         
         parTab[parTab$names =="boost_limit","fixed"] <- 0
         parTab[parTab$names =="boost_limit","values"] <- 4
@@ -130,9 +146,16 @@ parTab_modification <- function(parTab, options,fixed_S=FALSE){
 
     ## Modify if antigenic seniority
     if(antigenic_seniority){
-        parTab[parTab$names == "mod","fixed"] <- 0
-        parTab[parTab$names == "mod","fixed"][1] <- 1
+        ##parTab[parTab$names == "mod","fixed"] <- 0
+        ##parTab[parTab$names == "mod","fixed"][1] <- 1
+        parTab[parTab$names == "tau","fixed"] <- 0
+        parTab[parTab$names == "tau","values"] <- 0.05
+        parTab[parTab$names == "mod","fixed"] <- 1
+        parTab[parTab$names == "mod","values"] <- 1   
+        
     } else {
+        parTab[parTab$names == "tau","fixed"] <- 1
+        parTab[parTab$names == "tau","values"] <- 0
         parTab[parTab$names == "mod","fixed"] <- 1
         parTab[parTab$names == "mod","values"] <- 1   
     }
@@ -150,7 +173,7 @@ parTab_modification <- function(parTab, options,fixed_S=FALSE){
     } else {
         parTab[parTab$names %in% c("beta","c"),"fixed"] <- 1
     }
-    parTab[parTab$names == "m","upper_bound"] <- 1
+    parTab[parTab$names == "m","upper_bound"] <- 10
     parTab[parTab$names == "ts","upper_bound"] <- 30
     return(parTab)
 }
@@ -264,8 +287,9 @@ parameter_descriptions <- function(){
     message(cat("beta", "cross reactivity gradient of additional boost from priming", sep="\t"))
     message(cat("c", "additional homologous boosting from primed exposure", sep="\t"))
     message(cat("sigma", "cross reactivity gradient", sep="\t"))
-    message(cat("y0_mod", "gradient of titre-dependent boosting term. -10000 turns this feature off; -1 is maximum titre dependent suppression; 1 is maximum titre dependent enhancement", sep="\t"))
+    message(cat("y0_mod", "gradient of titre-dependent boosting term. -10000 turns this feature off; 0 is no titre dependent suppression; 1 is maximum titre dependent suppression", sep="\t"))
     message(cat("boost_limit", "maximum titre below which titre-dependent boosting takes place. If y0_mod is -10000, then this is ignored", sep="\t"))
+    message(cat("tau", "antigenic seniority term. Proportion of boost lost with each subsequent exposure. tau=0 corresponds to no antigenic seniority", sep="\t"))
     message(cat("primed", "1 if this is a primed exposure, 0 otherwise", sep="\t"))
     message(cat("mod", "corresponding to rho in model description - scaling parameter for antigenic seniority between 0 and 1", sep="\t"))
     message(cat("x", "antigenic distance between the exposure strain and the strain being measured here (0 for homologous", sep="\t"))
@@ -291,6 +315,7 @@ parameter_descriptions <- function(){
 #' @param group if only one group to be simulated, subset exposureTab for this group
 #' @param strain if only one strain to be simulated, subset exposureTab for this strain
 #' @param normal if TRUE, adds normally distributed measurement error
+#' @param pars vector of parameter values to simulate from. If NULL, just uses those values in the read in parTab
 #' @return a list with the simulated data, the residuals between true simulated data and observed simulated data, the file location of saved simulated data
 #' @export
 create_data <- function(runName,
@@ -300,7 +325,8 @@ create_data <- function(runName,
                         times,
                         wd="~/net/home/ferret/inputs/data_normal",
                         group=NA,strain=NA,
-                        normal=TRUE){
+                        normal=TRUE,
+                        pars=NULL){
     options <- convert_runName_to_options(runName)
     parTab <- read.csv(parTab_file,stringsAsFactors=FALSE)
     parTab <- parTab_modification(parTab, options, FALSE)
@@ -314,26 +340,34 @@ create_data <- function(runName,
         
         parTab <- parTab[parTab$id %in% c(NA,"all",unique(exposureTab$id)) | parTab$names == "x",]
     }
+    if(!is.null(pars)){
+        parTab$values <- pars
+    }
+    
     ## Simulate data and save
     individuals <- rep(nindiv,ngroup)
     pars <- parTab[parTab$names %in% c("S","EA","MAX_TITRE"),"values"]
     names(pars) <- c("S","EA","MAX_TITRE")
+    print(options$form)
     f <- create_model_group_func_cpp(parTab,exposureTab,version="model",
                                      form=options$form,typing = TRUE,cross_reactivity = options$cr)
     dat <- f(parTab$values, times)
     dat <- floor(dat)
     dat <- apply(dat,2,function(x) rep(x, each=nindiv))
     index <- 1
-    difs <- NULL
-    for(i in 1:nrow(dat)){
-        for(j in 1:ncol(dat)){
-            tmp <- dat[i,j]
-            dat[i,j] <- add_noise(pars,dat[i,j],normal)
-            tmp <- tmp - dat[i,j]
-            difs[index] <- tmp
-            index <- index + 1
-        }
-    }
+    #difs <- NULL
+    dat1 <- apply(dat, 2, function(x) add_noise_serosolver(x, pars))
+    difs <- dat1 - dat
+    dat <- dat1
+    ##for(i in 1:nrow(dat)){
+    ##    for(j in 1:ncol(dat)){
+    ##        tmp <- dat[i,j]
+    ##        dat[i,j] <- add_noise(pars,dat[i,j],normal)
+    ##        tmp <- tmp - dat[i,j]
+    ##        difs[index] <- tmp
+    ##        index <- index + 1
+    ##    }
+    ##}
     rownames(dat) <- NULL
     colnames(dat) <- times
     labels <- expand.grid(indiv=1:3,strain=LETTERS[1:5],group=1:5)
@@ -377,13 +411,16 @@ create_data <- function(runName,
 
     ## Filenames
     filename <- paste0(wd,"/",runID,"_",runName,"_data.csv")
+    print(filename)
     plot_filename <- paste0(wd,"/",runID,"_",runName,"_plot.png")
+    parTab_filename <- paste0(wd,"/",runID,"_",runName,"_parTab.csv")
     if(!is.na(group)){
         filename <- paste0(wd,"/",runID,"_",runName,"_",group,"_data.csv")
     }
     write.csv(dat_unlabelled, filename,row.names=FALSE)
+    write.csv(parTab, parTab_filename, row.names=FALSE)
     png(plot_filename,width=8,height=6,units="in",res=300)
     print(p1)
     dev.off()             
-    return(list("data"=dat,"residuals"=difs,"filename"=filename))
+    return(list("data"=dat,"residuals"=difs,"filename"=filename,"parTab_filename"=parTab_filename))
 }

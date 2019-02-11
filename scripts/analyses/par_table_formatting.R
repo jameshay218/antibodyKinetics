@@ -40,7 +40,8 @@ par_names <- c("mod1"="ρ1", "mod2"="ρ2","mod3"="ρ3","mod4"="ρ4",
                "adjmu"="μ(1-dp)","adjmu.1"="μ(1-dp)", "adjmu.2"="μ(1-dp)", 
                "adjmu.3"="μ(1-dp)", "adjmu.4"="μ(1-dp)", "adjmu.5"="μ(1-dp)",
                "mu"="μ","sigma"="σ","S"="sd","beta"="β",
-               "c"="c","lnlike"="Log likelihood","dp"="dp","ts"="ts","m"="m","y0_mod"="γ", "boost_limit"="y_limit")
+               "c"="c","lnlike"="Log likelihood","dp"="dp","ts"="ts","m"="m","y0_mod"="γ", "boost_limit"="y_limit",
+               "tau"="τ")
 
 par_names_2 <- c("mu"="μ","mu.1"="μ1","mu.2"="μ2","mu.3"="μ3","mu.4"="μ4","mu.5"="μ5",
                   "m"="m","m.1"="m1","m.2"="m2","m.3"="m3","m.4"="m4","m.5"="m5",  
@@ -49,7 +50,8 @@ par_names_2 <- c("mu"="μ","mu.1"="μ1","mu.2"="μ2","mu.3"="μ3","mu.4"="μ4","
                  "dp"="dp","dp.1"="dp1","dp.2"="dp2","dp.3"="dp3","dp.4"="dp4","dp.5"="dp5",  
                  "y0_mod"="γ","boost_limit"="y_limit","S"="sd","beta"="β","mod1"="ρ1", "mod2"="ρ2","mod3"="ρ3","mod4"="ρ4",
                  "mod"="ρ1", "mod.1"="ρ2","mod.2"="ρ3","mod.3"="ρ4",
-                 "γ"="y0_mod","y_limit"="boost_limit","lnlike"="Log likelihood","c"="c"
+                 "γ"="y0_mod","y_limit"="boost_limit","lnlike"="Log likelihood","c"="c",
+                 "tau"="τ"
                  )
 
 

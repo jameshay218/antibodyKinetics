@@ -15,7 +15,8 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 				   NumericVector exposure_times, IntegerVector exposure_strains,
 				   NumericVector exposure_next, IntegerVector exposure_measured,
 				   IntegerVector exposure_orders, IntegerVector exposure_primes, 
-				   IntegerVector cr_inds, IntegerVector par_inds, 
+				   IntegerVector cr_inds, IntegerVector par_inds,
+				   CharacterVector par_names,
 				   IntegerVector order_inds, IntegerVector par_lengths,
 				   IntegerVector cr_lengths, int version);
 #endif

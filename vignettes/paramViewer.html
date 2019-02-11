@@ -12,14 +12,14 @@
 
 <meta name="author" content="James Hay" />
 
-<meta name="date" content="2018-06-08" />
+<meta name="date" content="2019-02-11" />
 
 <title>Parameter viewer shiny app</title>
 
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
+<style type="text/css" data-origin="pandoc">
 div.sourceCode { overflow-x: auto; }
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
   margin: 0; padding: 0; vertical-align: baseline; border: none; }
@@ -55,7 +55,29 @@ code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
 code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
 code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
 </style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -70,7 +92,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Parameter viewer shiny app</h1>
 <h4 class="author"><em>James Hay</em></h4>
-<h4 class="date"><em>2018-06-08</em></h4>
+<h4 class="date"><em>2019-02-11</em></h4>
 
 
 
@@ -96,7 +118,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>How many strains are being measured in this experiment? Increasing or decreasing this value adds options and trackers for each strain in the experiment</li>
 <li>Either “None” (no cross reactivity), “Cross reactivity” (antigenic distance mediated cross reactivity included, but the same for all exposure types) or “Typed CR” (different cross reactivity parameter for each exposure type).</li>
 <li>Flag indicating if titre dependent boosting is present</li>
-<li>Input area for priming, cross reactivity and titre dependent boosting parameters. If <strong>6</strong> is left unchecked, then <code>gamma</code> and <code>y_switch</code> can be ignored. Parameters correspond to those in the paper.</li>
+<li>Input area for priming, cross reactivity, titre dependent boosting and antigenic seniority parameters. If <strong>6</strong> is left unchecked, then <code>gamma</code> and <code>boost_limit</code> can be ignored. Parameters correspond to those in the paper.</li>
 <li>Dropdown to change the cross reactivity gradient for each exposure type (or all, if universal cross reactivity).</li>
 <li>Input area for predefined antigenic distance matrix. Note that <code>Upload</code> must be pressed once the correct file is selected.</li>
 <li>Download button for the current antigenic distance matrix</li>
@@ -111,7 +133,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><code>3</code></li>
 <li><code>Cross reactivity</code></li>
 <li>Unchecked</li>
-<li><code>Beta=0.6; c=4; gamma=0; y_switch=0</code></li>
+<li><code>Beta=0.6; c=4; gamma=0; boost_limit=0; tau=0</code></li>
 <li><code>all</code>, <code>1</code></li>
 <li>Leave blank</li>
 <li>NA</li>
@@ -161,7 +183,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>Dropdown to select which strain for this exposure type we are considering (ie. the parameters that govern antibody titres of strain B following exposure with strain A) - this will be “all” as long as there is any typing in the model.</li>
 <li>Dropdown to select which affected strain we are interested - only relevant if there is no cross-reactivity in the model, and any strain specific interactions must be parameterised explicitly. If there is cross reactivity, then the impact of an exposure on other strains is simply governed by their antigenic distance and cross-reactivity as specified in the <code>Model settings</code> tab.</li>
 <li>Sliders to change the main model parameters. Note that long term waning rate is on the log scale. *Sorry - after changing each parameter, the “Exposure” dropdown changes back to the first exposure type. I have no plans to fix this, as it is just an inconvenience“*.</li>
-<li>Change <span class="math inline">\(\rho\)</span>, the antigenic seniority modifiers for each exposure. Note that this only goes up to 4 exposures at the moment - contact me if this is a problem! (It should just be a case of changing the code in ui.R).</li>
+<li>REMOVED: Superceded by <span class="math inline">\(\tau\)</span>. Change <span class="math inline">\(\rho\)</span>, the antigenic seniority modifiers for each exposure. Note that this only goes up to 4 exposures at the moment - contact me if this is a problem! (It should just be a case of changing the code in ui.R).</li>
 <li>Download the current parameter set.</li>
 <li>Predicted antibody trajectories for the current set of inputs.</li>
 </ol>

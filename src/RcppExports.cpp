@@ -44,8 +44,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // model_func_group_cpp
-NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times, IntegerVector groups, IntegerVector strains, IntegerVector exposure_indices, IntegerVector exposure_i_lengths, IntegerVector strain_indices, IntegerVector strain_i_lengths, NumericVector exposure_times, IntegerVector exposure_strains, NumericVector exposure_next, IntegerVector exposure_measured, IntegerVector exposure_orders, IntegerVector exposure_primes, IntegerVector cr_inds, IntegerVector par_inds, IntegerVector order_inds, IntegerVector par_lengths, IntegerVector cr_lengths, int version);
-RcppExport SEXP _antibodyKinetics_model_func_group_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP groupsSEXP, SEXP strainsSEXP, SEXP exposure_indicesSEXP, SEXP exposure_i_lengthsSEXP, SEXP strain_indicesSEXP, SEXP strain_i_lengthsSEXP, SEXP exposure_timesSEXP, SEXP exposure_strainsSEXP, SEXP exposure_nextSEXP, SEXP exposure_measuredSEXP, SEXP exposure_ordersSEXP, SEXP exposure_primesSEXP, SEXP cr_indsSEXP, SEXP par_indsSEXP, SEXP order_indsSEXP, SEXP par_lengthsSEXP, SEXP cr_lengthsSEXP, SEXP versionSEXP) {
+NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times, IntegerVector groups, IntegerVector strains, IntegerVector exposure_indices, IntegerVector exposure_i_lengths, IntegerVector strain_indices, IntegerVector strain_i_lengths, NumericVector exposure_times, IntegerVector exposure_strains, NumericVector exposure_next, IntegerVector exposure_measured, IntegerVector exposure_orders, IntegerVector exposure_primes, IntegerVector cr_inds, IntegerVector par_inds, CharacterVector par_names, IntegerVector order_inds, IntegerVector par_lengths, IntegerVector cr_lengths, int version);
+RcppExport SEXP _antibodyKinetics_model_func_group_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP groupsSEXP, SEXP strainsSEXP, SEXP exposure_indicesSEXP, SEXP exposure_i_lengthsSEXP, SEXP strain_indicesSEXP, SEXP strain_i_lengthsSEXP, SEXP exposure_timesSEXP, SEXP exposure_strainsSEXP, SEXP exposure_nextSEXP, SEXP exposure_measuredSEXP, SEXP exposure_ordersSEXP, SEXP exposure_primesSEXP, SEXP cr_indsSEXP, SEXP par_indsSEXP, SEXP par_namesSEXP, SEXP order_indsSEXP, SEXP par_lengthsSEXP, SEXP cr_lengthsSEXP, SEXP versionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -65,11 +65,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type exposure_primes(exposure_primesSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type cr_inds(cr_indsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type par_inds(par_indsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type par_names(par_namesSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type order_inds(order_indsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type par_lengths(par_lengthsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type cr_lengths(cr_lengthsSEXP);
     Rcpp::traits::input_parameter< int >::type version(versionSEXP);
-    rcpp_result_gen = Rcpp::wrap(model_func_group_cpp(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version));
+    rcpp_result_gen = Rcpp::wrap(model_func_group_cpp(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, par_names, order_inds, par_lengths, cr_lengths, version));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -116,8 +117,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // posterior_func_group_cpp
-double posterior_func_group_cpp(NumericVector pars, NumericVector times, IntegerVector groups, IntegerVector strains, IntegerVector exposure_indices, IntegerVector exposure_i_lengths, IntegerVector strain_indices, IntegerVector strain_i_lengths, NumericVector exposure_times, IntegerVector exposure_strains, NumericVector exposure_next, IntegerVector exposure_measured, IntegerVector exposure_orders, IntegerVector exposure_primes, IntegerVector cr_inds, IntegerVector par_inds, IntegerVector order_inds, IntegerVector par_lengths, IntegerVector cr_lengths, int version, IntegerVector individuals, NumericMatrix data);
-RcppExport SEXP _antibodyKinetics_posterior_func_group_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP groupsSEXP, SEXP strainsSEXP, SEXP exposure_indicesSEXP, SEXP exposure_i_lengthsSEXP, SEXP strain_indicesSEXP, SEXP strain_i_lengthsSEXP, SEXP exposure_timesSEXP, SEXP exposure_strainsSEXP, SEXP exposure_nextSEXP, SEXP exposure_measuredSEXP, SEXP exposure_ordersSEXP, SEXP exposure_primesSEXP, SEXP cr_indsSEXP, SEXP par_indsSEXP, SEXP order_indsSEXP, SEXP par_lengthsSEXP, SEXP cr_lengthsSEXP, SEXP versionSEXP, SEXP individualsSEXP, SEXP dataSEXP) {
+double posterior_func_group_cpp(NumericVector pars, NumericVector times, IntegerVector groups, IntegerVector strains, IntegerVector exposure_indices, IntegerVector exposure_i_lengths, IntegerVector strain_indices, IntegerVector strain_i_lengths, NumericVector exposure_times, IntegerVector exposure_strains, NumericVector exposure_next, IntegerVector exposure_measured, IntegerVector exposure_orders, IntegerVector exposure_primes, IntegerVector cr_inds, IntegerVector par_inds, CharacterVector par_names, IntegerVector order_inds, IntegerVector par_lengths, IntegerVector cr_lengths, int version, IntegerVector individuals, NumericMatrix data);
+RcppExport SEXP _antibodyKinetics_posterior_func_group_cpp(SEXP parsSEXP, SEXP timesSEXP, SEXP groupsSEXP, SEXP strainsSEXP, SEXP exposure_indicesSEXP, SEXP exposure_i_lengthsSEXP, SEXP strain_indicesSEXP, SEXP strain_i_lengthsSEXP, SEXP exposure_timesSEXP, SEXP exposure_strainsSEXP, SEXP exposure_nextSEXP, SEXP exposure_measuredSEXP, SEXP exposure_ordersSEXP, SEXP exposure_primesSEXP, SEXP cr_indsSEXP, SEXP par_indsSEXP, SEXP par_namesSEXP, SEXP order_indsSEXP, SEXP par_lengthsSEXP, SEXP cr_lengthsSEXP, SEXP versionSEXP, SEXP individualsSEXP, SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -137,19 +138,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type exposure_primes(exposure_primesSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type cr_inds(cr_indsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type par_inds(par_indsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type par_names(par_namesSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type order_inds(order_indsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type par_lengths(par_lengthsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type cr_lengths(cr_lengthsSEXP);
     Rcpp::traits::input_parameter< int >::type version(versionSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type individuals(individualsSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(posterior_func_group_cpp(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version, individuals, data));
+    rcpp_result_gen = Rcpp::wrap(posterior_func_group_cpp(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, par_names, order_inds, par_lengths, cr_lengths, version, individuals, data));
     return rcpp_result_gen;
 END_RCPP
 }
 // posterior_func_group_cpp_matrix
-NumericMatrix posterior_func_group_cpp_matrix(NumericVector pars, NumericVector times, IntegerVector groups, IntegerVector strains, IntegerVector exposure_indices, IntegerVector exposure_i_lengths, IntegerVector strain_indices, IntegerVector strain_i_lengths, NumericVector exposure_times, IntegerVector exposure_strains, NumericVector exposure_next, IntegerVector exposure_measured, IntegerVector exposure_orders, IntegerVector exposure_primes, IntegerVector cr_inds, IntegerVector par_inds, IntegerVector order_inds, IntegerVector par_lengths, IntegerVector cr_lengths, int version, IntegerVector individuals, NumericMatrix data);
-RcppExport SEXP _antibodyKinetics_posterior_func_group_cpp_matrix(SEXP parsSEXP, SEXP timesSEXP, SEXP groupsSEXP, SEXP strainsSEXP, SEXP exposure_indicesSEXP, SEXP exposure_i_lengthsSEXP, SEXP strain_indicesSEXP, SEXP strain_i_lengthsSEXP, SEXP exposure_timesSEXP, SEXP exposure_strainsSEXP, SEXP exposure_nextSEXP, SEXP exposure_measuredSEXP, SEXP exposure_ordersSEXP, SEXP exposure_primesSEXP, SEXP cr_indsSEXP, SEXP par_indsSEXP, SEXP order_indsSEXP, SEXP par_lengthsSEXP, SEXP cr_lengthsSEXP, SEXP versionSEXP, SEXP individualsSEXP, SEXP dataSEXP) {
+NumericMatrix posterior_func_group_cpp_matrix(NumericVector pars, NumericVector times, IntegerVector groups, IntegerVector strains, IntegerVector exposure_indices, IntegerVector exposure_i_lengths, IntegerVector strain_indices, IntegerVector strain_i_lengths, NumericVector exposure_times, IntegerVector exposure_strains, NumericVector exposure_next, IntegerVector exposure_measured, IntegerVector exposure_orders, IntegerVector exposure_primes, IntegerVector cr_inds, IntegerVector par_inds, CharacterVector par_names, IntegerVector order_inds, IntegerVector par_lengths, IntegerVector cr_lengths, int version, IntegerVector individuals, NumericMatrix data);
+RcppExport SEXP _antibodyKinetics_posterior_func_group_cpp_matrix(SEXP parsSEXP, SEXP timesSEXP, SEXP groupsSEXP, SEXP strainsSEXP, SEXP exposure_indicesSEXP, SEXP exposure_i_lengthsSEXP, SEXP strain_indicesSEXP, SEXP strain_i_lengthsSEXP, SEXP exposure_timesSEXP, SEXP exposure_strainsSEXP, SEXP exposure_nextSEXP, SEXP exposure_measuredSEXP, SEXP exposure_ordersSEXP, SEXP exposure_primesSEXP, SEXP cr_indsSEXP, SEXP par_indsSEXP, SEXP par_namesSEXP, SEXP order_indsSEXP, SEXP par_lengthsSEXP, SEXP cr_lengthsSEXP, SEXP versionSEXP, SEXP individualsSEXP, SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -169,13 +171,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type exposure_primes(exposure_primesSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type cr_inds(cr_indsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type par_inds(par_indsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type par_names(par_namesSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type order_inds(order_indsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type par_lengths(par_lengthsSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type cr_lengths(cr_lengthsSEXP);
     Rcpp::traits::input_parameter< int >::type version(versionSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type individuals(individualsSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(posterior_func_group_cpp_matrix(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths, version, individuals, data));
+    rcpp_result_gen = Rcpp::wrap(posterior_func_group_cpp_matrix(pars, times, groups, strains, exposure_indices, exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times, exposure_strains, exposure_next, exposure_measured, exposure_orders, exposure_primes, cr_inds, par_inds, par_names, order_inds, par_lengths, cr_lengths, version, individuals, data));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -184,12 +187,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_antibodyKinetics_toUnitScale", (DL_FUNC) &_antibodyKinetics_toUnitScale, 3},
     {"_antibodyKinetics_fromUnitScale", (DL_FUNC) &_antibodyKinetics_fromUnitScale, 3},
     {"_antibodyKinetics_model_trajectory_cpp", (DL_FUNC) &_antibodyKinetics_model_trajectory_cpp, 2},
-    {"_antibodyKinetics_model_func_group_cpp", (DL_FUNC) &_antibodyKinetics_model_func_group_cpp, 20},
+    {"_antibodyKinetics_model_func_group_cpp", (DL_FUNC) &_antibodyKinetics_model_func_group_cpp, 21},
     {"_antibodyKinetics_obs_error", (DL_FUNC) &_antibodyKinetics_obs_error, 5},
     {"_antibodyKinetics_norm_error", (DL_FUNC) &_antibodyKinetics_norm_error, 4},
     {"_antibodyKinetics_obs_likelihood", (DL_FUNC) &_antibodyKinetics_obs_likelihood, 3},
-    {"_antibodyKinetics_posterior_func_group_cpp", (DL_FUNC) &_antibodyKinetics_posterior_func_group_cpp, 22},
-    {"_antibodyKinetics_posterior_func_group_cpp_matrix", (DL_FUNC) &_antibodyKinetics_posterior_func_group_cpp_matrix, 22},
+    {"_antibodyKinetics_posterior_func_group_cpp", (DL_FUNC) &_antibodyKinetics_posterior_func_group_cpp, 23},
+    {"_antibodyKinetics_posterior_func_group_cpp_matrix", (DL_FUNC) &_antibodyKinetics_posterior_func_group_cpp_matrix, 23},
     {NULL, NULL, 0}
 };
 

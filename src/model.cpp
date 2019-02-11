@@ -19,10 +19,10 @@ using namespace Rcpp;
 //' @family model functions
 //' @useDynLib antibodyKinetics
 //' @examples
-//' pars <- c("lower_bound"=-1000,"S"=1,"EA"=0,"MAX_TITRE"=13,
-//'           "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.02, "c"=4,
-//'           "sigma"=0.01,"y0_mod"=-10000,"boost_limit"=0,
-//'           "primed"=0,"mod"=1,
+//' pars <- c("lower_bound"=0,"S"=1,"EA"=0,"MAX_TITRE"=13,
+//'           "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.6, "c"=4,
+//'           "sigma"=1,"y0_mod"=-20,"boost_limit"=-1,"tau"=0.05,
+//'           "order"=1, "primed"=0,"mod"=1,
 //'           "x"=0,"t_i"=10,"y0"=0,"eff_y0"=0)
 //' times <- seq(0,100,by=1)
 //' y <- model_trajectory_cpp(pars,times)
@@ -47,7 +47,6 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times){
   double mod = pars[17];
   double x = pars[18];
   double t_i = pars[19];
-
   // We have y0 twice. In the non-additive version (one antibody producing process),
   // eff_y0 is zero. Otherwise, it's the titre at the time of exposure.
   double y0 = pars[20];
@@ -57,27 +56,31 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times){
   double t = 0;
   double tmp = 0;
 
-  double cr = MAX(0, (1.0 - sigma*x));
-  double prime_cr = MAX(0,(1.0 - beta*x));
-  
-  //mu = mod*cr + prime_cr*primed;  
+  //double cr = MAX(0, (1.0 - sigma*x));
+  //double prime_cr = MAX(0,(1.0 - beta*x));
+  double cr = mu-sigma*x;
+  double prime_cr = c-beta*x;
+  if(cr < 0) cr = 0;
+  if(prime_cr < 0) prime_cr = 0;
+  mu = cr + prime_cr*primed;  
   if(y0_mod >= -999){
     if(y0 >= boost_limit){
       //mu = (-mu/(mu + y0_mod))*boost_limit + mu;
       //mu = y0_mod*boost_limit + mu;
-      mu = MAX(0, (1.0 - y0_mod*boost_limit));
+      titre_dependent  = MAX(0, (1.0 - y0_mod*boost_limit));
     } else { 
       //mu = (-mu/(mu+y0_mod))*y0 + mu;
-      mu = MAX(0, (1.0 - y0_mod*y0));
+      titre_dependent  = MAX(0, (1.0 - y0_mod*y0));
       
       //mu = y0_mod*y0 + mu;
     }
+  } else {
+    titre_dependent = 1;
   }
-  
   // Seniority
   seniority = MAX(0, 1.0 - tau*(order-1.0));
-  
-  mu = seniority*titre_dependent*mod*(mu*cr + c*prime_cr*primed);
+  //  mu = seniority*titre_dependent*mod*(mu*cr + c*prime_cr*primed);
+  mu = seniority*titre_dependent*mod*mu;
   if(mu < 0) mu = 0;
 
   //mu += prime_cr*primed;
@@ -87,7 +90,8 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times){
     t = times[i];
     if(t <= t_i) tmp = 0;
     else if(t > t_i && t <= (t_i + tp)) tmp = (mu/tp)*(t-t_i);
-    else if(t > (tp+t_i) && t <=(ts + t_i+tp)) tmp = ((-(dp*mu)/ts)*(t) + ((mu*dp)/ts)*(t_i+tp) + mu);
+    else if(t > (tp+t_i) && t <=(ts + t_i+tp)) tmp = ((-(dp*mu)/ts)*(t) +
+						      ((mu*dp)/ts)*(t_i+tp) + mu);
     else tmp = (-m*(t)+m*(t_i+tp+ts)+(1-dp)*mu);
     tmp += eff_y0;
     if(tmp < lower_bound) tmp = lower_bound;
@@ -122,6 +126,7 @@ NumericVector model_trajectory_cpp(NumericVector pars, NumericVector times){
 //' @param exposure_primes IntegerVector of whether each exposure was primed or not (for priming modifier)
 //' @param cr_inds IntegerVector of indices describing which parTab rows relate to cross reactivity parameters
 //' @param par_inds IntegerVector of indices describing which parTab rows relate to model parameters
+//' @param par_names CharacterVector names from parTab
 //' @param order_inds IntegerVector of indices describing which parTab rows relate to order modifer parameters
 //' @param exposure_i_lengths IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group
 //' @param par_lengths IntegerVector of lengths describing the size of blocks in the par_type_ind vector that relate to each exposure type
@@ -138,7 +143,8 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 				   NumericVector exposure_times, IntegerVector exposure_strains,
 				   NumericVector exposure_next, IntegerVector exposure_measured,
 				   IntegerVector exposure_orders, IntegerVector exposure_primes, 
-				   IntegerVector cr_inds, IntegerVector par_inds, 
+				   IntegerVector cr_inds, IntegerVector par_inds,
+				   CharacterVector par_names,
 				   IntegerVector order_inds, IntegerVector par_lengths,
 				   IntegerVector cr_lengths, int version){
   int group; // Index of group
@@ -199,6 +205,7 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	B = par_lengths[tmp_exposures[k]+1] - 1;
 
 	fullPars = pars[par_inds[Range(A,B)]];
+	
 	index = tmp_exposures[k];
 	t_i = exposure_times[index];
 	next_t = exposure_next[index];
@@ -236,6 +243,8 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
 	    tmp_time_indices = time_indices[times >= t_i & times < next_t];
 	  }
 	}
+	// Regardless of which version, we want to solve at the end the titre at the time of
+	// the next exposure, which is used as the starting titre for the next exposure
 	tmpTimes.push_back(next_t);
 	// Solve the model
 	y = model_trajectory_cpp(fullPars, tmpTimes);
@@ -253,5 +262,3 @@ NumericMatrix model_func_group_cpp(NumericVector pars, NumericVector times,
   }
   return results;
 }
-
- 

@@ -50,9 +50,9 @@ library(antibodyKinetics)
 parameter_descriptions()
 
 pars <- c("lower_bound"=0,"S"=1,"EA"=0,"MAX_TITRE"=13,
-          "mu"=4,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.02, "c"=4,
-          "sigma"=0.01,"y0_mod"=-10000,"boost_limit"=0,
-          "primed"=0,"mod"=1,
+          "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.6, "c"=4,
+          "sigma"=1,"y0_mod"=-10000,"boost_limit"=0,"tau"=0.05,
+          "order"=1,"primed"=0,"mod"=1,
           "x"=0,"t_i"=10,"y0"=0,"eff_y0"=0)
           
 ## Vector of times to solve the model over
@@ -97,9 +97,9 @@ The parameter table can be split into 4 key "sections":
 
  * The top 4 parameters correspond to boundary conditions and observation error parameters, as described in `describe_parameters()`
  * The next *n* parameters correspond to antibody dynamics parameters specific to either each exposure type, each exposure ID (if not applying to "all") or each exposure-strain specific set of interaction parameters
- * After these type-specific parameters, entries correspond to additional boosting elicited by priming, parameters describing the cross reactivity and titre-dependent boosting parameters
+ * After these type-specific parameters, entries correspond to additional boosting elicited by priming, parameters describing the cross reactivity, titre-dependent boosting and antigenic seniority parameters
  * Parameters named "x" correspond to antigenic distances between each pair of strains in "exposure" and "strain", assuming symmetric antigenic distance (A -> B == B -> A)
- * The final set of entries, `mod` correspond to the $\rho$ parameters in the manuscript
+ * OUTDATED: the final set of entries, `mod` correspond to the ρ parameters modifying each boost depending on its order. ie. the proportion of the 2nd boost experienced is μ*ρ1. Note that this was used as the previous implementation of antigenic seniority, and has since been superceded by the τ parameter.
 
 Some minor tweaks are needed to fix, remove or modify some parameters depending on the options used. The parameter table can be correctly formatted using the following function:
 
@@ -116,26 +116,17 @@ data(exampleExposureTab)
 library(ggplot2)
 times <- seq(0,100,by=1)
 
-## R implementation
 ## Create a function pointer that only needs the unlabelled vector 
 ## of model parameters and the observation time vector
-f1 <- create_model_group_func(parTab,exampleExposureTab,form=options$form,typing = TRUE,cross_reactivity = options$cr)
-y1 <- f1(parTab$values, times)
-y1 <- reshape2::melt(y1, id.vars=c("times","group"))    
-p1 <- ggplot(y1) + geom_line(aes(x=times,y=value,col=variable)) + facet_wrap(~group)+theme_bw()
-
-## Cpp implementation
-## Create a function pointer that only needs the unlabelled vector 
-## of model parameters and the observation time vector
-f2 <- create_model_group_func_cpp(parTab,exampleExposureTab,version="model",form=options$form,typing = TRUE,cross_reactivity = options$cr)
-y2 <- f2(parTab$values, times)
+f <- create_model_group_func_cpp(parTab,exampleExposureTab,version="model",form=options$form,typing = TRUE,cross_reactivity = options$cr)
+y <- f(parTab$values, times)
 ## Cpp implementation retains less labelling for speed, so 
 ## corresponding groups/strains must be added back to the data frame
 cpp_labels <- as.data.frame(expand.grid("strain"=LETTERS[1:5],"group"=1:5))
-y2 <- cbind(cpp_labels, as.data.frame(y2))
-y2 <- reshape2::melt(y2, id.vars=c("strain","group"))
-y2$variable <- as.numeric(y$variable)
-p2 <- ggplot(y2) + geom_line(aes(x=variable,y=value,col=strain)) + facet_wrap(~group) + theme_bw()
+y <- cbind(cpp_labels, as.data.frame(y))
+y <- reshape2::melt(y, id.vars=c("strain","group"))
+y$variable <- as.numeric(y$variable)
+p <- ggplot(y) + geom_line(aes(x=variable,y=value,col=strain)) + facet_wrap(~group) + theme_bw()
 ```
 
 #### 3.3 Posterior function
@@ -172,14 +163,14 @@ To test a particular model, use the appropriate `runName` in `inputs/run_key.csv
 The above examples should be sufficient to give a feel for what the package is doing and how it is doing it. The below vignettes give more detail regarding how to reproduce the analysis in the paper:
 
 1. [Model fitting vignette](https://jameshay218.github.io/antibodyKinetics/inst/doc/model_fitting.html)
-2. [Model comparison scripts](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses). A tidied .csv file of the outputs from these scripts can be found [here](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses/waic_table.csv). Running the code in `all_analyses.R` or `all_analyses_PTchains.R`, depending on which MCMC sampler was used, will generate and save .csv files with:
+2. [Model comparison scripts](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses). A tidied .csv file of the outputs from these scripts can be found [here](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses/waic_table.csv). Running the code in `all_analyses.R` or `all_analyses_PTchains.R`, depending on which MCMC sampler was used, will generate and save files with:
      
-      a) Effective sample sizes
-      b) Convergence diagnostics
-      c) Whether chains need to be visually inspected for convergence or rerun (eg. if bimodal posterior distributions detected)
-      d) BIC and WAIC
-      e) A table of posterior mean, median, mode and 95% credible intervals for each estimated parameter for each model (very large!)
-      f) A table of residuals (model predicted values - observed values) for each model
+      a) Convergence diagnostics;
+      b) Whether chains need to be visually inspected for convergence or rerun (eg. if bimodal posterior distributions detected);
+      c) BIC, WAIC, elpd loo and p loo (from the `loo` R package);
+      d) A table of posterior mean, median, mode, 95% credible intervals, effective sample size and Rhat values for each estimated parameter for each model (very large!);
+      e) A table of residuals (model predicted values - observed values) for each model;
+      f) R objects with all `loo` estimates and pareto k estimates (from the [loo](https://cran.r-project.org/web/packages/loo/index.html) R package)
 3. [Figure generation scripts](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/figures): each script corresponds to a figure in the manuscript. However, running these relies on previously generating all of the MCMC chains as described above. Note that some minor additional formatting and labelling has been done to the figures in the manuscript. Note also that some figures (methods) were created using Inkscape, and therefore do not have accompanying scripts.
 4. [Parameter table formatting script](https://github.com/jameshay218/antibodyKinetics/blob/master/scripts/analyses/par_table_formatting.R): this script was used to improve the formatting/symbols used in the output files from the model comparison scripts.
 

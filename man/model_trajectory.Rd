@@ -2,7 +2,8 @@
 % Please edit documentation in R/model.R
 \name{model_trajectory}
 \alias{model_trajectory}
-\title{Model trajectory calc}
+\title{Model 
+Model trajectory calc}
 \usage{
 model_trajectory(pars, times, logSigma = FALSE)
 }
@@ -23,10 +24,10 @@ An equivalent function using Rcpp is implemented at \code{\link{model_trajectory
 Run \code{\link{parameter_descriptions}} for documentation of the model parameter vector
 }
 \examples{
-pars <- c("lower_bound"=-1000,"S"=1,"EA"=0,"MAX_TITRE"=13,
-          "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.02, "c"=4,
-          "sigma"=0.01,"y0_mod"=-10000,"boost_limit"=0,
-          "primed"=0,"mod"=1,
+pars <- c("lower_bound"=0,"S"=1,"EA"=0,"MAX_TITRE"=13,
+          "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.6, "c"=4,
+          "sigma"=1,"y0_mod"=-20,"boost_limit"=-1,"tau"=0.05,
+          "order"=1,"primed"=0,"mod"=1,
           "x"=0,"t_i"=10,"y0"=0,"eff_y0"=0)
 times <- seq(0,100,by=10)
 y <- model_trajectory(pars,times)

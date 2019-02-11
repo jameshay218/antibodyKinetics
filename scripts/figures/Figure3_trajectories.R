@@ -24,7 +24,7 @@ source("~/Documents/Ferret_Model/antibodyKinetics/scripts/figures/plotting_help.
 ##############################################################
 
 ## Which run ID would you like to plot?
-i <- 62
+i <- 85
 use_multi <- FALSE ## use multivariate chain?
 
 ## Where to save plot to?
@@ -34,7 +34,7 @@ setwd(paste0(res_wd,"plots/",i))
 #chain_wd_base <- "~/Documents/Ferret_Model/raw_results_test/outputs_real/"
 ## Where are the MCMC chains saved?
 #chain_wd_base <- "~/Documents/Ferret_Model/results_112017/outputs"
-chain_wd_base <- "/media/james/Storage 2/ferret_results/rerun_correct_times_28082018/outputs/"
+chain_wd_base <- "/media/james/Storage 2/ferret_results/rerun_Jan2019/outputs_real/"
 
 ## Data and exposure table for plot
 infection_times <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/scripts/figures/infection_times.csv",stringsAsFactors=FALSE)
@@ -45,13 +45,13 @@ dat_file <- "~/Documents/Ferret_Model/antibodyKinetics/inputs/real_data_simple.c
 adaptive <- 1000000
 
 ## Parameter and exposure table file locations
-#parTab_loc <- "~/net/home/ferret/inputs/parTabs/"
-#exposureTab_loc <- "~/net/home/ferret/inputs/exposureTabs/"
-parTab_loc <- "~/Documents/Ferret_Model/antibodyKinetics/inputs/parTabs/"
-exposureTab_loc <- "~/Documents/Ferret_Model/antibodyKinetics/inputs/exposureTabs/"
+parTab_loc <- "~/net/home/ferret/inputs/parTabs/"
+exposureTab_loc <- "~/net/home/ferret/inputs/exposureTabs/"
+#parTab_loc <- "~/Documents/Ferret_Model/antibodyKinetics/inputs/parTabs/"
+#exposureTab_loc <- "~/Documents/Ferret_Model/antibodyKinetics/inputs/exposureTabs/"
 
-#runs <- read.csv("~/net/home/ferret/inputs/run_tracker.csv",stringsAsFactors=FALSE)
-runs <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inputs/run_tracker.csv",stringsAsFactors=FALSE)
+runs <- read.csv("~/net/home/ferret/inputs/run_tracker.csv",stringsAsFactors=FALSE)
+#runs <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inputs/run_tracker.csv",stringsAsFactors=FALSE)
 convergence <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/waic_table_complete.csv",stringsAsFactors=FALSE)
 
 ## Times to solve model over

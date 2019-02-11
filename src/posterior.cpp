@@ -149,6 +149,7 @@ double obs_likelihood(NumericVector y, NumericVector data, NumericVector params)
 //' @param exposure_primes IntegerVector of whether each exposure was primed or not (for priming modifier)
 //' @param cr_inds IntegerVector of indices describing which parTab rows relate to cross reactivity parameters
 //' @param par_inds IntegerVector of indices describing which parTab rows relate to model parameters
+//' @param par_names CharacterVector names from parTab
 //' @param order_inds IntegerVector of indices describing which parTab rows relate to order modifer parameters
 //' @param exposure_i_lengths IntegerVector of lengths describing the size of blocks in the exposure_indices vector that relate to each exposure group
 //' @param par_lengths IntegerVector of lengths describing the size of blocks in the par_type_ind vector that relate to each exposure type
@@ -167,7 +168,8 @@ double posterior_func_group_cpp(
 				NumericVector exposure_times, IntegerVector exposure_strains,
 				NumericVector exposure_next, IntegerVector exposure_measured,
 				IntegerVector exposure_orders, IntegerVector exposure_primes, 
-				IntegerVector cr_inds, IntegerVector par_inds, 
+				IntegerVector cr_inds, IntegerVector par_inds,
+				CharacterVector par_names,
 				IntegerVector order_inds, IntegerVector par_lengths,
 				IntegerVector cr_lengths, int version, IntegerVector individuals,
 				NumericMatrix data){
@@ -176,7 +178,7 @@ double posterior_func_group_cpp(
 					      exposure_i_lengths,strain_indices, strain_i_lengths,
 					      exposure_times, exposure_strains, exposure_next,
 					      exposure_measured, exposure_orders, exposure_primes,
-					      cr_inds, par_inds, order_inds, par_lengths,
+					      cr_inds, par_inds, par_names, order_inds, par_lengths,
 					      cr_lengths, version);
   double ln = 0;
   int index_data = 0;
@@ -208,7 +210,8 @@ NumericMatrix posterior_func_group_cpp_matrix(
 					      NumericVector exposure_times, IntegerVector exposure_strains,
 					      NumericVector exposure_next, IntegerVector exposure_measured,
 					      IntegerVector exposure_orders, IntegerVector exposure_primes, 
-					      IntegerVector cr_inds, IntegerVector par_inds, 
+					      IntegerVector cr_inds, IntegerVector par_inds,
+					      CharacterVector par_names,
 					      IntegerVector order_inds, IntegerVector par_lengths,
 					      IntegerVector cr_lengths, int version, IntegerVector individuals,
 					      NumericMatrix data){
@@ -217,7 +220,7 @@ NumericMatrix posterior_func_group_cpp_matrix(
                                               exposure_i_lengths,strain_indices, strain_i_lengths,
                                               exposure_times, exposure_strains, exposure_next,
                                               exposure_measured, exposure_orders, exposure_primes,
-                                              cr_inds, par_inds, order_inds, par_lengths,
+                                              cr_inds, par_inds, par_names, order_inds, par_lengths,
                                               cr_lengths, version);
   int n_col = data.ncol();
   int n_row = data.nrow();

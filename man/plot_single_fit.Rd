@@ -4,7 +4,9 @@
 \alias{plot_single_fit}
 \title{Plot single trajectory model fit}
 \usage{
-plot_single_fit(parTab, exposureTab, ferret_titres, times, chain, options)
+plot_single_fit(parTab, exposureTab, ferret_titres, times, chain, options,
+  add_sim_obs = FALSE, n = 1000, nindiv = 3, nstrain = 1,
+  ngroup = 1)
 }
 \description{
 Plot single trajectory model fit

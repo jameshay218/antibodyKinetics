@@ -8,8 +8,9 @@
 #' @param MODEL_FUNCTION pointer to the model solving function that takes two arguments: pars and ts. This should return a matrix of trajectories with times across columns
 #' @param nstrains the number of strains for which measurements are available
 #' @param ngroups the number of exposure groups
+#' @param calc_obs if TRUE, also calculates predicted observations
 #' @export
-generate_prediction_intervals <- function(chain, samp_no=1000,ts=seq(0,70,by=1), ts_obs=ts, MODEL_FUNCTION,nstrains=3,ngroups=5){
+generate_prediction_intervals <- function(chain, samp_no=1000,ts=seq(0,70,by=1), ts_obs=ts, MODEL_FUNCTION,nstrains=3,ngroups=5, calc_obs=TRUE){
     ## Take random samples from the MCMC chain
     samp_max <- max(nrow(chain), samp_no)
     samps <- sample(nrow(chain),samp_max, replace=FALSE)
@@ -32,7 +33,6 @@ generate_prediction_intervals <- function(chain, samp_no=1000,ts=seq(0,70,by=1),
     
     ## For each sample
     for(i in 1:samp_no){
-        
         samp <- samps[i]
         ## Get parameters
         pars <- as.numeric(chain[samp,!(colnames(chain) %in% c("sampno","lnlike"))])
@@ -40,18 +40,22 @@ generate_prediction_intervals <- function(chain, samp_no=1000,ts=seq(0,70,by=1),
 
         ## Solve model
         y <- MODEL_FUNCTION(pars, ts)
-        y_obs <- MODEL_FUNCTION(pars, ts_obs)
-        ## Save this trajectory
-        index <- 1
-        for(x in 1:ngroups){
-            for(j in 1:nstrains){
-                dats[[x]][[j]][i,] <- y[index,]
-                obs <- floor(y_obs[index,])
-                #print(obs)
-                obs <- sapply(obs, add_noise, pars=pars, normal=TRUE)
-                #print(obs)
-                observations[[x]][[j]][i,] <- obs
-                index <- index + 1
+        if(calc_obs){
+            y_obs <- MODEL_FUNCTION(pars, ts_obs)
+            ## Save this trajectory
+            index <- 1
+            
+            for(x in 1:ngroups){
+                for(j in 1:nstrains){
+                    dats[[x]][[j]][i,] <- y[index,]
+                    #obs <- floor(y_obs[index,])
+                                        #print(obs)
+                    obs <- add_noise_serosolver(y_obs[index,], pars)
+                    #obs <- sapply(obs, add_noise, pars=pars, normal=TRUE)
+                                        #print(obs)
+                    observations[[x]][[j]][i,] <- obs
+                    index <- index + 1
+                }
             }
         }
     }

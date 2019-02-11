@@ -4,7 +4,8 @@
 \alias{calculate_lik_matrix}
 \title{Calculate per data point likelihood matrix}
 \usage{
-calculate_lik_matrix(chain, parTab, dat, f, N, nindiv = 3)
+calculate_lik_matrix(chain, parTab, dat, f, N, nindiv = 3,
+  generate_labels = TRUE)
 }
 \arguments{
 \item{chain}{the MCMC chain with each row corresponding to an iteration}
@@ -18,6 +19,8 @@ calculate_lik_matrix(chain, parTab, dat, f, N, nindiv = 3)
 \item{N}{number of samples to take from the MCMC chain}
 
 \item{nindiv}{the number of individuals in each group/strain combination}
+
+\item{generate_labels}{if TRUE, generates labels to match each estimated k value to the correct data point. This only works if using data with an experimental design matching the protocol}
 }
 \value{
 a matrix of same dimensions as dat

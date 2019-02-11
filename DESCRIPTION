@@ -1,6 +1,6 @@
 Package: antibodyKinetics
 Title: antibodyKinetics
-Version: 1.0.0
+Version: 1.1.0
 Author: jameshay218
 Maintainer: jameshay218 <jameshay218@gmail.com> <james.hay13@imperial.ac.uk>
 Description: R package with the necessary functions for implementing and fitting
@@ -11,6 +11,7 @@ URL: https://github.com/jameshay218/antibodyKinetics
 BugReports: https://github.com/jameshay218/antibodyKinetics/issues
 RoxygenNote: 6.1.1
 Suggests:
+    coda,
     testthat,
     shiny,
     shinyBS,

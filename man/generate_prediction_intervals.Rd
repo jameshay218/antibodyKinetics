@@ -4,8 +4,9 @@
 \alias{generate_prediction_intervals}
 \title{Generate prediction intervals from MCMC chain}
 \usage{
-generate_prediction_intervals(chain, samp_no = 1000, ts, MODEL_FUNCTION,
-  nstrains = 3, ngroups = 5)
+generate_prediction_intervals(chain, samp_no = 1000, ts = seq(0, 70, by
+  = 1), ts_obs = ts, MODEL_FUNCTION, nstrains = 3, ngroups = 5,
+  calc_obs = TRUE)
 }
 \arguments{
 \item{chain}{the MCMC chain to sample from}
@@ -14,11 +15,15 @@ generate_prediction_intervals(chain, samp_no = 1000, ts, MODEL_FUNCTION,
 
 \item{ts}{the times over which to solve the model}
 
+\item{ts_obs}{times at which observations were made}
+
 \item{MODEL_FUNCTION}{pointer to the model solving function that takes two arguments: pars and ts. This should return a matrix of trajectories with times across columns}
 
 \item{nstrains}{the number of strains for which measurements are available}
 
 \item{ngroups}{the number of exposure groups}
+
+\item{calc_obs}{if TRUE, also calculates predicted observations}
 }
 \description{
 Produces a data frame of lower 2.5%, upper 97.5% and median prediction intervals for a given model function.

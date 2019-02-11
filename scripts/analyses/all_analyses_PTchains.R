@@ -6,7 +6,6 @@ devtools::load_all("~/Documents/Ferret_Model/antibodyKinetics")
 source("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/convergence_check_funcs.R")
 source("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/model_comparison_functions.R")
 
-top_wd <- getwd()
 
 #############################
 ## Run model comparison?
@@ -19,10 +18,10 @@ do_parameter_estimates <- TRUE
 
 ## Input area
 ## Full file path to giving location to save all results
-res_wd <- "~/Documents/Ferret_Model/results"
+res_wd <- top_wd <- "~/Documents/Ferret_Model/main_results_long"
 ## Full file path to folder containing the MCMC chains
 #chain_wd_base <- "~/net/home/ferret/outputs/"
-chain_wd_base <- "/media/james/Storage 2/ferret_results/rerun_correct_times_28082018/outputs/"
+chain_wd_base <- "/media/james/Storage 2/ferret_results/rerun_Jan2019/outputs_real"
 #chain_wd_base <- "/media/james/Storage 2/ferrets_17Aug2018"
 
 ## Location of the data file used
@@ -39,6 +38,7 @@ exposureTab_loc <- "~/net/home/ferret/inputs/exposureTabs/"
 
 ## Table describing which files and options are used for which runs
 runs <- read.csv("~/net/home/ferret/inputs/run_tracker.csv",stringsAsFactors=FALSE)
+#runs <- runs[runs$runID %in% c(6,14,31,38,62,82,90,92,98,102,106,113,117),]
 ###
 
 ## IF SKIPPING
@@ -79,7 +79,6 @@ all_estimates <- NULL
 all_loo_estimates <- NULL
 all_loo_labels <- NULL
 all_k_percentages <- NULL
-
 ## For each run/model
 for(i in 1:nrow(runs)){
     runName <- runs$runName[i]
@@ -132,7 +131,7 @@ for(i in 1:nrow(runs)){
         psrf_names[i] <- names(which.max(gelman_multi$psrf[,2]))
         gelman.mpsrf[i] <- gelman_multi$mpsrf
         ## Threshold for convergence between multiple chains
-        if(gelman.psrf[i] < 1.15 && gelman.mpsrf < 1.15) gelman_fine <- TRUE
+        if(gelman.psrf[i] < 1.1 && gelman.mpsrf < 1.1) gelman_fine <- TRUE
     } else {
         gelman.psrf_multi[i] <- NA
         psrf_names_multi[i] <- NA
@@ -184,7 +183,8 @@ for(i in 1:nrow(runs)){
                                                           adaptive_period,
                                                           parTab, exposureTab,
                                                           dat_file, options, TRUE,
-                                                          times, n, TRUE)        
+                                                          times, n, TRUE,
+                                                          n1=10000)        
         bics[i] <- model_comparison_res[["BIC"]]
         waics[i] <- model_comparison_res[["WAIC"]]
         pwaics[i] <- model_comparison_res[["pwaic"]]
@@ -210,7 +210,7 @@ for(i in 1:nrow(runs)){
     }
 }
 
-runs <- runs[runs$form == "C",]
+#runs <- runs[runs$form == "C",]
 results <- data.frame(runID=runs$runID, runName=runs$runName,
                       ess_names,ess_vector,psrf_names,gelman.psrf,gelman.mpsrf,
                       ess_check,gelman_check,
@@ -242,3 +242,9 @@ pdf("residuals_final2.pdf")
 p <- ggplot(residuals) + geom_point(aes(x=y,y=residual)) + facet_wrap(~runName)
 print(p)
 dev.off()
+
+
+parTab <- read.csv("~/net/home/ferret/inputs/parTabs/E_parTab.csv",stringsAsFactors=FALSE)
+options <- convert_runName_to_options("CYAY6BN")
+parTab <- parTab_modification(parTab, options, FALSE)
+nrow(parTab[parTab$fixed == 0,])

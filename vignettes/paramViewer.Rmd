@@ -42,7 +42,7 @@ The key for these options is as follows:
 4. How many strains are being measured in this experiment? Increasing or decreasing this value adds options and trackers for each strain in the experiment
 5. Either "None" (no cross reactivity), "Cross reactivity" (antigenic distance mediated cross reactivity included, but the same for all exposure types) or "Typed CR" (different cross reactivity parameter for each exposure type).
 6. Flag indicating if titre dependent boosting is present
-7. Input area for priming, cross reactivity and titre dependent boosting parameters. If **6** is left unchecked, then `gamma` and `y_switch` can be ignored. Parameters correspond to those in the paper.
+7. Input area for priming, cross reactivity, titre dependent boosting and antigenic seniority parameters. If **6** is left unchecked, then `gamma` and `boost_limit` can be ignored. Parameters correspond to those in the paper.
 8. Dropdown to change the cross reactivity gradient for each exposure type (or all, if universal cross reactivity).
 9. Input area for predefined antigenic distance matrix. Note that `Upload` must be pressed once the correct file is selected.
 10. Download button for the current antigenic distance matrix
@@ -56,7 +56,7 @@ Set the following to get going quickly:
   4. `3`
   5. `Cross reactivity`
   6. Unchecked
-  7. `Beta=0.6; c=4; gamma=0; y_switch=0`
+  7. `Beta=0.6; c=4; gamma=0; boost_limit=0; tau=0`
   8. `all`, `1`
   9. Leave blank
   10. NA
@@ -98,7 +98,7 @@ Key:
 3. Dropdown to select which strain for this exposure type we are considering (ie. the parameters that govern antibody titres of strain B following exposure with strain A) - this will be "all" as long as there is any typing in the model.
 4. Dropdown to select which affected strain we are interested - only relevant if there is no cross-reactivity in the model, and any strain specific interactions must be parameterised explicitly. If there is cross reactivity, then the impact of an exposure on other strains is simply governed by their antigenic distance and cross-reactivity as specified in the `Model settings` tab.
 5. Sliders to change the main model parameters. Note that long term waning rate is on the log scale. *Sorry - after changing each parameter, the "Exposure" dropdown changes back to the first exposure type. I have no plans to fix this, as it is just an inconvenience"*.
-6. Change $\rho$, the antigenic seniority modifiers for each exposure. Note that this only goes up to 4 exposures at the moment - contact me if this is a problem! (It should just be a case of changing the code in ui.R).
+6. REMOVED: Superceded by $\tau$. Change $\rho$, the antigenic seniority modifiers for each exposure. Note that this only goes up to 4 exposures at the moment - contact me if this is a problem! (It should just be a case of changing the code in ui.R).
 7. Download the current parameter set.
 8. Predicted antibody trajectories for the current set of inputs.
 

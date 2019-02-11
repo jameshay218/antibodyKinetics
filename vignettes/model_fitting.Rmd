@@ -112,7 +112,7 @@ Once the MCMC chain has been run, calculate some diagnostics of convergence and 
 chain <- read.csv(run_1$file)
 
 ## Effective sample size of each free parameter
-print(coda::effectiveSize(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],c(startTab[startTab$fixed==0,"names"],"mod.1","mod.2","mod.3")])))
+print(coda::effectiveSize(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],c(startTab[startTab$fixed==0,"names"])])))
 
 ## Look at some example traces
 plot(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],c("mu","sigma")]))
@@ -135,7 +135,7 @@ times1 <- seq(0,100,by=0.1)
 bestPars <- get_best_pars(chain)
 
 ## Generate upper and lower prediction intervals using MCMC chain
-mod <- generate_prediction_intervals(chain, 200,seq(0,100,by=1),f,nstrains=5,ngroups=5)
+mod <- generate_prediction_intervals(chain, 200,seq(0,100,by=1),MODEL_FUNCTION=f,nstrains=5,ngroups=5)[[1]]
 
 ## Format data for plotting
 ## Just adding labels and changing variable classes

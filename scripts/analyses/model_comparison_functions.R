@@ -9,11 +9,11 @@ model_comparison_analyses <- function(wd, multi_chain=TRUE,
                                             1,adaptive_period,multi_chain,FALSE,PTchain)[["chain"]])
     cr <- options$cr
     form <- options$form
-    
+
     dat <- read.csv(dat_file)
     dat <- as.matrix(rbind(times, dat))
     rownames(dat) <- NULL
-    
+
     ## Create model solving functions
     f <- create_model_group_func_cpp(parTab,exposureTab,version="model",
                                      form=form,typing = typing,cross_reactivity = cr)
@@ -23,8 +23,9 @@ model_comparison_analyses <- function(wd, multi_chain=TRUE,
     
     ## Generate residuals
     res <- NULL
-    mle_res <- generate_mle_residuals(f,chain,times,dat, 3)
-    
+    mle_res <- generate_mle_residuals(f,chain,times,dat, individuals[1])
+    #mle_res <- NULL
+
     ## All calculations
     all_calcs <- NULL
     calcs <- calc_dic_2(lik, chain)
@@ -34,11 +35,10 @@ model_comparison_analyses <- function(wd, multi_chain=TRUE,
     BIC <- calculate_BIC(chain,parTab,dat[2:nrow(dat),])
     AIC <- calculate_AIC(chain,parTab)
     WAIC <- calculate_WAIC(chain, parTab, dat, f, n)
-    loo_estimates <- calculate_loo(chain, parTab, dat, f, n1)
+    loo_estimates <- calculate_loo(chain, parTab, dat, f, n1, individuals[1])
     loo_pareto_k <- loo_estimates[[2]]
     loo_estimates <- loo_estimates[[1]]
     n_pars <- nrow(parTab[parTab$fixed == 0,])
-
     elpd_loo <- loo_estimates$estimates[1,1]
     elpd_loo_se <- loo_estimates$estimates[1,2]
     p_loo <- loo_estimates$estimates[2,1]
@@ -86,7 +86,7 @@ generate_residuals <- function(model_func, chain, times,
     res <- NULL
     index <- 1
     for(i in samples){
-        pars <- zikaInfer::get_index_pars(chain, i)
+        pars <- get_index_pars(chain, i)
         y <- f(pars,times)
         y <- apply(y,2,function(x) rep(x, each=n_individuals))
         y[y > pars[4]] <- pars[4]
@@ -105,3 +105,8 @@ estimate_mode <- function(x) {
 typing <- TRUE
 multi_chain <- FALSE
 PTchain <- TRUE
+
+view_pareto_labels <- function(loo_estimates, i){
+  tmp <- loo_estimates[[i]]
+  tmp[tmp$pareto_k > 0.7,]
+}

@@ -92,20 +92,21 @@ shinyServer(
                     tmpCrTab <- parameters$crTab[parameters$crTab$names %in% get_available_exposure_types_cr(),]
                     cr_values <- tmpCrTab$values
                     cr_names <- tmpCrTab$names
-                    bot_parTab <- data.frame(names=c("beta","c",rep("sigma",length(cr_names)),"y0_mod"),id="all",
-                                             values=c(inputs$beta,inputs$c,cr_values,inputs$y0_mod),
-                                             type=c("all","all",cr_names,"all"),
+                    bot_parTab <- data.frame(names=c("beta","c",rep("sigma",length(cr_names)),"y0_mod","boost_limit","tau"),id="all",
+                                             values=c(inputs$beta,inputs$c,cr_values,inputs$y0_mod, inputs$boost_limit, inputs$tau),
+                                             type=c("all","all",cr_names,"all","all","all"),
                                              exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
-                                             lower_bound=c(0,0,rep(0,length(cr_names)),-20),upper_bound=c(100,20,rep(100,length(cr_names)),2),stringsAsFactors=FALSE)
+                                             lower_bound=c(0,0,rep(0,length(cr_names)),0, 0, 0),
+                                             upper_bound=c(100,20,rep(100,length(cr_names)),500,12,1),stringsAsFactors=FALSE)
                 } else {
-                    bot_parTab <- data.frame(names=c("beta","c","sigma","y0_mod"),id="all",
-                                             values=c(inputs$beta,inputs$c,0,inputs$y0_mod),
-                                             type=c("all","all","all","all"),
+                    bot_parTab <- data.frame(names=c("beta","c","sigma","y0_mod","boost_limit","tau"),id="all",
+                                             values=c(inputs$beta,inputs$c,0,inputs$y0_mod, inputs$boost_limit, inputs$tau),
+                                             type=c("all","all","all","all","all","all"),
                                              exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
-                                             lower_bound=c(0,0,0,-20),upper_bound=c(100,20,100,2),stringsAsFactors=FALSE)
+                                             lower_bound=c(0,0,0,0,0,0),upper_bound=c(100,20,100,500,12,1),stringsAsFactors=FALSE)
                 }
 
-                mod_parTab <- data.frame(names="mod",id=NA,values=c(inputs$mod1,inputs$mod2,inputs$mod3,inputs$mod4),
+                mod_parTab <- data.frame(names="mod",id=NA,values=c(1,1,1,1),
                                          type="all",exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
                                          lower_bound=0,upper_bound=1,stringsAsFactors=FALSE)
 

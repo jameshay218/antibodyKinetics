@@ -11,9 +11,7 @@ shinyUI(
                #' Parameter exploration panel
                tabPanel("Exposures",
                         ## ISOLATE EXPOSURE PARAMETERS
-                        sidebarPanel(
-                            
-                            
+                        sidebarPanel(                            
                             h4(strong("Exposures")),
                             fluidRow(uiOutput("choose_exposure_id")),
                             fluidRow(uiOutput("choose_exposure_type")),
@@ -74,14 +72,15 @@ shinyUI(
                             h4(strong("Priming and CR parameters")),
                             
                             fluidRow(
-                                column(3, numericInput("beta","Beta",0,min=0,max=100)),
+                                column(3, numericInput("beta","beta",0,min=0,max=100)),
                                 column(3, numericInput("c","c",4,min=0,max=20)),
                                 column(3, numericInput("y0_mod","gamma",0,min=-1,max=1)),
-                                column(3, numericInput("boost_limit","y_switch",0,min=0,max=12))
+                                column(3, numericInput("boost_limit","boost_limit",0,min=0,max=12)),
+                                column(3, numericInput("tau","tau",0,min=0,max=1))                                
                             ),
                             fluidRow(
                                 column(8,uiOutput("choose_exposure_type_cr")),
-                                column(4,numericInput("sigma_value","Sigma value",1,min=0,max=2))
+                                column(4,numericInput("sigma_value","Sigma value",1,min=0,max=5))
                             ),
                             fluidRow(
                                 fileInput("antigenic_tab_input",strong("Antigenic distance input")),
@@ -120,13 +119,6 @@ shinyUI(
                             fluidRow(column(8,uiOutput("select_m")),column(2,actionButton("randomise_m","Random"))),
                             fluidRow(actionButton("randomise_all","Randomise all")),
                             hr(),
-                            h4(strong("Antigenic seniority modifiers")),
-                            fluidRow(
-                                column(3,numericInput("mod1","1",1,min=0,max=1)),
-                                column(3,numericInput("mod2","2",1,min=0,max=1)),
-                                column(3,numericInput("mod3","3",1,min=0,max=1)),
-                                column(3,numericInput("mod4","4",1,min=0,max=1))
-                            ),
                             fluidRow(
                                 downloadButton("download_all",strong("Download Parameters"))
                             )

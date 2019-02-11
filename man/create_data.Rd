@@ -4,25 +4,19 @@
 \alias{create_data}
 \title{Create simulated titre data}
 \usage{
-create_data(runName, parTab_file, exposureTab_file, form, typing, cr,
-  priming, ngroup = 5, nstrain = 5, nindiv = 3, times,
+create_data(runName, runID, parTab_file, exposureTab_file, ngroup = 5,
+  nstrain = 5, nindiv = 3, times,
   wd = "~/net/home/ferret/inputs/data_normal", group = NA,
-  strain = NA, normal = TRUE)
+  strain = NA, normal = TRUE, pars = NULL)
 }
 \arguments{
 \item{runName}{the simulation name to save data under}
 
+\item{runID}{run ID to append to the front of the filename}
+
 \item{parTab_file}{file location of the parameter table to simulate from}
 
 \item{exposureTab_file}{file location of the exposure table to simulate from}
-
-\item{form}{"competitive" or "isolated" form of the model for multiple exposures}
-
-\item{typing}{should each exposure have type-specific parameters?}
-
-\item{cr}{cross reactivity shared between all exposures or type-specific?}
-
-\item{priming}{does priming infection have a subsequent effect on vaccination?}
 
 \item{ngroup}{how many groups to simulate? Make sure that this matches the dimensions of exposureTab_file}
 
@@ -39,6 +33,8 @@ create_data(runName, parTab_file, exposureTab_file, form, typing, cr,
 \item{strain}{if only one strain to be simulated, subset exposureTab for this strain}
 
 \item{normal}{if TRUE, adds normally distributed measurement error}
+
+\item{pars}{vector of parameter values to simulate from. If NULL, just uses those values in the read in parTab}
 }
 \value{
 a list with the simulated data, the residuals between true simulated data and observed simulated data, the file location of saved simulated data

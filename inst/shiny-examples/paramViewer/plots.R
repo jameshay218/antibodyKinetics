@@ -28,13 +28,16 @@ output$main_plot <- renderPlot({
 
         ## If flag is checked for titre dependent boosting, add these entries. Otherwise, use
         ## values that remove this mechanism
+        tau_lower <- 0
+        tau_upper <- 1
+        
         if(inputs$titre_dependent_boosting){
             boost_limit <- inputs$boost_limit
             y0_mod <- inputs$y0_mod
             boost_limit_lower <- 0
             boost_limit_upper <- 12
 
-            y0_mod_lower <- -1
+            y0_mod_lower <- 0
             y0_mod_upper <- 1
         } else {
             boost_limit <- -1
@@ -53,20 +56,23 @@ output$main_plot <- renderPlot({
             cr_values <- tmpCrTab$values
             cr_names <- tmpCrTab$names
             print(tmpCrTab)
-            bot_parTab <- data.frame(names=c("beta","c",rep("sigma",length(cr_names)),"y0_mod","boost_limit"),id="all",
-                                     values=c(inputs$beta,inputs$c,cr_values,y0_mod,boost_limit),
-                                     type=c("all","all",cr_names,"all","all"),
+            bot_parTab <- data.frame(names=c("beta","c",rep("sigma",length(cr_names)),"y0_mod","boost_limit","tau"),id="all",
+                                     values=c(inputs$beta,inputs$c,cr_values,y0_mod,boost_limit,inputs$tau),
+                                     type=c("all","all",cr_names,"all","all","all"),
                                      exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
-                                     lower_bound=c(0,0,rep(0,length(cr_names)),y0_mod_lower,boost_limit_lower),upper_bound=c(100,20,rep(100,length(cr_names)),y0_mod_upper,boost_limit_upper),stringsAsFactors=FALSE)
+                                     lower_bound=c(0,0,rep(0,length(cr_names)),y0_mod_lower,boost_limit_lower, tau_lower),
+                                     upper_bound=c(100,20,rep(100,length(cr_names)),y0_mod_upper,boost_limit_upper, tau_upper),
+                                     stringsAsFactors=FALSE)
         } else {
-            bot_parTab <- data.frame(names=c("beta","c","sigma","y0_mod","boost_limit"),id="all",
-                                     values=c(inputs$beta,inputs$c,0,y0_mod,boost_limit),
-                                     type=c("all","all","all","all","all"),
+            bot_parTab <- data.frame(names=c("beta","c","sigma","y0_mod","boost_limit","tau"),id="all",
+                                     values=c(inputs$beta,inputs$c,0,y0_mod,boost_limit,inputs$tau),
+                                     type=c("all","all","all","all","all","all"),
                                      exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
-                                     lower_bound=c(0,0,0,y0_mod_lower,boost_limit_lower),upper_bound=c(100,20,100,y0_mod_upper,boost_limit_upper),stringsAsFactors=FALSE)
+                                     lower_bound=c(0,0,0,y0_mod_lower,boost_limit_lower,tau_lower),
+                                     upper_bound=c(100,20,100,y0_mod_upper,boost_limit_upper, tau_upper),stringsAsFactors=FALSE)
         }
 
-        mod_parTab <- data.frame(names="mod",id=NA,values=c(inputs$mod1,inputs$mod2,inputs$mod3,inputs$mod4),
+        mod_parTab <- data.frame(names="mod",id=NA,values=c(1,1,1,1),
                                  type="all",exposure=NA,strain=NA,order=NA,fixed=1,steps=0.1,
                                  lower_bound=0,upper_bound=1,stringsAsFactors=FALSE)
 

@@ -9,7 +9,7 @@ calculate_x(y, m)
 \arguments{
 \item{y}{the desired proportion cross reactivity}
 
-\item{m}{the rate of the exponential function for cross reactivity}
+\item{m}{the gradient for cross reactivity}
 }
 \value{
 a single value, x

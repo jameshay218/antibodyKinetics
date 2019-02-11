@@ -106,7 +106,7 @@ calculate_WAIC <- function(chain, parTab, dat, f, N){
     
    ## For each sample
     for(i in 1:nrow(chain)){
-        pars <- zikaInfer::get_index_pars(chain,i)
+        pars <- get_index_pars(chain,i)
 
         ## Get parameters
         y <- f(pars,times)
@@ -159,9 +159,10 @@ calculate_WAIC <- function(chain, parTab, dat, f, N){
 #' From the output of an MCMC chain, calculates the likelihood of observing each data point. This can then be used in loo::loo
 #' @inheritParams calculate_WAIC
 #' @param nindiv the number of individuals in each group/strain combination
+#' @param generate_labels if TRUE, generates labels to match each estimated k value to the correct data point. This only works if using data with an experimental design matching the protocol
 #' @return a matrix of same dimensions as dat
 #' @export
-calculate_lik_matrix <- function(chain, parTab, dat, f, N, nindiv=3){
+calculate_lik_matrix <- function(chain, parTab, dat, f, N, nindiv=3, generate_labels=TRUE){
     ## Do this for a subsample of the MCMC chain to save time
     samps <- sample(1:nrow(chain),size = N,replace=FALSE)
     chain <- chain[samps,]
@@ -176,34 +177,34 @@ calculate_lik_matrix <- function(chain, parTab, dat, f, N, nindiv=3){
     groups <- strains <- character(nrow(dat)*ncol(dat))
     all_times <- numeric(nrow(dat)*ncol(dat))
     indiv <- character(nrow(dat)*ncol(dat))
-    times <- c(0,21,37,49,70)
     data_points <- numeric(nrow(dat)*ncol(dat))
  
     index <- 1
     ## For each strain/group pairing
     i <- 1
-    pars <- zikaInfer::get_index_pars(chain,i)
-
+    pars <- get_index_pars(chain,i)
     ## Get parameters
+    #times_ferret <- c(0,21,39,47,70)
     y <- f(pars,times)
-    
-    for(j in 1:nrow(y)){
-        ## For each time point
-        for(x in 1:ncol(y)){
-            ## We have 3 of each individual
-            for(q in 1:nindiv){
-                groups[index] <- as.character(ferret_titres[(3*(j-1)+1)+(q-1),"group"])
-                strains[index] <- as.character(ferret_titres[(3*(j-1)+1)+(q-1),"strain"])
-                indiv[index] <- as.character(ferret_titres[(3*(j-1)+1)+(q-1),"indiv"])
-                all_times[index] <- times[x]
-                data_points[index] <- dat[(3*(j-1)+1)+(q-1),x]
-                index <- index + 1
+    if(generate_labels){
+        for(j in 1:nrow(y)){
+            ## For each time point
+            for(x in 1:ncol(y)){
+                ## We have 3 of each individual
+                for(q in 1:nindiv){
+                    groups[index] <- as.character(ferret_titres[(nindiv*(j-1)+1)+(q-1),"group"])
+                    strains[index] <- as.character(ferret_titres[(nindiv*(j-1)+1)+(q-1),"strain"])
+                    indiv[index] <- as.character(ferret_titres[(nindiv*(j-1)+1)+(q-1),"indiv"])
+                    all_times[index] <- times[x]
+                    data_points[index] <- dat[(nindiv*(j-1)+1)+(q-1),x]
+                    index <- index + 1
+                }
             }
         }
     }
     ## For each sample
     for(i in 1:nrow(chain)){
-        pars <- zikaInfer::get_index_pars(chain,i)
+        pars <- get_index_pars(chain,i)
 
         ## Get parameters
         y <- f(pars,times)
@@ -216,7 +217,7 @@ calculate_lik_matrix <- function(chain, parTab, dat, f, N, nindiv=3){
                 ## We have 3 of each individual
                 for(q in 1:nindiv){                   
                     ## Get likelihood for this point
-                    wow <- norm_error(y[j,x],dat[(3*(j-1)+1)+(q-1),x],pars["S"],pars["MAX_TITRE"])
+                    wow <- norm_error(y[j,x],dat[(nindiv*(j-1)+1)+(q-1),x],pars["S"],pars["MAX_TITRE"])
                     ## Store this likelihood
                     tmp[i, index] <- wow
                     index <- index + 1                
@@ -224,7 +225,8 @@ calculate_lik_matrix <- function(chain, parTab, dat, f, N, nindiv=3){
             }
         }
     }
-    all_labels <- data.frame(groups,strains,indiv,all_times, data_points)
+    all_labels <- NULL
+    if(generate_labels) all_labels <- data.frame(groups,strains,indiv,all_times, data_points)
     return(list(tmp, all_labels))
 }
 
@@ -237,11 +239,13 @@ calculate_lik_matrix <- function(chain, parTab, dat, f, N, nindiv=3){
 #' @export
 calculate_loo <- function(chain, parTab, dat, f, N=1000, nindiv=3){
   samps <- sample(1:nrow(chain),size = N,replace=FALSE)
-  chain <- chain[samps,]
-  tmp <- calculate_lik_matrix(chain, parTab, dat, f, N,nindiv=nindiv)
+  chain1 <- chain[samps,]
+  tmp <- calculate_lik_matrix(chain1, parTab, dat, f, N,nindiv=nindiv)
   all_liks <- log(tmp[[1]])
+  all_liks[!is.finite(all_liks)] <- -1000000
   labels <- tmp[[2]]
   rel_n_eff <- loo::relative_eff(exp(all_liks),chain_id=rep(1,each=N))
+    
   loo1 <- loo::loo(all_liks,r_eff=rel_n_eff,cores=1)
   pareto_k <- data.frame(labels, pareto_k=loo1$diagnostics$pareto_k)
   return(list(loo1,pareto_k))
@@ -266,5 +270,34 @@ get_titre_labels <- function(nindiv=3){
     }
     all_labels <- data.frame(groups,strains,all_times)
     return(all_labels)
+}
+
+
+#' Index pars
+#'
+#' Given an MCMC chain, returns the parameters at the specified index
+#' @param chain the MCMC chain
+#' @param index the index
+#' @return a named vector of the best parameters
+#' @export
+get_index_pars <- function(chain, index){
+    tmpNames <- colnames(chain)[2:(ncol(chain)-1)]
+    pars <- as.numeric(chain[index,2:(ncol(chain)-1)])
+    names(pars) <- tmpNames
+    return(pars)
+}
+
+
+#' Best pars
+#'
+#' Given an MCMC chain, returns the set of best fitting parameters
+#' @param chain the MCMC chain
+#' @return a name vector of the best parameters
+#' @export
+get_best_pars <- function(chain){
+    tmpNames <- colnames(chain)[2:(ncol(chain)-1)]
+    bestPars <- as.numeric(chain[which.max(chain[,"lnlike"]),2:(ncol(chain)-1)])
+    names(bestPars) <- tmpNames
+    return(bestPars)
 }
 

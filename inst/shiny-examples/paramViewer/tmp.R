@@ -16,18 +16,18 @@ makePlot <- !is.null(parameters$exposureTab) && nrow(parameters$exposureTab) > 0
                                           steps=0.1,
                                           lower_bound=c(-1000,0,0,0),
                                           upper_bound=c(0,1,1,15))
-                cr_pars <- data.frame(names=c("beta","c","sigma","y0_mod"),id="all",
-                                      values=c(inputs$beta,inputs$c,-Inf,-20),
+                cr_pars <- data.frame(names=c("beta","c","sigma","y0_mod","boost_limit","tau"),id="all",
+                                      values=c(inputs$beta,inputs$c,-1000,0, 0,0),
                                       type="all",
                                       exposure=NA,
                                       strain=NA,
                                       order=NA,
                                       fixed=1,
                                       steps=0.1,
-                                      lower_bound=c(-20,0,-20,-20),
-                                      upper_bound=c(2,20,2,2))
+                                      lower_bound=c(0,0,0,0,0,0),
+                                      upper_bound=c(100,12,100,500,12,1))
                 mod_pars <- data.frame(names="mod",id=NA,
-                                       values=c(inputs$mod1,inputs$mod2,inputs$mod3,inputs$mod4),
+                                       values=c(1,1,1,1),
                                        type=NA,
                                        exposure=NA,
                                        strain=NA,

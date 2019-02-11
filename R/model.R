@@ -28,15 +28,14 @@ calculate_x <- function(y, m){
 #' @family model functions
 #' @useDynLib antibodyKinetics
 #' @examples
-#' pars <- c("lower_bound"=-1000,"S"=1,"EA"=0,"MAX_TITRE"=13,
-#'           "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.02, "c"=4,
-#'           "sigma"=0.01,"y0_mod"=-10000,"boost_limit"=0,
-#'           "primed"=0,"mod"=1,
+#' pars <- c("lower_bound"=0,"S"=1,"EA"=0,"MAX_TITRE"=13,
+#'           "mu"=8,"tp"=12,"dp"=0.5,"ts"=10,"m"=0.003,"beta"=0.6, "c"=4,
+#'           "sigma"=1,"y0_mod"=-20,"boost_limit"=-1,"tau"=0.05,
+#'           "order"=1,"primed"=0,"mod"=1,
 #'           "x"=0,"t_i"=10,"y0"=0,"eff_y0"=0)
 #' times <- seq(0,100,by=10)
 #' y <- model_trajectory(pars,times)
 model_trajectory <- function(pars, times, logSigma=FALSE){
-    print(pars)
     ## Calculate modified mu from cross reactivity and modifiers
     mu <- pars["mu"]
     dp <- pars["dp"]
@@ -65,16 +64,18 @@ model_trajectory <- function(pars, times, logSigma=FALSE){
         y0_mod <- pars["y0_mod"]
     }
     boost_limit <- pars["boost_limit"]
+    ##mu <- mu*exp(-max(y0,0)*y0_mod)
+    ##cr <- exp(-sigma*pars["x"])
     
-    ## mu = f(y0)
-    #mu <- mu*exp(-max(y0,0)*y0_mod)
-                                        #cr <- exp(-sigma*pars["x"])
-    cr  <- (1 - sigma*x)
-    #cr <- mu - sigma*x
-    prime_cr <- (1-beta*x)
+    ##cr  <- (1 - sigma*x)
+    ##prime_cr <- (1-beta*x)
+    cr <- mu - sigma*x
+    prime_cr <- c-beta*x
+    
     if(cr < 0) cr <- 0;
     if(prime_cr < 0) prime_cr <- 0;
-    #mu <- mod*cr + prime_cr*primed;  
+    mu <- cr + prime_cr*primed
+    ##mu <- mod*cr + prime_cr*primed;  
 
     titre_dependent <- 1
     if(y0_mod >= -999){
@@ -90,7 +91,7 @@ model_trajectory <- function(pars, times, logSigma=FALSE){
 
     seniority <- 1.0 - tau*(order - 1)
     if(seniority < 0) seniority <- 0
-    mu <- seniority*titre_dependent*mod*(mu*cr + c*prime_cr*primed)
+    mu <- seniority*titre_dependent*mod*mu
 
     if(mu < 0) mu = 0;
     

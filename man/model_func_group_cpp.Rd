@@ -7,8 +7,8 @@
 model_func_group_cpp(pars, times, groups, strains, exposure_indices,
   exposure_i_lengths, strain_indices, strain_i_lengths, exposure_times,
   exposure_strains, exposure_next, exposure_measured, exposure_orders,
-  exposure_primes, cr_inds, par_inds, order_inds, par_lengths, cr_lengths,
-  version)
+  exposure_primes, cr_inds, par_inds, par_names, order_inds, par_lengths,
+  cr_lengths, version)
 }
 \arguments{
 \item{pars}{the vector of model parameters as in parTab}
@@ -42,6 +42,8 @@ model_func_group_cpp(pars, times, groups, strains, exposure_indices,
 \item{cr_inds}{IntegerVector of indices describing which parTab rows relate to cross reactivity parameters}
 
 \item{par_inds}{IntegerVector of indices describing which parTab rows relate to model parameters}
+
+\item{par_names}{CharacterVector names from parTab}
 
 \item{order_inds}{IntegerVector of indices describing which parTab rows relate to order modifer parameters}
 
