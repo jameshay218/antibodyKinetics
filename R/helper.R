@@ -348,7 +348,7 @@ create_data <- function(runName,
     individuals <- rep(nindiv,ngroup)
     pars <- parTab[parTab$names %in% c("S","EA","MAX_TITRE"),"values"]
     names(pars) <- c("S","EA","MAX_TITRE")
-    print(options$form)
+
     f <- create_model_group_func_cpp(parTab,exposureTab,version="model",
                                      form=options$form,typing = TRUE,cross_reactivity = options$cr)
     dat <- f(parTab$values, times)

@@ -20,6 +20,8 @@ This vignette provides step-by-step code to take you through the MCMC framework 
 ## Haemagglutination inhibition titre data
 The code below attaches the titre data used in this analysis and visualises the data by strain, sampling time and experimental group. Each row corresponds to observed HI titres against a single influenza strain from a single experimental group for a single individual. Each column gives observations made at a particular sampling time. The data is melted below using the `reshape2` package for plotting, but the unmelted data frame is used in model fitting.
 ```{r, fig.width=7, fig.height=6}
+set.seed(1234)
+
 ## Load the titre data and exposure times
 data(ferret_titres)
 data(exposure_times)
@@ -115,7 +117,7 @@ chain <- read.csv(run_1$file)
 print(coda::effectiveSize(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],c(startTab[startTab$fixed==0,"names"])])))
 
 ## Look at some example traces
-plot(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],c("mu","sigma")]))
+plot(coda::as.mcmc(chain[chain$sampno > mcmcPars["adaptive_period"],c("mu","tau")]))
 ```
 
 ## Model fit

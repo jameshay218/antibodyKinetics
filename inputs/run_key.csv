@@ -5,63 +5,59 @@ runID,Model Form,Antigenic Seniority,Cross Reactivity,Priming,Typed exposures,Wa
 4,Competitive,Absent,Type specific,Absent,3 types,Monophasic,Present
 5,Competitive,Absent,Universal,Absent,6 types,Biphasic,Present
 6,Competitive,Absent,Type specific,Absent,6 types,Biphasic,Present
-7,Competitive,Absent,Universal,Absent,3 types,Biphasic,Present (suppression)
-8,Competitive,Absent,Type specific,Absent,3 types,Biphasic,Present (suppression)
-9,Competitive,Absent,Universal,Absent,6 types,Monophasic,Absent
-10,Competitive,Absent,Type specific,Absent,6 types,Monophasic,Absent
-11,Competitive,Absent,Universal,Absent,3 types,Monophasic,Absent
-12,Competitive,Absent,Type specific,Absent,3 types,Monophasic,Absent
-13,Competitive,Absent,Universal,Absent,6 types,Biphasic,Absent
-14,Competitive,Absent,Type specific,Absent,6 types,Biphasic,Absent
-15,Competitive,Absent,Universal,Absent,3 types,Biphasic,Absent
-16,Competitive,Absent,Type specific,Absent,3 types,Biphasic,Absent
-17,Competitive,Absent,Universal,Present,6 types,Monophasic,Present
-18,Competitive,Absent,Type specific,Present,6 types,Monophasic,Present
-19,Competitive,Absent,Universal,Present,3 types,Monophasic,Present
-20,Competitive,Absent,Type specific,Present,3 types,Monophasic,Present
-21,Competitive,Absent,Universal,Present,6 types,Biphasic,Present
-22,Competitive,Absent,Type specific,Present,6 types,Biphasic,Present
-23,Competitive,Absent,Universal,Present,3 types,Biphasic,Present
-24,Competitive,Absent,Type specific,Present,3 types,Biphasic,Present
-25,Competitive,Absent,Universal,Present,6 types,Monophasic,Absent
-26,Competitive,Absent,Type specific,Present,6 types,Monophasic,Absent
-27,Competitive,Absent,Universal,Present,3 types,Monophasic,Absent
-28,Competitive,Absent,Type specific,Present,3 types,Monophasic,Absent
-29,Competitive,Absent,Universal,Present,6 types,Biphasic,Absent
-30,Competitive,Absent,Type specific,Present,6 types,Biphasic,Absent
-31,Competitive,Absent,Universal,Present,3 types,Biphasic,Absent
-32,Competitive,Absent,Type specific,Present,3 types,Biphasic,Absent
-33,Competitive,Present,Universal,Absent,6 types,Monophasic,Present
-34,Competitive,Present,Type specific,Absent,6 types,Monophasic,Present
-35,Competitive,Present,Universal,Absent,3 types,Monophasic,Present
-36,Competitive,Present,Type specific,Absent,3 types,Monophasic,Present
-37,Competitive,Present,Universal,Absent,6 types,Biphasic,Present
-38,Competitive,Present,Type specific,Absent,6 types,Biphasic,Present
-39,Competitive,Present,Universal,Absent,3 types,Biphasic,Present
-40,Competitive,Present,Type specific,Absent,3 types,Biphasic,Present
-41,Competitive,Present,Universal,Absent,6 types,Monophasic,Absent
-42,Competitive,Present,Type specific,Absent,6 types,Monophasic,Absent
-43,Competitive,Present,Universal,Absent,3 types,Monophasic,Absent
-44,Competitive,Present,Type specific,Absent,3 types,Monophasic,Absent
-45,Competitive,Present,Universal,Absent,6 types,Biphasic,Absent
-46,Competitive,Present,Type specific,Absent,6 types,Biphasic,Absent
-47,Competitive,Present,Universal,Absent,3 types,Biphasic,Absent
-48,Competitive,Present,Type specific,Absent,3 types,Biphasic,Absent
-49,Competitive,Present,Universal,Present,6 types,Monophasic,Present
-50,Competitive,Present,Type specific,Present,6 types,Monophasic,Present
-51,Competitive,Present,Universal,Present,3 types,Monophasic,Present
-52,Competitive,Present,Type specific,Present,3 types,Monophasic,Present
-53,Competitive,Present,Universal,Present,6 types,Biphasic,Present
-54,Competitive,Present,Type specific,Present,6 types,Biphasic,Present
-55,Competitive,Present,Universal,Present,3 types,Biphasic,Present
-56,Competitive,Present,Type specific,Present,3 types,Biphasic,Present
-57,Competitive,Present,Universal,Present,6 types,Monophasic,Absent
-58,Competitive,Present,Type specific,Present,6 types,Monophasic,Absent
-59,Competitive,Present,Universal,Present,3 types,Monophasic,Absent
-60,Competitive,Present,Type specific,Present,3 types,Monophasic,Absent
-61,Competitive,Present,Universal,Present,6 types,Biphasic,Absent
-62,Competitive,Present,Type specific,Present,6 types,Biphasic,Absent
-63,Competitive,Present,Universal,Present,3 types,Biphasic,Absent
-64,Competitive,Present,Type specific,Present,3 types,Biphasic,Absent
-65,Competitive,Absent,Universal,Absent,3 types,Biphasic,Present (enhancement)
-66,Competitive,Absent,Type specific,Absent,3 types,Biphasic,Present (enhancement)
+7,Competitive,Absent,Universal,Absent,6 types,Monophasic,Absent
+8,Competitive,Absent,Type specific,Absent,6 types,Monophasic,Absent
+9,Competitive,Absent,Universal,Absent,3 types,Monophasic,Absent
+10,Competitive,Absent,Type specific,Absent,3 types,Monophasic,Absent
+11,Competitive,Absent,Universal,Absent,6 types,Biphasic,Absent
+12,Competitive,Absent,Type specific,Absent,6 types,Biphasic,Absent
+13,Competitive,Absent,Universal,Absent,3 types,Biphasic,Absent
+14,Competitive,Absent,Type specific,Absent,3 types,Biphasic,Absent
+15,Competitive,Absent,Universal,Present,6 types,Monophasic,Present
+16,Competitive,Absent,Type specific,Present,6 types,Monophasic,Present
+17,Competitive,Absent,Universal,Present,3 types,Monophasic,Present
+18,Competitive,Absent,Type specific,Present,3 types,Monophasic,Present
+19,Competitive,Absent,Universal,Present,6 types,Biphasic,Present
+20,Competitive,Absent,Type specific,Present,6 types,Biphasic,Present
+21,Competitive,Absent,Universal,Present,3 types,Biphasic,Present
+22,Competitive,Absent,Type specific,Present,3 types,Biphasic,Present
+23,Competitive,Absent,Universal,Present,6 types,Monophasic,Absent
+24,Competitive,Absent,Type specific,Present,6 types,Monophasic,Absent
+25,Competitive,Absent,Universal,Present,3 types,Monophasic,Absent
+26,Competitive,Absent,Type specific,Present,3 types,Monophasic,Absent
+27,Competitive,Absent,Universal,Present,6 types,Biphasic,Absent
+28,Competitive,Absent,Type specific,Present,6 types,Biphasic,Absent
+29,Competitive,Absent,Universal,Present,3 types,Biphasic,Absent
+30,Competitive,Absent,Type specific,Present,3 types,Biphasic,Absent
+31,Competitive,Present,Universal,Absent,6 types,Monophasic,Present
+32,Competitive,Present,Type specific,Absent,6 types,Monophasic,Present
+33,Competitive,Present,Universal,Absent,3 types,Monophasic,Present
+34,Competitive,Present,Type specific,Absent,3 types,Monophasic,Present
+35,Competitive,Present,Universal,Absent,6 types,Biphasic,Present
+36,Competitive,Present,Type specific,Absent,6 types,Biphasic,Present
+37,Competitive,Present,Universal,Absent,3 types,Biphasic,Present
+38,Competitive,Present,Type specific,Absent,3 types,Biphasic,Present
+39,Competitive,Present,Universal,Absent,6 types,Monophasic,Absent
+40,Competitive,Present,Type specific,Absent,6 types,Monophasic,Absent
+41,Competitive,Present,Universal,Absent,3 types,Monophasic,Absent
+42,Competitive,Present,Type specific,Absent,3 types,Monophasic,Absent
+43,Competitive,Present,Universal,Absent,6 types,Biphasic,Absent
+44,Competitive,Present,Type specific,Absent,6 types,Biphasic,Absent
+45,Competitive,Present,Universal,Absent,3 types,Biphasic,Absent
+46,Competitive,Present,Type specific,Absent,3 types,Biphasic,Absent
+47,Competitive,Present,Universal,Present,6 types,Monophasic,Present
+48,Competitive,Present,Type specific,Present,6 types,Monophasic,Present
+49,Competitive,Present,Universal,Present,3 types,Monophasic,Present
+50,Competitive,Present,Type specific,Present,3 types,Monophasic,Present
+51,Competitive,Present,Universal,Present,6 types,Biphasic,Present
+52,Competitive,Present,Type specific,Present,6 types,Biphasic,Present
+53,Competitive,Present,Universal,Present,3 types,Biphasic,Present
+54,Competitive,Present,Type specific,Present,3 types,Biphasic,Present
+55,Competitive,Present,Universal,Present,6 types,Monophasic,Absent
+56,Competitive,Present,Type specific,Present,6 types,Monophasic,Absent
+57,Competitive,Present,Universal,Present,3 types,Monophasic,Absent
+58,Competitive,Present,Type specific,Present,3 types,Monophasic,Absent
+59,Competitive,Present,Universal,Present,6 types,Biphasic,Absent
+60,Competitive,Present,Type specific,Present,6 types,Biphasic,Absent
+61,Competitive,Present,Universal,Present,3 types,Biphasic,Absent
+62,Competitive,Present,Type specific,Present,3 types,Biphasic,Absent
