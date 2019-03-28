@@ -1,4 +1,5 @@
-load_mcmc_chains <- function(location="",parTab,unfixed=TRUE, thin=1, burnin=100000, multi=TRUE, chainNo=FALSE, PTchain=FALSE){
+load_mcmc_chains <- function(location="",parTab,unfixed=TRUE, thin=1, burnin=100000, multi=TRUE, 
+                             chainNo=FALSE, PTchain=FALSE){
     if(multi){
         chains <- Sys.glob(file.path(location,"*multivariate_chain.csv"))
     } else {
@@ -20,6 +21,11 @@ load_mcmc_chains <- function(location="",parTab,unfixed=TRUE, thin=1, burnin=100
     read_chains <- lapply(read_chains, function(x) x[seq(1,nrow(x),by=thin),])
     read_chains <- lapply(read_chains,function(x) x[x$sampno > burnin,])
     print(lapply(read_chains, nrow))
+    max_sampno <- max(as.numeric(lapply(read_chains,function(x) max(x$sampno))))
+    remove_chains <- which(unlist(lapply(read_chains, function(x) max(x$sampno) < max_sampno)))
+    if(length(remove_chains) > 0){
+      read_chains <- read_chains[-remove_chains]
+    }
     
     if(chainNo){
         for(i in 1:length(read_chains)) read_chains[[i]]$chain <- i

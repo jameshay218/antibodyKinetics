@@ -70,7 +70,7 @@ lines(titre_trajectory_R,col="red")
 ## 3. Work flow
 The full work flow for the analysis is quite complex to replicate from scratch, but all of the inputs and scripts used are included. The examples below demonstrate how to run the entire model fitting process for a single model variant. 
 
-A table describing the inputs and options used for each model variant can be found in `inputs/run_tracker.csv`. The examples below replicate the inputs for runID 62. `inputs/run_key.csv` describes which model mechanisms are included in which runs.
+A table describing the inputs and options used for each model variant can be found in `inputs/run_tracker_all.csv`. The examples below replicate the inputs for runID 62. `inputs/run_key.csv` describes which model mechanisms are included in which runs.
 
 **NOTE** `stringsAsFactors` should be `FALSE` when reading in these parameter tables.
 
@@ -80,7 +80,7 @@ library(antibodyKinetics)
 ```
 
 #### 3.1 Generation of input parameters and exposure tables
-The purpose of this project is to explore different assumptions and immunological mechanisms in generating observed antibody titres. The format of input exposures and parameters therefore depends on the assumptions that the user wishes to make and the exposure schedule used. Making the correct input parameter and exposure tables is not completely trivial, and should be done using the `paramViewer()`, a vignette explaining its use can be found [here](https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html). However, example parameter tables and exposure tables can be found as attached R objects and in the `inputs` folder (including all those used in this analysis). Users should refer to `inputs/run_tracker.csv` for a description of which parameter and expsure tables in `inputs` correspond to which model.
+The purpose of this project is to explore different assumptions and immunological mechanisms in generating observed antibody titres. The format of input exposures and parameters therefore depends on the assumptions that the user wishes to make and the exposure schedule used. Making the correct input parameter and exposure tables is not completely trivial, and should be done using the `paramViewer()`, a vignette explaining its use can be found [here](https://jameshay218.github.io/antibodyKinetics/inst/doc/paramViewer.html). However, example parameter tables and exposure tables can be found as attached R objects and in the `inputs` folder (including all those used in this analysis). Users should refer to `inputs/run_tracker_all.csv` for a description of which parameter and expsure tables in `inputs` correspond to which model.
 
 The `runName` identifier and corresponding options can be generated as follows:
 ```r
@@ -153,7 +153,7 @@ Changing the model structure is not as simple as switching some input flags on o
 
 Users are referred to:
 
-1. [`inputs/run_tracker.csv`](https://github.com/jameshay218/antibodyKinetics/blob/master/inputs/run_tracker.csv) to find which parameter and exposure tables are used for which model variants, indexed by `runName`
+1. [`inputs/run_tracker_all.csv`](https://github.com/jameshay218/antibodyKinetics/blob/master/inputs/run_tracker_all.csv) to find which parameter and exposure tables are used for which model variants, indexed by `runName`
 2. [`inputs/run_key.csv`](https://github.com/jameshay218/antibodyKinetics/blob/master/inputs/run_key.csv) for a key showing which mechanisms are included in each `runName`
 3. The shiny app (above), which allows users to generate their own parameter and exposure tables for a given set of assumptions
 
@@ -163,11 +163,11 @@ To test a particular model, use the appropriate `runName` in `inputs/run_key.csv
 The above examples should be sufficient to give a feel for what the package is doing and how it is doing it. The below vignettes give more detail regarding how to reproduce the analysis in the paper:
 
 1. [Model fitting vignette](https://jameshay218.github.io/antibodyKinetics/inst/doc/model_fitting.html)
-2. [Model comparison scripts](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses). A tidied .csv file of the outputs from these scripts can be found [here](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses/waic_table.csv). Running the code in `all_analyses.R` or `all_analyses_PTchains.R`, depending on which MCMC sampler was used, will generate and save files with:
+2. [Model comparison scripts](https://github.com/jameshay218/antibodyKinetics/tree/master/scripts/analyses). Running the code in `all_analyses.R` will generate and save files with:
      
       a) Convergence diagnostics;
       b) Whether chains need to be visually inspected for convergence or rerun (eg. if bimodal posterior distributions detected);
-      c) BIC, WAIC, elpd loo and p loo (from the `loo` R package);
+      c) WAIC, elpd loo and p loo (from the `loo` R package);
       d) A table of posterior mean, median, mode, 95% credible intervals, effective sample size and Rhat values for each estimated parameter for each model (very large!);
       e) A table of residuals (model predicted values - observed values) for each model;
       f) R objects with all `loo` estimates and pareto k estimates (from the [loo](https://cran.r-project.org/web/packages/loo/index.html) R package)

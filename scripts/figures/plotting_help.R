@@ -7,7 +7,11 @@ ordered_names <- c("All","TIV","TIV + adjuvant","Infection",
 ordered_names2 <- c("All","TIV","TIV + adjuvant","Infection",
                    "TIV 1","TIV 2","TIV 1 + adjuvant","TIV 2 + adjuvant",
                    "Infection 1","Infection 2","Priming")
-den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals=TRUE, skip_pars=NULL,yupper=NULL,ymin=0, add_priming_blank=TRUE,use_pointrange=FALSE){
+den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals=TRUE, skip_pars=NULL,yupper=NULL,ymin=0, 
+                     add_priming_blank=TRUE,use_pointrange=FALSE, simulation=FALSE, hack_quantiles=FALSE,
+                     skip_types=NULL, nsamp=100){
+    samps <- sample(chain$sampno, nsamp)
+    chain <- chain[chain$sampno %in% samps,]
     print(parName)
     if(is.null(yupper)) yupper <- ymax
     print(yupper)
@@ -22,6 +26,7 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
     if(parName == "adjmu"){
         tmp_chain1 <- chain[,which(colnames(chain) == "mu"), drop=FALSE]
         tmp_chain2 <- chain[,which(colnames(chain) == "dp"), drop=FALSE]
+        parTab[parTab$names == "mu","values"] <- parTab[parTab$names == "mu","values"]*(1-parTab[parTab$names == "dp","values"])
         for(i in 1:ncol(tmp_chain1)) tmp_chain1[,i] <- tmp_chain1[,i] * (1-tmp_chain2[,i])
         tmp_chain <- tmp_chain1
         parName <- "mu"
@@ -38,7 +43,6 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
         types_table$names <- c("mod","mod.1","mod.2","mod.3")
     }
 
-   
     types_table$names <- colnames(tmp_chain)
 
     
@@ -48,6 +52,8 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
     types_table$type <- type_names[types_table$type]
     
     melted_chain <- merge(melted_chain,types_table,by="parName")
+    melted_chain$type <- as.character(melted_chain$type)
+    melted_chain[melted_chain$type %in% skip_types,"value"] <- 0
     
     quantiles <- plyr::ddply(melted_chain, c("parName","type","true_value"), function(x) signif(quantile(x$value,c(0.025,0.5,0.975)),3))
     means <- plyr::ddply(melted_chain, c("parName","type","true_value"), function(x) signif(mean(x$value),3))
@@ -61,9 +67,20 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
     ## Code to reorder the exposure type factor levels
     present_names <- ordered_names[ordered_names %in% as.character(unique(melted_chain$type))]
     if(add_priming_blank) present_names <- c(present_names,"Priming")
+    
     melted_chain$type = factor(melted_chain$type,present_names)
-    melted_chain[melted_chain$parName %in% skip_pars,"value"] <- NA
+    melted_chain[melted_chain$parName %in% skip_pars,"value"] <- 0
 
+    if(hack_quantiles){
+      tmp_quantiles <- ddply(melted_chain,~type,function(x) quantile(x$value,c(0.001,0.5,0.999)))
+      print(tmp_quantiles)
+      for(tmp_type in tmp_quantiles$type){
+        melted_chain[melted_chain$type == tmp_type & melted_chain$value < tmp_quantiles[tmp_quantiles$type == tmp_type,"0.1%"],"value"] <- 
+          tmp_quantiles[tmp_quantiles$type == tmp_type,"0.1%"]
+        melted_chain[melted_chain$type == tmp_type & melted_chain$value > tmp_quantiles[tmp_quantiles$type == tmp_type,"99.9%"],"value"] <- 
+          tmp_quantiles[tmp_quantiles$type == tmp_type,"99.9%"]
+      }
+    }
     
     use_var <- "type"
     if(parName == "mod"){
@@ -83,10 +100,15 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
                           width=0.2)
         } else {
           p <- p +  
-            geom_violin(aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.025,0.5,0.975),trim=TRUE,scale="width")
-          }
+            geom_violin(data=melted_chain[!(melted_chain$parName %in% skip_pars) &
+                                            !(melted_chain$type %in% skip_types),],
+                        aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.025,0.5,0.975),trim=TRUE,scale="width")
+        }
+        if(simulation){
         p <- p + 
-          geom_point(data=melted_chain, aes_string(x=use_var, y="true_value")) +
+          geom_point(data=melted_chain, aes_string(x=use_var, y="true_value"))
+        }
+        p <- p +
               coord_cartesian(ylim=c(ymin,ymax)) + xlab("") + ylab(ylab) +
               geom_hline(yintercept = c(ymin,yupper),linetype="dashed", alpha=0.3) +
                scale_x_discrete(drop=FALSE) +
@@ -103,10 +125,15 @@ den_plot <- function(chain, parName, parTab, options, ylab, ymax, plot_intervals
                           width=0.2)
         } else {
           p <- p + 
-            geom_violin(aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.5),trim=TRUE,scale="width")
-          } 
+            geom_violin(data=melted_chain[!(melted_chain$parName %in% skip_pars) &
+                                            !(melted_chain$type %in% skip_types),],
+                        aes_string(x=use_var,y="value"),fill="grey",draw_quantiles=c(0.5),trim=TRUE,scale="width")
+        } 
+        if(simulation){
+          p <- p +
+            geom_point(data=melted_chain, aes_string(x=use_var, y="true_value"))
+          }
         p <- p +
-          geom_point(data=melted_chain, aes_string(x=use_var, y="true_value")) +
             coord_cartesian(ylim=c(ymin,ymax)) + xlab("") + ylab(ylab) +
             geom_hline(yintercept = c(ymin,yupper),linetype="dashed", alpha=0.3) +
             scale_x_discrete(drop=FALSE) +
@@ -199,8 +226,8 @@ generate_cr_profiles <- function(chain, options, parTab, x_max){
     all_melted$type <- type_names[all_melted$type]
     all_melted$type = factor(all_melted$type,ordered_names)
     p <- ggplot(all_melted) + 
-        geom_line(aes(x=x,y=mid)) + 
-        geom_ribbon(aes(x=x,ymin=lower,ymax=upper),alpha=0.2) + 
+        geom_ribbon(aes(x=x,ymin=lower,ymax=upper),fill="gray70") + 
+       geom_line(aes(x=x,y=mid)) + 
         facet_wrap(~type)+
         theme_bw() +
         theme(legend.position="none") +
@@ -237,16 +264,18 @@ generate_cr_profiles <- function(chain, options, parTab, x_max){
 }
 
 
-y0_mod_plot <- function(chain, x_max, mu, obs_max=12, xby=10, nsamp=100,ymax=12){
+y0_mod_plot <- function(chain, x_max, mu, obs_max=12, xby=10, nsamp=100,ymax=12, mu_index=NULL){
 ##############
     ## y0 mod plot
 ##############
+  if(is.null(mu_index)) mu_index <- which(colnames(chain) == "mu")[1]
     x <- seq(0,x_max,by=0.1)
     
     prime_mu <- function(mu, y0, y0_mod, boost_limit){
         y0[y0 >= boost_limit] <- boost_limit
-        tmp <- y0_mod*y0 + mu
+        tmp <- 1.0 - y0_mod*y0
         tmp[tmp < 0] <- 0
+        tmp <- mu*tmp
         return(tmp)
     }
     xbreaks <- c(seq(0,x_max,by=xby),obs_max)
@@ -261,14 +290,15 @@ y0_mod_plot <- function(chain, x_max, mu, obs_max=12, xby=10, nsamp=100,ymax=12)
     mus <- matrix(nrow=nsamp,ncol=length(x))
     for(i in seq_along(samps)){
         index <- samps[i]
-        mus[i,] <- prime_mu(mu, x, chain[index,"y0_mod"],chain[index,"boost_limit"])
+        mus[i,] <- prime_mu(chain[index,mu_index], x, chain[index,"y0_mod"],chain[index,"boost_limit"])
     }
     dat <- apply(mus, 2, function(x) c(mean(x),quantile(x,c(0.025,0.975))))
     dat <- as.data.frame(t(dat))
     colnames(dat) <- c("y","lower","upper")
     dat$x <- x
     dat2 <- dat[dat$x==obs_max,]
-
+    mu <- signif(median(dat[dat$x == 0,"y"]),3)
+    
     ylabels <- unique(c(seq(0,ymax,by=2),signif(dat2[1,"lower"],3),signif(dat2[1,"y"],3),
                 signif(dat2[1,"upper"],3),mu))
  
@@ -279,8 +309,8 @@ y0_mod_plot <- function(chain, x_max, mu, obs_max=12, xby=10, nsamp=100,ymax=12)
     ylabels[which(ylabels==mu)] <- paste0("μ=",mu)
     
     y0_p2 <- ggplot(dat) + 
+      geom_ribbon(aes(x=x,ymax=upper,ymin=lower),fill="gray70") +
         geom_line(aes(x=x,y=y)) + 
-        geom_ribbon(aes(x=x,ymax=upper,ymin=lower),alpha=0.3) +
         theme_bw() +
         theme(axis.text.x=element_text(size=10,colour="black",family="Arial"),
               axis.text.y=element_text(size=10,colour="black",family="Arial"))+
@@ -304,15 +334,17 @@ combined_density_plot <- function(estimates, parName, title_parName, ymin,ymax, 
                                   saveDir="~/",savePNG=FALSE,saveEPS=FALSE,
                                   blueLine=-1000,redLine=-1000, fillBy=NULL){
   p <- ggplot(estimates[estimates$Parameter.name == parName,]) + 
-    geom_pointrange(aes_string(x="runID",y="Median",ymax="X97.5..CI",ymin="X2.5..CI",col=fillBy),size=0.25,fatten=0.5) + 
-    facet_wrap(~Exposure.Type) +
+      geom_pointrange(aes_string(x="runID",y="Median",ymax="X97.5..CI",ymin="X2.5..CI",col=fillBy),size=0.25,fatten=0.5) +
+      geom_errorbar(aes_string(x="runID",ymax="X97.5..CI",ymin="X2.5..CI",col=fillBy),width=0.2)+
+      facet_wrap(~Exposure.Type) +
     theme_bw() +
       theme(text=element_text(size=8,family="Arial"),
             strip.text=element_text(size=8,family="Arial"),
           axis.text.x=element_text(angle=45,hjust=1,size=8),
           axis.text.y=element_text(size=8),
           legend.position="bottom") +
-    ylab(paste0("Estimates for ",title_parName)) +
+      ylab(paste0("Estimates for ",title_parName)) +
+      xlab("") +
     coord_cartesian(ylim=c(ymin,ymax)) + 
     geom_hline(yintercept=c(priormin,priormax),linetype="dashed",alpha=0.5) + 
     geom_hline(yintercept=blueLine,linetype="dashed",col="blue",alpha=0.5) + 

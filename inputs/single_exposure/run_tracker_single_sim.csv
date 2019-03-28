@@ -1,0 +1,9 @@
+runID,parTab_file,exposureTab_file,dat_file,form,antigenic_seniority,cr,priming,types,wane,y0_mod,runName,sim,run_times
+sim_protocol_3,parTab_basic,exposureTab_single,single_exposure/sim/sim_protocol_3_data.csv,C,N,A,N,3,B,N,CNAN3BN,TRUE,protocol
+sim_frequent_3,parTab_basic,exposureTab_single,single_exposure/sim/sim_frequent_3_data.csv,C,N,A,N,3,M,N,CNAN3BN,TRUE,3days
+sim_frequent_10,parTab_basic,exposureTab_single,single_exposure/sim/sim_frequent_10_data.csv,C,N,A,N,3,B,N,CNAN3BN,TRUE,3days
+sim_weekly_3,parTab_basic,exposureTab_single,single_exposure/sim/sim_weekly_3_data.csv,C,N,A,N,3,M,N,CNAN3BN,TRUE,weekly
+biphasic_fixed,parTab_basic_fixed_biphasic,exposureTab_single,single_exposure/sim/sim_biphasic_fixed_CNAN3BN_data.csv,C,N,A,N,3,B,N,CNAN3BN,TRUE,protocol
+biphasic_full,parTab_basic,exposureTab_single,single_exposure/sim/sim_biphasic_full_CNAN3BN_data.csv,C,N,A,N,3,B,N,CNAN3BN,TRUE,protocol
+monophasic_fixed,parTab_basic_fixed_monophasic,exposureTab_single,single_exposure/sim/sim_monophasic_fixed_CNAN3MN_data.csv,C,N,A,N,3,M,N,CNAN3MN,TRUE,protocol
+monophasic_full,parTab_basic,exposureTab_single,single_exposure/sim/sim_monophasic_full_CNAN3MN_data.csv,C,N,A,N,3,M,N,CNAN3MN,TRUE,protocol

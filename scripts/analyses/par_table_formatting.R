@@ -1,7 +1,7 @@
 ## Modifies the all_estimates table to get nicer formatting
-runs <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inputs/run_tracker.csv",stringsAsFactors=FALSE) ## File location of run key table
-par_estimates <- read.csv("~/Documents/Ferret_Model/rerun_correct_times_28082018/parameter_estimates_complete.csv",stringsAsFactors=FALSE) ## File location of parameter estimate results
-par_estimates <- par_estimates[,-2]
+runs <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inputs/run_tracker_all.csv",stringsAsFactors=FALSE) ## File location of run key table
+par_estimates <- read.csv("~/Drive/Influenza/Ferret/PLOS Comp Bio/main_results/parameter_estimates.csv",stringsAsFactors=FALSE) ## File location of parameter estimate results
+
 runs[runs$form=="C","form"] <- "Competitive"
 runs[runs$form=="I","form"] <- "Isolated"
 
@@ -26,7 +26,7 @@ runs[runs$y0_mod=="N","y0_mod"] <- "Absent"
 runs <- runs[,c(1,4:10)]
 colnames(runs) <- c("runID","Model Form","Antigenic Seniority","Cross Reactivity",
                     "Priming","Typed exposures","Waning","Titre dependent boosting")
-write.table(runs,"~/Documents/Ferret_Model/inputs/run_key.csv",sep=",",row.names=FALSE)
+#write.table(runs,"~/Documents/Ferret_Model/inputs/run_key.csv",sep=",",row.names=FALSE)
 
 
 type_names <- c("all"="All","vacc"="TIV","adj"="TIV + adjuvant","infection"="Infection",
@@ -43,11 +43,11 @@ par_names <- c("mod1"="ρ1", "mod2"="ρ2","mod3"="ρ3","mod4"="ρ4",
                "c"="c","lnlike"="Log likelihood","dp"="dp","ts"="ts","m"="m","y0_mod"="γ", "boost_limit"="y_limit",
                "tau"="τ")
 
-par_names_2 <- c("mu"="μ","mu.1"="μ1","mu.2"="μ2","mu.3"="μ3","mu.4"="μ4","mu.5"="μ5",
-                  "m"="m","m.1"="m1","m.2"="m2","m.3"="m3","m.4"="m4","m.5"="m5",  
-                 "ts"="ts","ts.1"="ts1","ts.2"="ts2","ts.3"="ts3","ts.4"="ts4","ts.5"="ts5",  
-                 "sigma"="σ","sigma.1"="σ1","sigma.2"="σ2","sigma.3"="σ3","sigma.4"="σ4","sigma.5"="σ5",  
-                 "dp"="dp","dp.1"="dp1","dp.2"="dp2","dp.3"="dp3","dp.4"="dp4","dp.5"="dp5",  
+par_names_2 <- c("mu"="μ1","mu.1"="μ2","mu.2"="μ3","mu.3"="μ4","mu.4"="μ5","mu.5"="μ6",
+                  "m"="m1","m.1"="m2","m.2"="m3","m.3"="m4","m.4"="m5","m.5"="m6",  
+                 "ts"="ts1","ts.1"="ts2","ts.2"="ts3","ts.3"="ts4","ts.4"="ts5","ts.5"="ts6",  
+                 "sigma"="σ1","sigma.1"="σ2","sigma.2"="σ3","sigma.3"="σ4","sigma.4"="σ5","sigma.5"="σ6",  
+                 "dp"="dp1","dp.1"="dp2","dp.2"="dp3","dp.3"="dp4","dp.4"="dp5","dp.5"="dp6",  
                  "y0_mod"="γ","boost_limit"="y_limit","S"="sd","beta"="β","mod1"="ρ1", "mod2"="ρ2","mod3"="ρ3","mod4"="ρ4",
                  "mod"="ρ1", "mod.1"="ρ2","mod.2"="ρ3","mod.3"="ρ4",
                  "γ"="y0_mod","y_limit"="boost_limit","lnlike"="Log likelihood","c"="c",
@@ -57,16 +57,17 @@ par_names_2 <- c("mu"="μ","mu.1"="μ1","mu.2"="μ2","mu.3"="μ3","mu.4"="μ4","
 
 par_estimates$par_name <- par_names[par_estimates$par_name]
 par_estimates$type <- type_names[par_estimates$type]
-colnames(par_estimates) <- c("runID","Parameter name","Exposure Type","Mean","Median","Mode","2.5% CI","97.5% CI")
+colnames(par_estimates) <- c("runID","runName","Parameter name","Exposure Type","Mean","Median","Mode","2.5% CI","97.5% CI","ESS","Rhat","Rhat upper 95% CI")
 
 par_estimates <- merge(runs,par_estimates, by="runID")
-#write.table(par_estimates,"~/Documents/Ferret_Model/rerun_correct_times_28082018/parameter_estimates.csv",sep=",",row.names=FALSE)
+write.table(par_estimates,"~/Drive/Influenza/Ferret/PLOS Comp Bio/combined_results/main_par_estimates.csv",sep=",",row.names=FALSE)
 
 ########
 ## Format convergence/WAIC table
 ########
 
-convergence_table <- read.csv("~/Documents/Ferret_Model/rerun_correct_times_28082018/waic_table.csv",stringsAsFactors=FALSE)
+convergence_table <- read.csv("~/Drive/Influenza/Ferret/PLOS Comp Bio/main_results/convergence_check.csv",stringsAsFactors=FALSE)
+convergence_table <- convergence_table[convergence_table$runID %in% runs$runID,]
 convergence_table$ess_names <- par_names_2[convergence_table$ess_names]
 convergence_table$psrf_names <- par_names_2[convergence_table$psrf_names]
 #convergence_table$ess_names_univ <- par_names_2[convergence_table$ess_names_univ]
@@ -78,44 +79,12 @@ max_gelman_par <- NULL
 max_gelman <- NULL
 gelman_mpsrf <- NULL
 
-# Commented out code applied to chains run before parallel tempering version
-# for(i in 1:nrow(convergence_table)){
-#   if((convergence_table[i,"multi_chain_fine"] & convergence_table[i,"manual"] != "univ") |
-#      convergence_table[i,"manual"] == "multi"){
-#       min_ess[i] <- convergence_table[i,"ess_vector_multi"]
-#       min_ess_par[i] <- convergence_table[i,"ess_names_multi"]
-#       max_gelman_par[i] <- convergence_table[i,"psrf_names_multi"]
-#       max_gelman[i] <- convergence_table[i,"gelman.psrf_multi"]
-#       gelman_mpsrf[i] <- convergence_table[i,"gelman.mpsrf_multi"]
-#     
-#   }
-#   else if(convergence_table[i,"manual"] == "univ" | 
-#           (convergence_table[i,"multi_chain_fine"] != TRUE & convergence_table[i,"univ_chain_fine"] == TRUE)){
-#     min_ess[i] <- convergence_table[i,"ess_vector_univ"]
-#     min_ess_par[i] <- convergence_table[i,"ess_names_univ"]
-#     max_gelman_par[i] <- convergence_table[i,"psrf_names_univ"]
-#     max_gelman[i] <- convergence_table[i,"gelman.psrf_univ"]
-#     gelman_mpsrf[i] <- convergence_table[i,"gelman.mpsrf_univ"]
-#   }
-#   else{
-#     min_ess[i] <- convergence_table[i,"ess_vector_multi"]
-#     min_ess_par[i] <- convergence_table[i,"ess_names_multi"]
-#     max_gelman_par[i] <- convergence_table[i,"psrf_names_multi"]
-#     max_gelman[i] <- convergence_table[i,"gelman.psrf_multi"]
-#     gelman_mpsrf[i] <- convergence_table[i,"gelman.mpsrf_multi"]
-#   }
-# }
-#
-#convergence_table <- convergence_table[,c(1,20,21)]
-#convergence_table <- cbind(convergence_table,min_ess_par,min_ess,max_gelman_par,max_gelman,gelman_mpsrf)
-#
-#convergence_table <- convergence_table[,c(1,12,13,3:7)]
-convergence_table <- convergence_table[,c(1,12,13,3,4,5,6,7)]
-colnames(convergence_table) <- c("runID","BIC","WAIC",
+convergence_table <- convergence_table[,c(1,2,13,14,15,16,17,3,4,5,6,7)]
+colnames(convergence_table) <- c("runID","Run name","WAIC","ELPD LOO","ELPD LOO SE","P LOO","P LOO SE",
                                   "Minimum ESS Parameter","Minimum ESS Value",
                                  "Max Gelman PSRF Parameter","Max Gelman PSRF","Gelman MPSRF")
 convergence_table$δWAIC <- convergence_table$WAIC - min(convergence_table$WAIC)
-convergence_table$δBIC <- convergence_table$BIC - min(convergence_table$BIC)
-
+convergence_table$`δELPD LOO` <- max(convergence_table$`ELPD LOO`) - convergence_table$`ELPD LOO`
 convergence_table <- merge(runs,convergence_table,by="runID")
-write.table(convergence_table,"~/Documents/Ferret_Model/rerun_correct_times_28082018/waic_table_complete.csv",sep=",",row.names=FALSE)
+convergence_table <- convergence_table[order(convergence_table$`δELPD LOO`),]
+write.table(convergence_table,"~/Drive/Influenza/Ferret/PLOS Comp Bio/combined_results/model_comparison_table.csv",sep=",",row.names=FALSE)

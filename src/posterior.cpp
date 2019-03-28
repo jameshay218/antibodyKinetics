@@ -106,22 +106,18 @@ double obs_likelihood(NumericVector y, NumericVector data, NumericVector params)
   double tmp = 0;
   int MAX_TITRE = params(3);
   for(int i = 0; i < y.length();++i){
-    //if(y(i) < 0) y(i) = 0;
-    //if(y(i) >= MAX_TITRE) y(i) = MAX_TITRE;
-    //ln += R::dnorm(data(i),y(i),params(1),1);
+    // If data point is not NA, then calculate log likelihood
+    // If NA, then ignore
     if(!NumericVector::is_na(data(i))){
       tmp = norm_error(y(i),data(i),params(1),MAX_TITRE);
+      if(tmp == 0){
+	ln += -10000;
+      } else {
+	ln += log(tmp);
+      }
     }
-    if(tmp == 0){
-      ln += -10000;
-    } else {
-      ln += log(tmp);
-    }
-    //Rcpp::Rcout << "Data: " << data(i) << "; Model: " << y(i) << "; Lik: " << log(norm_error(y(i),data(i),1.2,MAX_TITRE)) << std::endl;
-    //ln += log(obs_error(floor(y(i)), floor(data(i)),params(1),params(2),MAX_TITRE));
-    //Rcpp::Rcout << data(i) << " " << y(i) << ": " << R::dpois(data(i),floor(y(i)),1) << std::endl;
-    
-    //ln += R::dpois(y(i),data(i),1);
+    // If it is NA, then we just count this data point's contribution to the
+    // overall log likelihood
   }
   return ln;
 }
@@ -187,6 +183,8 @@ double posterior_func_group_cpp(
   for(int i = 0; i < groups.size(); ++i){
     for(int j = 0; j < strains.size(); ++j){
       for(int k = 0; k < individuals[i]; ++k){
+	// Calculate likelihood of observing data on this strain in this experimental
+	// group for this individual
 	ln += obs_likelihood(result(index_model,_), data(index_data,_), pars);
 	index_data++;
       }

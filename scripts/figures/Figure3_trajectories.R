@@ -3,17 +3,16 @@
 ## It assumes that the user has installed the antibodyKinetics package, and has generated
 ## the required MCMC chains as outlined in the package vignettes
 ## Author: James Hay
-## Date: 11/06/2018
+## Date: 19/02/2019
 ## NOTE: PLEASE check all file paths included in these scripts, as they are specific to my machine!
 ####################################
-
 library(ggplot2)
 library(reshape2)
 library(cowplot)
 library(coda)
 library(extrafont)
 library(RColorBrewer)
-                                        #library(antibodyKinetics)
+##library(antibodyKinetics)
 devtools::load_all("~/Documents/Ferret_Model/antibodyKinetics")
 source("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/convergence_check_funcs.R")
 source("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/model_comparison_functions.R")
@@ -24,16 +23,13 @@ source("~/Documents/Ferret_Model/antibodyKinetics/scripts/figures/plotting_help.
 ##############################################################
 
 ## Which run ID would you like to plot?
-i <- 85
-use_multi <- FALSE ## use multivariate chain?
+i <- 21
 
 ## Where to save plot to?
-res_wd <- "~/Documents/Ferret_Model/"
-if(!dir.exists(paste0(res_wd,"plots/",i))) dir.create(paste0(res_wd,"plots/",i))
-setwd(paste0(res_wd,"plots/",i))
-#chain_wd_base <- "~/Documents/Ferret_Model/raw_results_test/outputs_real/"
+res_wd <- "~/Drive/Influenza/Ferret/PLOS Comp Bio/"
+if(!dir.exists(paste0(res_wd,"figures/",i))) dir.create(paste0(res_wd,"figures/",i))
+setwd(paste0(res_wd,"figures/",i))
 ## Where are the MCMC chains saved?
-#chain_wd_base <- "~/Documents/Ferret_Model/results_112017/outputs"
 chain_wd_base <- "/media/james/Storage 2/ferret_results/rerun_Jan2019/outputs_real/"
 
 ## Data and exposure table for plot
@@ -50,9 +46,9 @@ exposureTab_loc <- "~/net/home/ferret/inputs/exposureTabs/"
 #parTab_loc <- "~/Documents/Ferret_Model/antibodyKinetics/inputs/parTabs/"
 #exposureTab_loc <- "~/Documents/Ferret_Model/antibodyKinetics/inputs/exposureTabs/"
 
-runs <- read.csv("~/net/home/ferret/inputs/run_tracker.csv",stringsAsFactors=FALSE)
+runs <- read.csv("~/net/home/ferret/inputs_Jan2019/run_tracker_all.csv",stringsAsFactors=FALSE)
 #runs <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/inputs/run_tracker.csv",stringsAsFactors=FALSE)
-convergence <- read.csv("~/Documents/Ferret_Model/antibodyKinetics/scripts/analyses/waic_table_complete.csv",stringsAsFactors=FALSE)
+convergence <- read.csv("~/Drive/Influenza/Ferret/PLOS Comp Bio/combined_results/model_comparison_table.csv",stringsAsFactors=FALSE)
 
 ## Times to solve model over
 times <- c(0,21,37,49,70)
@@ -75,9 +71,10 @@ options <- antibodyKinetics::convert_runName_to_options(runName)
 parTab <- antibodyKinetics::parTab_modification(parTab,options,FALSE)
 
 chain_wd <- paste0(chain_wd_base,"/",runID,"_",runName)
-chain <- as.data.frame(load_mcmc_chains(chain_wd, parTab, FALSE, 1, adaptive, use_multi, TRUE,TRUE)[["chain"]])
+chain <- as.data.frame(load_mcmc_chains(chain_wd, parTab, FALSE, 1, adaptive, FALSE, TRUE,TRUE)[["chain"]])
 
-dat <- read.csv(dat_file)
+attach(ferret_titres)
+dat <- ferret_titres[,4:ncol(ferret_titres)]
 dat <- as.matrix(rbind(times, dat))
 rownames(dat) <- NULL
 
@@ -89,7 +86,7 @@ bestPars <- get_best_pars(chain)
 #f <- create_model_group_func_cpp(parTab,exposureTab,version="model",form=runs$form[i],
 #                                 typing = runs$typing[i],cross_reactivity = runs$cr[i])
 
-pred_intervals <- generate_prediction_intervals(chain, 1000,seq(0,80,by=1),times,f,nstrains=5,ngroups=5)
+pred_intervals <- generate_prediction_intervals(chain, n,seq(0,80,by=1),times,f,nstrains=5,ngroups=5)
 mod <- pred_intervals[[1]]
 sim_obs <- pred_intervals[[2]]
 

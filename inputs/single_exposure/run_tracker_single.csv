@@ -1,0 +1,5 @@
+runID,parTab_file,exposureTab_file,form,antigenic_seniority,cr,priming,types,wane,y0_mod,runName
+biphasic_full,parTab_basic,exposureTab_single,C,N,A,N,3,B,N,CNAN3BN
+monophasic_full,parTab_basic,exposureTab_single,C,N,A,N,3,M,N,CNAN3MN
+biphasic_fixed,parTab_basic_fixed_biphasic,exposureTab_single,C,N,A,N,3,B,N,CNAN3BN
+monophasic_fixed,parTab_basic_fixed_monophasic,exposureTab_single,C,N,A,N,3,M,N,CNAN3MN

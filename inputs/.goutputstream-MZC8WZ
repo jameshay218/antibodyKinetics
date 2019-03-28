@@ -1,0 +1,13 @@
+runID,parTab_file,exposureTab_file,form,antigenic_seniority,cr,priming,types,wane,y0_mod,runName,data_file
+protocol,inputs_Jan2019/sim_best_model/CNAY6BY/protocol_CNAY6BY_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,C,N,A,Y,6,B,Y,CNAY6BY,inputs_Jan2019/sim_best_model/CNAY6BY/protocol_CNAY6BY_data.csv
+weekly,inputs_Jan2019/sim_best_model/CNAY6BY/weekly_CNAY6BY_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,C,N,A,Y,6,B,Y,CNAY6BY,inputs_Jan2019/sim_best_model/CNAY6BY/weekly_CNAY6BY_data.csv
+3days,inputs_Jan2019/sim_best_model/CNAY6BY/3days_CNAY6BY_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,C,N,A,Y,6,B,Y,CNAY6BY,inputs_Jan2019/sim_best_model/CNAY6BY/3days_CNAY6BY_data.csv
+protocol,inputs_Jan2019/sim_best_model/CYAY6BY/protocol_CYAY6BY_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,C,Y,A,Y,6,B,Y,CYAY6BY,inputs_Jan2019/sim_best_model/CYAY6BY/protocol_CYAY6BY_data.csv
+weekly,inputs_Jan2019/sim_best_model/CYAY6BY/weekly_CYAY6BY_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,C,Y,A,Y,6,B,Y,CYAY6BY,inputs_Jan2019/sim_best_model/CYAY6BY/weekly_CYAY6BY_data.csv
+3days,inputs_Jan2019/sim_best_model/CYAY6BY/3days_CYAY6BY_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,C,Y,A,Y,6,B,Y,CYAY6BY,inputs_Jan2019/sim_best_model/CYAY6BY/3days_CYAY6BY_data.csv
+protocol,inputs_Jan2019/sim_best_model/CYTY6BN/protocol_CYTY6BN_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,C,Y,T,Y,6,B,N,CYTY6BN,inputs_Jan2019/sim_best_model/CYTY6BN/protocol_CYTY6BN_data.csv
+weekly,inputs_Jan2019/sim_best_model/CYTY6BN/weekly_CYTY6BN_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,C,Y,T,Y,6,B,N,CYTY6BN,inputs_Jan2019/sim_best_model/CYTY6BN/weekly_CYTY6BN_data.csv
+3days,inputs_Jan2019/sim_best_model/CYTY6BN/3days_CYTY6BN_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,C,Y,T,Y,6,B,N,CYTY6BN,inputs_Jan2019/sim_best_model/CYTY6BN/3days_CYTY6BN_data.csv
+protocol,inputs_Jan2019/sim_best_model/INAY6BY/protocol_INAY6BY_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,I,N,A,Y,6,B,Y,INAY6BY,inputs_Jan2019/sim_best_model/INAY6BY/protocol_INAY6BY_data.csv
+weekly,inputs_Jan2019/sim_best_model/INAY6BY/weekly_INAY6BY_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,I,N,A,Y,6,B,Y,INAY6BY,inputs_Jan2019/sim_best_model/INAY6BY/weekly_INAY6BY_data.csv
+3days,inputs_Jan2019/sim_best_model/INAY6BY/3days_INAY6BY_parTab.csv,inputs/exposureTabs/D_exposureTab.csv,I,N,A,Y,6,B,Y,INAY6BY,inputs_Jan2019/sim_best_model/INAY6BY/3days_INAY6BY_data.csv
