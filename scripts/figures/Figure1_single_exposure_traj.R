@@ -12,12 +12,12 @@ source("~/Documents/Ferret_Model/antibodyKinetics/scripts/figures/plotting_help.
 times <- c(0,21,37,49,70)
 n <- 1000 ## Samples to take from chain
 
-setwd("/media/james/Storage 2/ferret_results/plos_path_review/single_exposure/")
-runs <- read.csv("~/net/home/ferret/inputs_Jan2019/run_tracker.csv",stringsAsFactors=FALSE)
+setwd("/media/james/Storage 2/all_results_backup/ferret_results/single_exposure/")
+runs <- read.csv("~/net/home/ferret/inputs_Jan2019/run_tracker_single.csv",stringsAsFactors=FALSE)
 #runs$runName <- "CNAN3BN"
 runs$run_loc <- paste0(runs$runID,"_",runs$runName)
-runs$parTab_file <- paste0("~/net/home/ferret/inputs_Jan2019/",runs$parTab_file,".csv")
-runs$exposureTab_file <- paste0("~/net/home/ferret/inputs_Jan2019/",runs$exposureTab_file,".csv")
+runs$parTab_file <- paste0("~/net/home/ferret/inputs_Jan2019/single_exposure/",runs$parTab_file,".csv")
+runs$exposureTab_file <- paste0("~/net/home/ferret/inputs_Jan2019/single_exposure/",runs$exposureTab_file,".csv")
 
 parTab_full <- read.csv(runs$parTab_file[1],stringsAsFactors=FALSE)
 parTab_mono_full <- read.csv(runs$parTab_file[2],stringsAsFactors=FALSE)
@@ -64,22 +64,31 @@ loo_monophasic_fixed <- antibodyKinetics::calculate_loo(chain_monophasic_fixed, 
 p1 <- plot_single_fit(parTab_full, exposureTab, ferret_titres1, times, chain_full, options1,TRUE,10000) + xlab("") + ylab("") +
   ggtitle(paste0("ELPD: ", signif(loo_full$estimates[1,1],3), " (SE: ", signif(loo_full$estimates[1,2],3),")")) +
   theme(plot.margin=margin(2,10,1,1),
-        plot.title=element_text(family="Arial",size=10))
+        plot.title=element_text(family="sans",size=10),
+        axis.text.x = element_text(family="sans",size=8),
+        axis.text.y=element_text(family="sans",size=8))
 p2 <- plot_single_fit(parTab_mono_full, exposureTab, ferret_titres1, times, chain_mono_full, options2,TRUE,10000) + xlab("") + ylab("") +
   ggtitle(paste0("ELPD: ", signif(loo_mono_full$estimates[1,1],3), " (SE: ", signif(loo_mono_full$estimates[1,2],3),")")) +
   theme(plot.margin=margin(2,10,1,1),
-        plot.title=element_text(family="Arial",size=10))
+        plot.title=element_text(family="sans",size=10),
+        axis.text.x = element_text(family="sans",size=8),
+        axis.text.y=element_text(family="sans",size=8))
 p3 <- plot_single_fit(parTab_biphasic_fixed, exposureTab, ferret_titres1, times, chain_biphasic_fixed, options1,TRUE,10000) + xlab("") + ylab("") +
   ggtitle(paste0("ELPD: ", signif(loo_biphasic_fixed$estimates[1,1],3), " (SE: ", signif(loo_biphasic_fixed$estimates[1,2],3),")")) +
   theme(plot.margin=margin(2,10,1,1),
-        plot.title=element_text(family="Arial",size=10))
+        plot.title=element_text(family="sans",size=10),
+        axis.text.x = element_text(family="sans",size=8),
+        axis.text.y=element_text(family="sans",size=8))
 p4 <- plot_single_fit(parTab_monophasic_fixed, exposureTab, ferret_titres1, times, chain_monophasic_fixed, options2,TRUE,10000) + xlab("") + ylab("") +
   ggtitle(paste0("ELPD: ", signif(loo_monophasic_fixed$estimates[1,1],3), " (SE: ", signif(loo_monophasic_fixed$estimates[1,2],3),")")) +
   theme(plot.margin=margin(2,10,1,1),
-        plot.title=element_text(family="Arial",size=10))
+        plot.title=element_text(family="sans",size=10),
+        axis.text.x = element_text(family="sans",size=8),
+        axis.text.y=element_text(family="sans",size=8))
 library(cowplot)
 all_p <- plot_grid(p1,p3,p2,p4,ncol=2)
-svg(paste0("single_model_traj.svg"),width=5.2,height=4,family="Arial")
+all_p
+svg(paste0("single_model_traj.svg"),width=5.2,height=4,family="sans")
 print(all_p)
 dev.off()
 

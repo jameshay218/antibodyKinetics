@@ -9,12 +9,16 @@
 #' @param nstrains the number of strains for which measurements are available
 #' @param ngroups the number of exposure groups
 #' @param calc_obs if TRUE, also calculates predicted observations
+#' @param ci_range defaults to 95%, but can be changed to give say 50% CI
 #' @export
-generate_prediction_intervals <- function(chain, samp_no=1000,ts=seq(0,70,by=1), ts_obs=ts, MODEL_FUNCTION,nstrains=3,ngroups=5, calc_obs=TRUE){
+generate_prediction_intervals <- function(chain, samp_no=1000,ts=seq(0,70,by=1), ts_obs=ts, MODEL_FUNCTION,nstrains=3,ngroups=5, calc_obs=TRUE, ci_range=0.95){
     ## Take random samples from the MCMC chain
     samp_max <- max(nrow(chain), samp_no)
     samps <- sample(nrow(chain),samp_max, replace=FALSE)
 
+    ci_lower <- (1-ci_range)/2
+    ci_upper <- ci_range + ci_lower
+    
     ## The result of the model solving procedure will be a matrix of titres, with columns as time
     ## and rows as groups/strains. As such, we need a way to store samp_no*(ngroups*nstrains) trajectories
     ## of length length(ts). Best way off the top of my head - have a data frame for each
@@ -65,13 +69,13 @@ generate_prediction_intervals <- function(chain, samp_no=1000,ts=seq(0,70,by=1),
         tmpQuantiles <- NULL
         tmpQuantiles_observations <- NULL
         for(j in 1:nstrains){
-            quantiles <- t(apply(dats[[x]][[j]], 2, function(x) quantile(x,c(0.025,0.5,0.975))))
+            quantiles <- t(apply(dats[[x]][[j]], 2, function(x) quantile(x,c(ci_lower,0.5,ci_upper))))
             quantiles <- data.frame(time=ts,quantiles)
             colnames(quantiles) <- c("time","lower","median","upper")
             quantiles$strain <- j
             tmpQuantiles[[j]] <- quantiles
 
-            quantiles_obs <- t(apply(observations[[x]][[j]], 2, function(x) quantile(x,c(0.025,0.5,0.975))))
+            quantiles_obs <- t(apply(observations[[x]][[j]], 2, function(x) quantile(x,c(ci_lower,0.5,ci_upper))))
             quantiles_obs <- data.frame(time=ts_obs,quantiles_obs)
             colnames(quantiles_obs) <- c("time","lower","median","upper")
             quantiles_obs$strain <- j
